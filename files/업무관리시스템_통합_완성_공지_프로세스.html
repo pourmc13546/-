@@ -11151,6 +11151,63 @@ Best regards,
     let currentTask = null;
     let currentFilter = 'all';
 
+    // Supabase에서 프로세스 데이터 불러오기
+    async function loadProjectsDataFromSupabase() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('app_settings')
+          .select('value')
+          .eq('key', 'projectsData')
+          .single();
+
+        if (error) {
+          console.log('📌 Supabase에 저장된 데이터 없음, 기본 데이터 사용');
+          // 기본 데이터를 Supabase에 저장
+          await saveProjectsDataToSupabase();
+          return;
+        }
+
+        if (data && data.value) {
+          const savedData = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+          Object.assign(projectsData, savedData);
+          groups = [...projectsData[currentProject]];
+          renderTasks();
+          updateFilterCounts();
+          console.log('✅ Supabase에서 데이터 로드 완료');
+        }
+      } catch (e) {
+        console.error('❌ Supabase 로드 에러:', e);
+      }
+    }
+
+    // Supabase에 프로세스 데이터 저장
+    async function saveProjectsDataToSupabase() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('app_settings')
+          .upsert({
+            key: 'projectsData',
+            value: projectsData,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'key' });
+
+        if (error) {
+          console.error('❌ Supabase 저장 에러:', error);
+          return false;
+        }
+        console.log('✅ Supabase에 데이터 저장 완료');
+        return true;
+      } catch (e) {
+        console.error('❌ Supabase 저장 에러:', e);
+        return false;
+      }
+    }
+
+    // 페이지 로드 시 Supabase에서 데이터 불러오기
+    setTimeout(() => {
+      loadProjectsDataFromSupabase();
+    }, 500);
+
     // 프로젝트 선택
     function selectProject(projectId) {
       currentProject = projectId;
@@ -11487,7 +11544,7 @@ Best regards,
       });
     }
 
-    function saveSubtask() {
+    async function saveSubtask() {
       try {
         const nameInput = document.getElementById('subtask-name-input');
         if (!nameInput) {
@@ -11529,6 +11586,9 @@ Best regards,
 
         // 하위업무 추가
         currentTask.children.push(newSubtask);
+
+        // Supabase에 전체 데이터 저장
+        await saveProjectsDataToSupabase();
 
         // 입력 폼 제거
         const form = document.getElementById('subtask-add-form');
@@ -11577,51 +11637,57 @@ Best regards,
     }
 
     // 업무 상태 업데이트
-    function updateTaskStatus(newStatus) {
+    async function updateTaskStatus(newStatus) {
       if (!currentTask) return;
-      
+
       // 현재 업무의 상태 업데이트
       currentTask.status = newStatus;
-      
+
       // 진척도도 함께 업데이트
       if (newStatus === 'completed') {
         currentTask.progress = 100;
       } else if (newStatus === 'scheduled' && currentTask.progress === 100) {
         currentTask.progress = 0;
       }
-      
+
+      // Supabase에 전체 데이터 저장
+      await saveProjectsDataToSupabase();
+
       // 테이블 다시 렌더링
       renderTasks();
       updateFilterCounts();
-      
+
       // 토스트 메시지 표시
       showToast(`상태가 "${statusConfig[newStatus].label}"(으)로 변경되었습니다.`);
     }
 
     // 담당자 업데이트
-    function updateTaskWho(newWho) {
+    async function updateTaskWho(newWho) {
       if (!currentTask) return;
-      
+
       currentTask.who = newWho;
-      
+
+      // Supabase에 전체 데이터 저장
+      await saveProjectsDataToSupabase();
+
       // 헤더의 담당자 정보도 업데이트
       const headerWho = document.querySelector('#side-panel .text-sm.text-slate-600');
       if (headerWho) {
         const date = currentTask.start && currentTask.start !== '-' ? currentTask.start : '';
         headerWho.textContent = date ? `${newWho}  ${date}` : newWho;
       }
-      
+
       // 테이블 다시 렌더링
       renderTasks();
       updateFilterCounts();
-      
+
       showToast(`담당자가 "${newWho}"(으)로 변경되었습니다.`);
     }
 
     // 날짜 업데이트
-    function updateTaskDate(type, newDate) {
+    async function updateTaskDate(type, newDate) {
       if (!currentTask) return;
-      
+
       if (type === 'start') {
         currentTask.start = newDate || '-';
         // 헤더의 날짜 정보도 업데이트
@@ -11632,6 +11698,9 @@ Best regards,
       } else if (type === 'end') {
         currentTask.end = newDate || '-';
       }
+
+      // Supabase에 전체 데이터 저장
+      await saveProjectsDataToSupabase();
       
       // 테이블 다시 렌더링
       renderTasks();
