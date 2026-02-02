@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>확장/거래관리 - 해외입점사업 업무관리시스템</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            toss: {
+              blue: '#202454',
+              black: '#191f28',
+              gray: {
+                50: '#f9fafb',
+                100: '#f2f4f6',
+                200: '#e5e8eb',
+                300: '#d1d6db',
+                400: '#b0b8c1',
+                500: '#8b95a1',
+                600: '#6b7684',
+                700: '#4e5968',
+                800: '#333d4b',
+                900: '#191f28',
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
+    
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #e5e8eb; border-radius: 10px; }
+    
+    /* 사이드바 */
+    .sidebar {
+      width: 220px;
+      background: white;
+      border-right: 1px solid #e5e8eb;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      color: #6b7684;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-radius: 8px;
+      margin: 2px 8px;
+    }
+    .menu-item:hover {
+      background: #f2f4f6;
+      color: #333d4b;
+    }
+    .menu-item.active {
+      background: #202454;
+      color: white;
+    }
+    .menu-item.active:hover {
+      background: #191c40;
+    }
+    
+    .sub-menu { display: none; }
+    .sub-menu.open { display: block; }
+    .sub-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px 8px 44px;
+      color: #8b95a1;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-radius: 6px;
+      margin: 1px 8px;
+    }
+    .sub-menu-item:hover {
+      background: #f2f4f6;
+      color: #333d4b;
+    }
+    .sub-menu-item.active {
+      background: #e8f4ff;
+      color: #202454;
+      font-weight: 500;
+    }
+    .sub-menu-item::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      background: #d1d6db;
+      border-radius: 50%;
+    }
+    .sub-menu-item.active::before {
+      background: #202454;
+    }
+    
+    .arrow {
+      margin-left: auto;
+      transition: transform 0.2s;
+    }
+    .menu-item.open .arrow {
+      transform: rotate(180deg);
+    }
+    
+    .menu-label {
+      padding: 16px 20px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #b0b8c1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* 메인 콘텐츠 */
+    .main-content {
+      margin-left: 220px;
+      min-height: 100vh;
+      background: #f4f6f8;
+    }
+    
+    /* 테이블 */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .data-table th {
+      text-align: left;
+      padding: 12px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #6b7684;
+      border-bottom: 1px solid #e5e8eb;
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 12px 12px;
+      font-size: 13px;
+      color: #333d4b;
+      border-bottom: 1px solid #f2f4f6;
+      white-space: nowrap;
+    }
+    .data-table tr:hover td {
+      background: #f9fafb;
+    }
+    .data-table tbody tr {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .data-table tbody tr:hover {
+      background: #f2f4f6;
+    }
+    
+    /* 버튼 */
+    .btn-primary {
+      padding: 10px 20px;
+      background: #202454;
+      color: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover {
+      background: #1a1d45;
+    }
+    .btn-outline {
+      padding: 8px 14px;
+      background: white;
+      color: #4e5968;
+      border: 1px solid #d1d6db;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .btn-outline:hover {
+      border-color: #b0b8c1;
+      background: #f9fafb;
+    }
+    
+    /* 인풋 */
+    .search-input {
+      padding: 8px 12px 8px 36px;
+      border: 1px solid #e5e8eb;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 280px;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #202454;
+    }
+    .search-input::placeholder {
+      color: #b0b8c1;
+    }
+
+    /* 탭 버튼 */
+    .tab-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7684;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover {
+      color: #333d4b;
+    }
+    .tab-btn.active {
+      color: #202454;
+      border-bottom-color: #202454;
+    }
+
+    /* 프로세스 이벤트 - Shipment Event 스타일 */
+    .process-event {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .process-step {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .process-step.completed {
+      background: #202454;
+    }
+    .process-step.completed svg {
+      stroke: white;
+    }
+    .process-step.current {
+      background: white;
+      border: 2px solid #202454;
+    }
+    .process-step.current svg {
+      stroke: #202454;
+    }
+    .process-step.pending {
+      background: white;
+      border: 2px solid #d1d6db;
+    }
+    .process-step.pending svg {
+      stroke: #d1d6db;
+    }
+    .process-step svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .process-line {
+      width: 12px;
+      height: 2px;
+      background: #d1d6db;
+      flex-shrink: 0;
+    }
+    .process-line.completed {
+      background: #202454;
+    }
+    
+    /* 탭 콘텐츠 */
+    .trade-tab-content {
+      display: none;
+    }
+    .trade-tab-content.active {
+      display: block;
+    }
+
+    /* 상태 필터 탭 */
+    .status-filter {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6b7684;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .status-filter:hover {
+      background: #f2f4f6;
+    }
+    .status-filter.active {
+      background: #202454;
+      color: white;
+    }
+
+    /* 모달 스타일 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-container {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: transform 0.2s ease;
+    }
+    .modal-overlay.active .modal-container {
+      transform: translateY(0);
+    }
+    .modal-container.large {
+      max-width: 720px;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #f2f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #191f28;
+    }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .modal-close:hover {
+      background: #f2f4f6;
+    }
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(90vh - 140px);
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #f2f4f6;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333d4b;
+      margin-bottom: 8px;
+    }
+    .form-label .required {
+      color: #f04452;
+      margin-left: 2px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #e5e8eb;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #202454;
+      box-shadow: 0 0 0 3px rgba(32, 36, 84, 0.1);
+    }
+    .form-input::placeholder {
+      color: #adb5bd;
+    }
+    .form-select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #e5e8eb;
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+    }
+    .form-select:focus {
+      outline: none;
+      border-color: #202454;
+      box-shadow: 0 0 0 3px rgba(32, 36, 84, 0.1);
+    }
+    .form-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #e5e8eb;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 80px;
+    }
+    .form-textarea:focus {
+      outline: none;
+      border-color: #202454;
+      box-shadow: 0 0 0 3px rgba(32, 36, 84, 0.1);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .btn-cancel {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      background: #f2f4f6;
+      color: #4e5968;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-cancel:hover {
+      background: #e5e8eb;
+    }
+    .btn-submit {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      background: #202454;
+      color: white;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-submit:hover {
+      background: #191d45;
+    }
+
+    /* 상세 모달 스타일 */
+    .detail-section {
+      margin-bottom: 24px;
+    }
+    .detail-section:last-child {
+      margin-bottom: 0;
+    }
+    .detail-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #191f28;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f2f4f6;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .detail-item.full {
+      grid-column: 1 / -1;
+    }
+    .detail-label {
+      font-size: 12px;
+      color: #8b95a1;
+    }
+    .detail-value {
+      font-size: 14px;
+      color: #333d4b;
+      font-weight: 500;
+    }
+    .detail-value.highlight {
+      color: #202454;
+    }
+    .detail-value.amount {
+      font-size: 18px;
+      font-weight: 700;
+      color: #202454;
+    }
+
+    /* 타임라인 스타일 */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e5e8eb;
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 16px;
+    }
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -24px;
+      top: 4px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #e5e8eb;
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px #e5e8eb;
+    }
+    .timeline-dot.active {
+      background: #202454;
+      box-shadow: 0 0 0 2px #202454;
+    }
+    .timeline-dot.completed {
+      background: #16a34a;
+      box-shadow: 0 0 0 2px #16a34a;
+    }
+    .timeline-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .timeline-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #333d4b;
+    }
+    .timeline-date {
+      font-size: 12px;
+      color: #8b95a1;
+    }
+
+    /* 프로세스 상세 스타일 */
+    .process-detail {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px;
+      background: #f9fafb;
+      border-radius: 12px;
+    }
+    .process-detail-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      position: relative;
+    }
+    .process-detail-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 20px;
+      right: -50%;
+      width: 100%;
+      height: 2px;
+      background: #e5e8eb;
+    }
+    .process-detail-item.completed:not(:last-child)::after {
+      background: #202454;
+    }
+    .process-detail-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e5e8eb;
+      color: #8b95a1;
+      position: relative;
+      z-index: 1;
+    }
+    .process-detail-item.completed .process-detail-icon {
+      background: #202454;
+      color: white;
+    }
+    .process-detail-item.current .process-detail-icon {
+      background: white;
+      border: 2px solid #202454;
+      color: #202454;
+    }
+    .process-detail-label {
+      font-size: 11px;
+      color: #8b95a1;
+      text-align: center;
+    }
+    .process-detail-item.completed .process-detail-label,
+    .process-detail-item.current .process-detail-label {
+      color: #333d4b;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f6f8]">
+
+  <!-- 사이드바 -->
+  <div class="sidebar">
+    <!-- 로고 영역 -->
+    <div class="px-5 py-4 border-b border-gray-100">
+      <h1 class="text-base font-bold text-gray-900">업무관리시스템</h1>
+      <p class="text-xs text-gray-400 mt-0.5">해외입점사업</p>
+    </div>
+    
+    <div class="menu-label">메인</div>
+    
+    <!-- 대시보드 -->
+    <div class="menu-item">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      대시보드
+    </div>
+    
+    <!-- 공지/결정사항 -->
+    <div class="menu-item">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+      </svg>
+      공지/결정사항
+    </div>
+    
+    <!-- 프로세스현황 -->
+    <div class="menu-item">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      </svg>
+      프로세스현황
+    </div>
+    
+    <div class="menu-label">업무</div>
+    
+    <!-- 바이어관리 -->
+    <div class="menu-item" onclick="toggleSideMenu(this)">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      바이어관리
+      <svg class="w-4 h-4 arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </div>
+    <div class="sub-menu">
+      <div class="sub-menu-item">바이어 목록</div>
+      <div class="sub-menu-item">계약 관리</div>
+    </div>
+    
+    <!-- 확장/거래관리 (활성화) -->
+    <div class="menu-item active open" onclick="toggleSideMenu(this)">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      확장/거래관리
+      <svg class="w-4 h-4 arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </div>
+    <div class="sub-menu open">
+      <div class="sub-menu-item active" onclick="switchSubTab('order')">주문관리</div>
+      <div class="sub-menu-item" onclick="switchSubTab('shipping')">배송/물류관리</div>
+      <div class="sub-menu-item" onclick="switchSubTab('issue')">이슈/클레임</div>
+      <div class="sub-menu-item" onclick="switchSubTab('settlement')">정산관리</div>
+    </div>
+    
+    <!-- 제품관리 -->
+    <div class="menu-item" onclick="toggleSideMenu(this)">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+      </svg>
+      제품관리
+      <svg class="w-4 h-4 arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </div>
+    <div class="sub-menu">
+      <div class="sub-menu-item">제품 목록</div>
+      <div class="sub-menu-item">재고 현황</div>
+    </div>
+    
+    <div class="menu-label">관리</div>
+    
+    <!-- 문서관리 -->
+    <div class="menu-item">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      문서관리
+    </div>
+    
+    <!-- 인사이트 -->
+    <div class="menu-item">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      </svg>
+      인사이트
+    </div>
+    
+    <!-- 설정 -->
+    <div class="menu-item">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      설정
+    </div>
+  </div>
+
+  <!-- 메인 콘텐츠 -->
+  <div class="main-content">
+    <div class="p-8">
+      
+      <!-- ========== 주문관리 탭 ========== -->
+      <div id="orderTab" class="trade-tab-content active">
+        <!-- 페이지 헤더 -->
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">주문관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">해외 바이어 주문 현황 및 처리</p>
+          </div>
+        </div>
+
+        <!-- 요약 카드 -->
+        <div class="grid grid-cols-5 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체 주문</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1">8</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-red-200">
+            <p class="text-sm text-red-600">신규</p>
+            <p class="text-2xl font-bold text-red-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-amber-200">
+            <p class="text-sm text-amber-600">진행중</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1">3</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <p class="text-sm text-green-600">완료</p>
+            <p class="text-2xl font-bold text-green-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-purple-200">
+            <p class="text-sm text-purple-600">이번달 거래액</p>
+            <p class="text-2xl font-bold text-purple-600 mt-1">$93,200</p>
+          </div>
+        </div>
+
+        <!-- 테이블 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="new">신규</option>
+                <option value="progress">진행중</option>
+                <option value="completed">완료</option>
+                <option value="issue">이슈</option>
+              </select>
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 담당자</option>
+                <option value="kim">김운영</option>
+                <option value="lee">이매니저</option>
+                <option value="park">박담당</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="주문번호, 바이어명 검색..." class="search-input">
+              </div>
+              <button class="btn-primary text-sm" onclick="openModal('order')">+ 주문 등록</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>주문번호</th>
+                <th>바이어</th>
+                <th>주문일</th>
+                <th>납기일</th>
+                <th>상품</th>
+                <th class="text-right">수량</th>
+                <th class="text-right">금액</th>
+                <th>담당자</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody id="order-table-body"></tbody>
+          </table>
+          
+          <!-- 페이지네이션 -->
+          <div class="px-8 py-4 border-t border-toss-gray-100 flex items-center justify-center gap-1">
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-400 hover:bg-toss-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded bg-toss-gray-900 text-white text-sm font-medium">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-600 hover:bg-toss-gray-50 text-sm">2</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-600 hover:bg-toss-gray-50 text-sm">3</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-400 hover:bg-toss-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 배송/물류관리 탭 ========== -->
+      <div id="shippingTab" class="trade-tab-content">
+        <!-- 페이지 헤더 -->
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">배송/물류관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">수출 물류 전 과정 추적 및 통관/배송 현황 관리</p>
+          </div>
+        </div>
+
+        <!-- 요약 카드 -->
+        <div class="grid grid-cols-6 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1">12</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-slate-200">
+            <p class="text-sm text-slate-600">국내운송</p>
+            <p class="text-2xl font-bold text-slate-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-blue-200">
+            <p class="text-sm text-blue-600">수출통관</p>
+            <p class="text-2xl font-bold text-blue-600 mt-1">3</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-indigo-200">
+            <p class="text-sm text-indigo-600">선적</p>
+            <p class="text-2xl font-bold text-indigo-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-amber-200">
+            <p class="text-sm text-amber-600">해외운송</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <p class="text-sm text-green-600">배송완료</p>
+            <p class="text-2xl font-bold text-green-600 mt-1">3</p>
+          </div>
+        </div>
+
+        <!-- 테이블 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm">
+          <!-- 상단 필터 탭 -->
+          <div class="px-6 py-4 border-b border-toss-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <button class="status-filter active" onclick="filterShippingStatus(this, 'all')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                전체
+              </button>
+              <button class="status-filter" onclick="filterShippingStatus(this, 'progress')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                진행중
+              </button>
+              <button class="status-filter" onclick="filterShippingStatus(this, 'completed')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                완료
+              </button>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="주문번호, B/L No. 검색..." class="search-input">
+              </div>
+              <button class="btn-outline text-sm">엑셀 다운로드</button>
+              <button class="btn-primary text-sm" onclick="openModal('shipping')">+ 배송 등록</button>
+            </div>
+          </div>
+          
+          <!-- 테이블 - 5단계 Shipment Event -->
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="w-[90px]">주문번호</th>
+                <th class="w-[120px]">바이어</th>
+                <th class="w-[200px]">배송 진행상황</th>
+                <th class="w-[75px]">현재 상태</th>
+                <th class="w-[85px]">B/L No.</th>
+                <th class="w-[75px]">목적지</th>
+                <th class="w-[85px]">출발일</th>
+                <th class="w-[85px]">도착예정</th>
+                <th class="w-[80px]">운송사</th>
+                <th class="w-[60px]">담당자</th>
+              </tr>
+            </thead>
+            <tbody id="shipping-table-body"></tbody>
+          </table>
+          
+          <!-- 페이지네이션 -->
+          <div class="px-8 py-4 border-t border-toss-gray-100 flex items-center justify-center gap-1">
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-400 hover:bg-toss-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded bg-toss-gray-900 text-white text-sm font-medium">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-600 hover:bg-toss-gray-50 text-sm">2</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-400 hover:bg-toss-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 이슈/클레임 탭 ========== -->
+      <div id="issueTab" class="trade-tab-content">
+        <!-- 페이지 헤더 -->
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">이슈/클레임</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">거래 중 발생한 이슈 및 클레임 처리</p>
+          </div>
+        </div>
+
+        <!-- 요약 카드 -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체 이슈</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1">3</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-red-200">
+            <p class="text-sm text-red-600">미처리</p>
+            <p class="text-2xl font-bold text-red-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-amber-200">
+            <p class="text-sm text-amber-600">처리중</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <p class="text-sm text-green-600">해결</p>
+            <p class="text-2xl font-bold text-green-600 mt-1">1</p>
+          </div>
+        </div>
+
+        <!-- 테이블 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="pending">미처리</option>
+                <option value="progress">처리중</option>
+                <option value="resolved">해결</option>
+              </select>
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 우선순위</option>
+                <option value="urgent">긴급</option>
+                <option value="high">높음</option>
+                <option value="normal">보통</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="이슈번호, 제목 검색..." class="search-input">
+              </div>
+              <button class="btn-primary text-sm" onclick="openModal('issue')">+ 이슈 등록</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>이슈번호</th>
+                <th>우선순위</th>
+                <th>상태</th>
+                <th>유형</th>
+                <th>제목</th>
+                <th>관련 주문</th>
+                <th>바이어</th>
+                <th>담당자</th>
+                <th>등록일</th>
+                <th>경과일</th>
+              </tr>
+            </thead>
+            <tbody id="issue-table-body"></tbody>
+          </table>
+          
+          <!-- 페이지네이션 -->
+          <div class="px-8 py-4 border-t border-toss-gray-100 flex items-center justify-center gap-1">
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-400 hover:bg-toss-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded bg-toss-gray-900 text-white text-sm font-medium">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-400 hover:bg-toss-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 정산관리 탭 ========== -->
+      <div id="settlementTab" class="trade-tab-content">
+        <!-- 페이지 헤더 -->
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">정산관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">거래 정산 현황 및 입금 관리</p>
+          </div>
+        </div>
+
+        <!-- 요약 카드 -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체 정산</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1">3</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-slate-200">
+            <p class="text-sm text-slate-600">대기</p>
+            <p class="text-2xl font-bold text-slate-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-blue-200">
+            <p class="text-sm text-blue-600">처리중</p>
+            <p class="text-2xl font-bold text-blue-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <p class="text-sm text-green-600">완료</p>
+            <p class="text-2xl font-bold text-green-600 mt-1">1</p>
+          </div>
+        </div>
+
+        <!-- 테이블 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="waiting">대기</option>
+                <option value="progress">처리중</option>
+                <option value="completed">완료</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="정산번호, 바이어 검색..." class="search-input">
+              </div>
+              <button class="btn-outline" style="color: #202454; border-color: #202454;">엑셀 다운로드</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>정산번호</th>
+                <th>주문번호</th>
+                <th>바이어</th>
+                <th class="text-right">주문금액</th>
+                <th class="text-right">수수료</th>
+                <th class="text-right">정산금액</th>
+                <th>상태</th>
+                <th>정산예정일</th>
+                <th>완료일</th>
+              </tr>
+            </thead>
+            <tbody id="settlement-table-body"></tbody>
+          </table>
+          
+          <!-- 페이지네이션 -->
+          <div class="px-8 py-4 border-t border-toss-gray-100 flex items-center justify-center gap-1">
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-400 hover:bg-toss-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded bg-toss-gray-900 text-white text-sm font-medium">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded text-toss-gray-400 hover:bg-toss-gray-50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ==================== 샘플 데이터 ====================
+    const orderData = [
+      { id: 'ORD-2025-048', buyer: 'GlobalTech Inc.', country: '🇺🇸', orderDate: '2025.03.25', dueDate: '2025.04.10', product: '워터실드 프리미엄', qty: 500, amount: '$12,500', assignee: '김운영', status: '신규', note: '긴급 주문 요청' },
+      { id: 'ORD-2025-047', buyer: 'EuroTrade GmbH', country: '🇩🇪', orderDate: '2025.03.24', dueDate: '2025.04.15', product: '하이템프 코팅', qty: 300, amount: '$8,400', assignee: '이매니저', status: '신규', note: '' },
+      { id: 'ORD-2025-046', buyer: 'AsiaPac Ltd.', country: '🇸🇬', orderDate: '2025.03.23', dueDate: '2025.04.08', product: '워터실드 스탠다드', qty: 1000, amount: '$22,000', assignee: '박담당', status: '진행중', note: '샘플 요청' },
+      { id: 'ORD-2025-045', buyer: 'CanadaCorp', country: '🇨🇦', orderDate: '2025.03.22', dueDate: '2025.04.05', product: '특수 시트 A형', qty: 200, amount: '$6,000', assignee: '김운영', status: '진행중', note: '' },
+      { id: 'ORD-2025-044', buyer: 'AussieTrade', country: '🇦🇺', orderDate: '2025.03.20', dueDate: '2025.04.02', product: '워터실드 프리미엄', qty: 800, amount: '$20,000', assignee: '이매니저', status: '진행중', note: '분할 배송 요청' },
+      { id: 'ORD-2025-043', buyer: 'UK Imports', country: '🇬🇧', orderDate: '2025.03.18', dueDate: '2025.03.30', product: '파우더 코팅제', qty: 400, amount: '$9,600', assignee: '박담당', status: '완료', note: '' },
+      { id: 'ORD-2025-042', buyer: 'FranceBuild', country: '🇫🇷', orderDate: '2025.03.15', dueDate: '2025.03.28', product: '보수용 퍼티', qty: 600, amount: '$7,200', assignee: '김운영', status: '이슈', note: '색상 불일치 클레임' },
+      { id: 'ORD-2025-041', buyer: 'GlobalTech Inc.', country: '🇺🇸', orderDate: '2025.03.10', dueDate: '2025.03.25', product: '워터실드 프리미엄', qty: 300, amount: '$7,500', assignee: '이매니저', status: '완료', note: '' },
+    ];
+
+    // 배송/물류관리 데이터 - 5단계 프로세스 (통관+물류 통합)
+    const shippingData = [
+      { 
+        orderId: 'ORD-2025-048', buyer: 'GlobalTech Inc.', blNo: 'BL-2025-008', 
+        country: '🇺🇸', countryName: '미국', status: '국내운송',
+        departure: '2025.03.26', eta: '2025.04.10', carrier: 'CJ대한통운', assignee: '김운영',
+        steps: [1, 0, 0, 0, 0],
+        vessel: '-', route: '인천 → LA',
+        history: [
+          { step: '주문 접수', date: '2025.03.25', status: 'completed' },
+          { step: '국내운송 시작', date: '2025.03.26', status: 'active' },
+          { step: '수출통관', date: '-', status: 'pending' },
+          { step: '선적', date: '-', status: 'pending' },
+          { step: '해외운송', date: '-', status: 'pending' },
+          { step: '배송완료', date: '-', status: 'pending' }
+        ]
+      },
+      { 
+        orderId: 'ORD-2025-047', buyer: 'EuroTrade GmbH', blNo: 'BL-2025-007', 
+        country: '🇩🇪', countryName: '독일', status: '수출통관',
+        departure: '2025.03.25', eta: '2025.04.15', carrier: 'MSC', assignee: '이매니저',
+        steps: [2, 1, 0, 0, 0],
+        vessel: 'MSC ISABELLA', route: '부산 → 함부르크',
+        history: [
+          { step: '주문 접수', date: '2025.03.24', status: 'completed' },
+          { step: '국내운송 완료', date: '2025.03.25', status: 'completed' },
+          { step: '수출통관 진행중', date: '2025.03.26', status: 'active' },
+          { step: '선적', date: '-', status: 'pending' },
+          { step: '해외운송', date: '-', status: 'pending' },
+          { step: '배송완료', date: '-', status: 'pending' }
+        ]
+      },
+      { 
+        orderId: 'ORD-2025-046', buyer: 'AsiaPac Ltd.', blNo: 'BL-2025-006', 
+        country: '🇸🇬', countryName: '싱가포르', status: '선적',
+        departure: '2025.03.24', eta: '2025.04.08', carrier: 'Evergreen', assignee: '박담당',
+        steps: [2, 2, 1, 0, 0],
+        vessel: 'EVER GOLDEN', route: '부산 → 싱가포르',
+        history: [
+          { step: '주문 접수', date: '2025.03.23', status: 'completed' },
+          { step: '국내운송 완료', date: '2025.03.24', status: 'completed' },
+          { step: '수출통관 완료', date: '2025.03.25', status: 'completed' },
+          { step: '선적 진행중', date: '2025.03.26', status: 'active' },
+          { step: '해외운송', date: '-', status: 'pending' },
+          { step: '배송완료', date: '-', status: 'pending' }
+        ]
+      },
+      { 
+        orderId: 'ORD-2025-045', buyer: 'CanadaCorp', blNo: 'BL-2025-005', 
+        country: '🇨🇦', countryName: '캐나다', status: '해외운송',
+        departure: '2025.03.22', eta: '2025.04.05', carrier: 'FedEx', assignee: '김운영',
+        steps: [2, 2, 2, 1, 0],
+        vessel: 'FedEx Express', route: '인천 → 밴쿠버',
+        history: [
+          { step: '주문 접수', date: '2025.03.22', status: 'completed' },
+          { step: '국내운송 완료', date: '2025.03.23', status: 'completed' },
+          { step: '수출통관 완료', date: '2025.03.24', status: 'completed' },
+          { step: '선적 완료', date: '2025.03.25', status: 'completed' },
+          { step: '해외운송 중', date: '2025.03.26', status: 'active' },
+          { step: '배송완료', date: '-', status: 'pending' }
+        ]
+      },
+      { 
+        orderId: 'ORD-2025-044', buyer: 'AussieTrade', blNo: 'BL-2025-004', 
+        country: '🇦🇺', countryName: '호주', status: '해외운송',
+        departure: '2025.03.20', eta: '2025.04.02', carrier: 'Maersk', assignee: '이매니저',
+        steps: [2, 2, 2, 1, 0],
+        vessel: 'MAERSK SELETAR', route: '부산 → 시드니',
+        history: [
+          { step: '주문 접수', date: '2025.03.20', status: 'completed' },
+          { step: '국내운송 완료', date: '2025.03.21', status: 'completed' },
+          { step: '수출통관 완료', date: '2025.03.22', status: 'completed' },
+          { step: '선적 완료', date: '2025.03.23', status: 'completed' },
+          { step: '해외운송 중', date: '2025.03.24', status: 'active' },
+          { step: '배송완료', date: '-', status: 'pending' }
+        ]
+      },
+      { 
+        orderId: 'ORD-2025-043', buyer: 'UK Imports', blNo: 'BL-2025-003', 
+        country: '🇬🇧', countryName: '영국', status: '배송완료',
+        departure: '2025.03.18', eta: '2025.03.30', carrier: 'MSC', assignee: '박담당',
+        steps: [2, 2, 2, 2, 2],
+        vessel: 'MSC LONDON', route: '부산 → 펠릭스토',
+        history: [
+          { step: '주문 접수', date: '2025.03.18', status: 'completed' },
+          { step: '국내운송 완료', date: '2025.03.19', status: 'completed' },
+          { step: '수출통관 완료', date: '2025.03.20', status: 'completed' },
+          { step: '선적 완료', date: '2025.03.21', status: 'completed' },
+          { step: '해외운송 완료', date: '2025.03.28', status: 'completed' },
+          { step: '배송완료', date: '2025.03.30', status: 'completed' }
+        ]
+      },
+      { 
+        orderId: 'ORD-2025-041', buyer: 'GlobalTech Inc.', blNo: 'BL-2025-001', 
+        country: '🇺🇸', countryName: '미국', status: '배송완료',
+        departure: '2025.03.10', eta: '2025.03.25', carrier: 'FedEx', assignee: '김운영',
+        steps: [2, 2, 2, 2, 2],
+        vessel: 'FedEx Express', route: '인천 → LA',
+        history: [
+          { step: '주문 접수', date: '2025.03.10', status: 'completed' },
+          { step: '국내운송 완료', date: '2025.03.11', status: 'completed' },
+          { step: '수출통관 완료', date: '2025.03.12', status: 'completed' },
+          { step: '선적 완료', date: '2025.03.13', status: 'completed' },
+          { step: '해외운송 완료', date: '2025.03.23', status: 'completed' },
+          { step: '배송완료', date: '2025.03.25', status: 'completed' }
+        ]
+      },
+    ];
+
+    const issueData = [
+      { id: 'ISS-2025-003', priority: '긴급', status: '미처리', type: '품질', title: '도료 색상 불일치', orderId: 'ORD-2025-042', buyer: 'FranceBuild', assignee: '김운영', date: '2025.03.24', days: 'D+1', description: '납품된 도료의 색상이 샘플과 다릅니다. 고객사에서 전량 반품을 요청하고 있습니다.', actions: ['고객사 담당자 연락 완료', '품질팀 검토 진행중'] },
+      { id: 'ISS-2025-002', priority: '높음', status: '처리중', type: '배송', title: '배송 지연', orderId: 'ORD-2025-043', buyer: 'UK Imports', assignee: '이매니저', date: '2025.03.22', days: 'D+3', description: '예정일보다 3일 지연되어 고객사에서 불만을 표시하고 있습니다.', actions: ['운송사 긴급 연락', '고객사 사과 메일 발송'] },
+      { id: 'ISS-2025-001', priority: '보통', status: '협의중', type: '가격', title: '추가 할인 요청', orderId: 'ORD-2025-046', buyer: 'AsiaPac Ltd.', assignee: '박담당', date: '2025.03.20', days: 'D+5', description: '대량 구매에 따른 추가 할인을 요청하고 있습니다. 현재 5% 추가 할인 제안 검토 중입니다.', actions: ['영업팀 내부 협의', '가격 재산정 검토'] },
+    ];
+
+    const settlementData = [
+      { id: 'STL-2025-007', orderId: 'ORD-2025-041', buyer: 'GlobalTech Inc.', orderAmount: '$7,500', fee: '-$375', settlement: '$7,125', status: '완료', dueDate: '2025.03.28', completeDate: '2025.03.27', method: 'T/T 송금', bank: 'KB국민은행', account: '123-456-789012' },
+      { id: 'STL-2025-006', orderId: 'ORD-2025-038', buyer: 'EuroTrade GmbH', orderAmount: '$15,200', fee: '-$760', settlement: '$14,440', status: '처리중', dueDate: '2025.03.30', completeDate: '-', method: 'L/C', bank: '신한은행', account: '987-654-321098' },
+      { id: 'STL-2025-005', orderId: 'ORD-2025-035', buyer: 'AsiaPac Ltd.', orderAmount: '$22,000', fee: '-$1,100', settlement: '$20,900', status: '대기', dueDate: '2025.04.05', completeDate: '-', method: 'T/T 송금', bank: '하나은행', account: '456-789-012345' },
+    ];
+
+    // ==================== 상태 뱃지 함수 ====================
+    function getStatusBadge(status) {
+      const statusMap = {
+        '신규': { bg: '#fee2e2', color: '#dc2626' },
+        '진행중': { bg: '#fef3c7', color: '#d97706' },
+        '완료': { bg: '#dcfce7', color: '#16a34a' },
+        '이슈': { bg: '#fee2e2', color: '#dc2626' },
+        '대기': { bg: '#f1f5f9', color: '#64748b' },
+        '처리중': { bg: '#dbeafe', color: '#2563eb' },
+        '국내운송': { bg: '#f1f5f9', color: '#64748b' },
+        '수출통관': { bg: '#dbeafe', color: '#2563eb' },
+        '선적': { bg: '#e0e7ff', color: '#4f46e5' },
+        '해외운송': { bg: '#fef3c7', color: '#d97706' },
+        '배송완료': { bg: '#dcfce7', color: '#16a34a' },
+        '미처리': { bg: '#fee2e2', color: '#dc2626' },
+        '협의중': { bg: '#fef3c7', color: '#d97706' },
+      };
+      
+      const style = statusMap[status] || { bg: '#f1f5f9', color: '#64748b' };
+      return `<span style="padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap; display: inline-block; background: ${style.bg}; color: ${style.color};">${status}</span>`;
+    }
+    
+    function getPriorityBadge(priority) {
+      const priorityMap = {
+        '긴급': { bg: '#fee2e2', color: '#dc2626' },
+        '높음': { bg: '#fef3c7', color: '#d97706' },
+        '보통': { bg: '#f1f5f9', color: '#64748b' },
+        '낮음': { bg: '#f1f5f9', color: '#64748b' },
+      };
+      
+      const style = priorityMap[priority] || { bg: '#f1f5f9', color: '#64748b' };
+      return `<span style="padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap; display: inline-block; background: ${style.bg}; color: ${style.color};">${priority}</span>`;
+    }
+
+    // 배송 프로세스 이벤트 렌더링 (5단계)
+    function renderProcessEvent(steps) {
+      const stepIcons = [
+        '<svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+        '<svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/></svg>',
+        '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>',
+        '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+        '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+      ];
+      
+      const stepLabels = ['국내운송', '수출통관', '선적', '해외운송', '배송완료'];
+      
+      let html = '<div class="process-event">';
+      
+      steps.forEach((step, index) => {
+        let stepClass = 'pending';
+        if (step === 2) {
+          stepClass = 'completed';
+        } else if (step === 1) {
+          stepClass = 'current';
+        }
+        
+        html += `<div class="process-step ${stepClass}" title="${stepLabels[index]}">${stepIcons[index]}</div>`;
+        
+        if (index < steps.length - 1) {
+          const lineClass = step === 2 ? 'completed' : '';
+          html += `<div class="process-line ${lineClass}"></div>`;
+        }
+      });
+      
+      html += '</div>';
+      return html;
+    }
+
+    // ==================== 렌더링 함수 ====================
+    function renderOrderTable() {
+      const tbody = document.getElementById('order-table-body');
+      tbody.innerHTML = orderData.map((order, index) => `
+        <tr onclick="openDetailModal('order', ${index})">
+          <td class="font-medium text-toss-blue">${order.id}</td>
+          <td>${order.buyer}</td>
+          <td>${order.orderDate}</td>
+          <td>${order.dueDate}</td>
+          <td>${order.product}</td>
+          <td class="text-right">${order.qty.toLocaleString()}</td>
+          <td class="text-right font-medium">${order.amount}</td>
+          <td>${order.assignee}</td>
+          <td>${getStatusBadge(order.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderShippingTable() {
+      const tbody = document.getElementById('shipping-table-body');
+      tbody.innerHTML = shippingData.map((item, index) => `
+        <tr onclick="openDetailModal('shipping', ${index})">
+          <td class="font-medium text-toss-blue">${item.orderId}</td>
+          <td>${item.buyer}</td>
+          <td>${renderProcessEvent(item.steps)}</td>
+          <td>${getStatusBadge(item.status)}</td>
+          <td class="font-mono text-sm text-toss-gray-500">${item.blNo}</td>
+          <td><span class="text-lg mr-1">${item.country}</span>${item.countryName}</td>
+          <td>${item.departure}</td>
+          <td>${item.eta}</td>
+          <td>${item.carrier}</td>
+          <td>${item.assignee}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderIssueTable() {
+      const tbody = document.getElementById('issue-table-body');
+      tbody.innerHTML = issueData.map((item, index) => `
+        <tr onclick="openDetailModal('issue', ${index})">
+          <td class="font-medium text-toss-blue">${item.id}</td>
+          <td>${getPriorityBadge(item.priority)}</td>
+          <td>${getStatusBadge(item.status)}</td>
+          <td>${item.type}</td>
+          <td>${item.title}</td>
+          <td>${item.orderId}</td>
+          <td>${item.buyer}</td>
+          <td>${item.assignee}</td>
+          <td>${item.date}</td>
+          <td><span class="text-red-500 font-medium">${item.days}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderSettlementTable() {
+      const tbody = document.getElementById('settlement-table-body');
+      tbody.innerHTML = settlementData.map((item, index) => `
+        <tr onclick="openDetailModal('settlement', ${index})">
+          <td class="font-medium text-toss-blue">${item.id}</td>
+          <td>${item.orderId}</td>
+          <td>${item.buyer}</td>
+          <td class="text-right">${item.orderAmount}</td>
+          <td class="text-right" style="color: #8b95a1;">${item.fee}</td>
+          <td class="text-right font-medium">${item.settlement}</td>
+          <td>${getStatusBadge(item.status)}</td>
+          <td>${item.dueDate}</td>
+          <td>${item.completeDate}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ==================== 상세 모달 함수 ====================
+    function openDetailModal(type, index) {
+      let data, modalContent;
+      
+      switch(type) {
+        case 'order':
+          data = orderData[index];
+          modalContent = renderOrderDetail(data);
+          break;
+        case 'shipping':
+          data = shippingData[index];
+          modalContent = renderShippingDetail(data);
+          break;
+        case 'issue':
+          data = issueData[index];
+          modalContent = renderIssueDetail(data);
+          break;
+        case 'settlement':
+          data = settlementData[index];
+          modalContent = renderSettlementDetail(data);
+          break;
+      }
+      
+      document.getElementById('detailModalBody').innerHTML = modalContent;
+      document.getElementById('detailModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function renderOrderDetail(data) {
+      return `
+        <div class="detail-section">
+          <div class="detail-section-title">주문 정보</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">주문번호</span>
+              <span class="detail-value highlight">${data.id}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">상태</span>
+              <span class="detail-value">${getStatusBadge(data.status)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">바이어</span>
+              <span class="detail-value">${data.country} ${data.buyer}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">담당자</span>
+              <span class="detail-value">${data.assignee}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">주문일</span>
+              <span class="detail-value">${data.orderDate}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">납기일</span>
+              <span class="detail-value">${data.dueDate}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">상품 정보</div>
+          <div class="detail-grid">
+            <div class="detail-item full">
+              <span class="detail-label">상품명</span>
+              <span class="detail-value">${data.product}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">수량</span>
+              <span class="detail-value">${data.qty.toLocaleString()}개</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">금액</span>
+              <span class="detail-value amount">${data.amount}</span>
+            </div>
+          </div>
+        </div>
+        ${data.note ? `
+        <div class="detail-section">
+          <div class="detail-section-title">비고</div>
+          <p style="font-size: 14px; color: #4e5968; line-height: 1.6;">${data.note}</p>
+        </div>
+        ` : ''}
+      `;
+    }
+
+    function renderShippingDetail(data) {
+      const stepLabels = ['국내운송', '수출통관', '선적', '해외운송', '배송완료'];
+      
+      return `
+        <div class="detail-section">
+          <div class="detail-section-title">배송 진행상황</div>
+          <div class="process-detail">
+            ${data.steps.map((step, i) => `
+              <div class="process-detail-item ${step === 2 ? 'completed' : step === 1 ? 'current' : ''}">
+                <div class="process-detail-icon">
+                  ${step === 2 ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : 
+                    '<span style="font-size: 12px; font-weight: 600;">' + (i + 1) + '</span>'}
+                </div>
+                <span class="process-detail-label">${stepLabels[i]}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">배송 정보</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">주문번호</span>
+              <span class="detail-value highlight">${data.orderId}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">B/L No.</span>
+              <span class="detail-value">${data.blNo}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">바이어</span>
+              <span class="detail-value">${data.buyer}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">목적지</span>
+              <span class="detail-value">${data.country} ${data.countryName}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">운송사</span>
+              <span class="detail-value">${data.carrier}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">선박/항공편</span>
+              <span class="detail-value">${data.vessel}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">출발일</span>
+              <span class="detail-value">${data.departure}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">도착예정일</span>
+              <span class="detail-value">${data.eta}</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">경로</span>
+              <span class="detail-value">${data.route}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">배송 이력</div>
+          <div class="timeline">
+            ${data.history.map(h => `
+              <div class="timeline-item">
+                <div class="timeline-dot ${h.status}"></div>
+                <div class="timeline-content">
+                  <span class="timeline-title">${h.step}</span>
+                  <span class="timeline-date">${h.date}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderIssueDetail(data) {
+      return `
+        <div class="detail-section">
+          <div class="detail-section-title">이슈 정보</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">이슈번호</span>
+              <span class="detail-value highlight">${data.id}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">상태</span>
+              <span class="detail-value">${getStatusBadge(data.status)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">우선순위</span>
+              <span class="detail-value">${getPriorityBadge(data.priority)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">유형</span>
+              <span class="detail-value">${data.type}</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">제목</span>
+              <span class="detail-value" style="font-size: 16px; font-weight: 600;">${data.title}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">관련 정보</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">관련 주문</span>
+              <span class="detail-value highlight">${data.orderId}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">바이어</span>
+              <span class="detail-value">${data.buyer}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">담당자</span>
+              <span class="detail-value">${data.assignee}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">등록일</span>
+              <span class="detail-value">${data.date}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">상세 내용</div>
+          <p style="font-size: 14px; color: #4e5968; line-height: 1.6;">${data.description}</p>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">처리 현황</div>
+          <div class="timeline">
+            ${data.actions.map((action, i) => `
+              <div class="timeline-item">
+                <div class="timeline-dot ${i === 0 ? 'active' : 'completed'}"></div>
+                <div class="timeline-content">
+                  <span class="timeline-title">${action}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSettlementDetail(data) {
+      return `
+        <div class="detail-section">
+          <div class="detail-section-title">정산 정보</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">정산번호</span>
+              <span class="detail-value highlight">${data.id}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">상태</span>
+              <span class="detail-value">${getStatusBadge(data.status)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">주문번호</span>
+              <span class="detail-value">${data.orderId}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">바이어</span>
+              <span class="detail-value">${data.buyer}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">금액 상세</div>
+          <div style="background: #f9fafb; border-radius: 12px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+              <span style="color: #6b7684;">주문금액</span>
+              <span style="font-weight: 500;">${data.orderAmount}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+              <span style="color: #6b7684;">수수료 (5%)</span>
+              <span style="color: #dc2626;">${data.fee}</span>
+            </div>
+            <div style="border-top: 1px dashed #e5e8eb; padding-top: 12px; display: flex; justify-content: space-between;">
+              <span style="font-weight: 600; color: #333d4b;">정산금액</span>
+              <span class="detail-value amount">${data.settlement}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">결제 정보</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">결제방식</span>
+              <span class="detail-value">${data.method}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">입금은행</span>
+              <span class="detail-value">${data.bank}</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">계좌번호</span>
+              <span class="detail-value">${data.account}</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">일정</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">정산예정일</span>
+              <span class="detail-value">${data.dueDate}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">완료일</span>
+              <span class="detail-value">${data.completeDate}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ==================== 모달 열기/닫기 함수 ====================
+    function openModal(type) {
+      document.getElementById(type + 'Modal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal(type) {
+      document.getElementById(type + 'Modal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    function closeModalOnOverlay(event, type) {
+      if (event.target === event.currentTarget) {
+        closeModal(type);
+      }
+    }
+    
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+          modal.classList.remove('active');
+        });
+        document.body.style.overflow = '';
+      }
+    });
+    
+    // 폼 제출 함수들
+    function submitOrder() {
+      alert('주문이 등록되었습니다.');
+      closeModal('order');
+    }
+    
+    function submitShipping() {
+      alert('배송이 등록되었습니다.');
+      closeModal('shipping');
+    }
+    
+    function submitIssue() {
+      alert('이슈가 등록되었습니다.');
+      closeModal('issue');
+    }
+
+    // ==================== 사이드바 메뉴 ====================
+    function toggleSideMenu(el) {
+      el.classList.toggle('open');
+      const subMenu = el.nextElementSibling;
+      if (subMenu && subMenu.classList.contains('sub-menu')) {
+        subMenu.classList.toggle('open');
+      }
+    }
+
+    function switchSubTab(tabName) {
+      document.querySelectorAll('.sub-menu-item').forEach(item => item.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      document.querySelectorAll('.trade-tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById(tabName + 'Tab').classList.add('active');
+    }
+
+    // 배송 상태 필터
+    function filterShippingStatus(btn, status) {
+      document.querySelectorAll('.status-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // ==================== 초기화 ====================
+    document.addEventListener('DOMContentLoaded', function() {
+      renderOrderTable();
+      renderShippingTable();
+      renderIssueTable();
+      renderSettlementTable();
+    });
+  </script>
+
+  <!-- ==================== 상세보기 모달 ==================== -->
+  <div id="detailModal" class="modal-overlay" onclick="if(event.target === this) closeDetailModal()">
+    <div class="modal-container large" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>상세 정보</h2>
+        <div class="modal-close" onclick="closeDetailModal()">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+      </div>
+      <div class="modal-body" id="detailModalBody">
+        <!-- 상세 내용이 여기에 동적으로 삽입됩니다 -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeDetailModal()">닫기</button>
+        <button class="btn-submit">수정</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 등록 모달 ==================== -->
+  
+  <!-- 주문 등록 모달 -->
+  <div id="orderModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'order')">
+    <div class="modal-container" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>새 주문 등록</h2>
+        <div class="modal-close" onclick="closeModal('order')">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">바이어 선택<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">바이어를 선택하세요</option>
+            <option value="globaltech">GlobalTech Inc. (미국)</option>
+            <option value="ukimports">UK Imports (영국)</option>
+            <option value="aussietrade">AussieTrade (호주)</option>
+            <option value="asiapac">AsiaPac Ltd. (싱가포르)</option>
+            <option value="eurotrade">EuroTrade GmbH (독일)</option>
+            <option value="canadacorp">CanadaCorp (캐나다)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">주문일<span class="required">*</span></label>
+            <input type="date" class="form-input" value="2025-03-26">
+          </div>
+          <div class="form-group">
+            <label class="form-label">납기일<span class="required">*</span></label>
+            <input type="date" class="form-input" value="2025-04-26">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">상품명<span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="상품명을 입력하세요">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">수량<span class="required">*</span></label>
+            <input type="number" class="form-input" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">단가 (USD)<span class="required">*</span></label>
+            <input type="number" class="form-input" placeholder="0.00" step="0.01">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">담당자<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">담당자를 선택하세요</option>
+            <option value="kim">김운영</option>
+            <option value="lee">이매니저</option>
+            <option value="park">박담당</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">비고</label>
+          <textarea class="form-textarea" placeholder="추가 메모를 입력하세요"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('order')">취소</button>
+        <button class="btn-submit" onclick="submitOrder()">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 배송 등록 모달 -->
+  <div id="shippingModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'shipping')">
+    <div class="modal-container" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>새 배송 등록</h2>
+        <div class="modal-close" onclick="closeModal('shipping')">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">주문번호 선택<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">주문번호를 선택하세요</option>
+            <option value="ORD-2025-048">ORD-2025-048 (GlobalTech Inc.)</option>
+            <option value="ORD-2025-047">ORD-2025-047 (EuroTrade GmbH)</option>
+            <option value="ORD-2025-046">ORD-2025-046 (AsiaPac Ltd.)</option>
+            <option value="ORD-2025-045">ORD-2025-045 (CanadaCorp)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">B/L No.<span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="예: BL-2025-009">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">운송 방식<span class="required">*</span></label>
+            <select class="form-select">
+              <option value="">선택하세요</option>
+              <option value="sea">해상운송</option>
+              <option value="air">항공운송</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">운송사<span class="required">*</span></label>
+            <select class="form-select">
+              <option value="">선택하세요</option>
+              <option value="maersk">Maersk</option>
+              <option value="msc">MSC</option>
+              <option value="evergreen">Evergreen</option>
+              <option value="fedex">FedEx</option>
+              <option value="dhl">DHL</option>
+              <option value="cj">CJ대한통운</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">출발일<span class="required">*</span></label>
+            <input type="date" class="form-input" value="2025-03-26">
+          </div>
+          <div class="form-group">
+            <label class="form-label">도착예정일<span class="required">*</span></label>
+            <input type="date" class="form-input" value="2025-04-10">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">목적지</label>
+          <input type="text" class="form-input" placeholder="예: LA, USA">
+        </div>
+        <div class="form-group">
+          <label class="form-label">담당자<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">담당자를 선택하세요</option>
+            <option value="kim">김운영</option>
+            <option value="lee">이매니저</option>
+            <option value="park">박담당</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">비고</label>
+          <textarea class="form-textarea" placeholder="배송 관련 메모를 입력하세요"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('shipping')">취소</button>
+        <button class="btn-submit" onclick="submitShipping()">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이슈 등록 모달 -->
+  <div id="issueModal" class="modal-overlay" onclick="closeModalOnOverlay(event, 'issue')">
+    <div class="modal-container" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>새 이슈 등록</h2>
+        <div class="modal-close" onclick="closeModal('issue')">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">우선순위<span class="required">*</span></label>
+            <select class="form-select">
+              <option value="">선택하세요</option>
+              <option value="high">긴급</option>
+              <option value="medium">보통</option>
+              <option value="low">낮음</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">이슈 유형<span class="required">*</span></label>
+            <select class="form-select">
+              <option value="">선택하세요</option>
+              <option value="quality">품질 불량</option>
+              <option value="delivery">배송 지연</option>
+              <option value="customs">통관 이슈</option>
+              <option value="payment">결제 문제</option>
+              <option value="docs">서류 오류</option>
+              <option value="other">기타</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">관련 주문<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">주문번호를 선택하세요</option>
+            <option value="ORD-2025-048">ORD-2025-048 (GlobalTech Inc.)</option>
+            <option value="ORD-2025-047">ORD-2025-047 (EuroTrade GmbH)</option>
+            <option value="ORD-2025-046">ORD-2025-046 (AsiaPac Ltd.)</option>
+            <option value="ORD-2025-045">ORD-2025-045 (CanadaCorp)</option>
+            <option value="ORD-2025-044">ORD-2025-044 (AussieTrade)</option>
+            <option value="ORD-2025-043">ORD-2025-043 (UK Imports)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">이슈 제목<span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="이슈 제목을 입력하세요">
+        </div>
+        <div class="form-group">
+          <label class="form-label">상세 내용<span class="required">*</span></label>
+          <textarea class="form-textarea" placeholder="이슈 내용을 상세히 입력하세요" style="min-height: 120px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">담당자<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">담당자를 선택하세요</option>
+            <option value="kim">김운영</option>
+            <option value="lee">이매니저</option>
+            <option value="park">박담당</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">첨부파일</label>
+          <input type="file" class="form-input" style="padding: 8px 12px;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('issue')">취소</button>
+        <button class="btn-submit" onclick="submitIssue()">등록</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

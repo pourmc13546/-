@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>알리바바 해외제조사업부 2026 KPI 대시보드</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0d0d0d;min-height:100vh;color:#fff}
+.container{max-width:1400px;margin:0 auto;padding:15px}
+.header{text-align:center;padding:20px 0;border-bottom:2px solid #333;margin-bottom:20px}
+.header h1{font-size:2rem;color:#ff6a00}
+.header .subtitle{margin-top:8px;font-size:1.1rem;color:#ff8c00}
+.header .date{margin-top:5px;color:#666;font-size:0.9rem}
+.nav{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;justify-content:center}
+.nav button{padding:8px 14px;background:#1a1a1a;border:1px solid #333;border-radius:6px;color:#aaa;cursor:pointer;font-size:0.8rem}
+.nav button:hover,.nav button.on{background:#ff6a00;color:#000;border-color:#ff6a00;font-weight:600}
+.section{display:none}
+.section.on{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:15px;margin-bottom:20px}
+.card{background:#1a1a1a;border-radius:10px;padding:15px;border:1px solid #333}
+.card h3{color:#ff8c00;font-size:1rem;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #333}
+.target{background:linear-gradient(135deg,rgba(255,106,0,0.15),rgba(255,106,0,0.05));border:2px solid #ff6a00;border-radius:10px;padding:20px;margin-bottom:20px;text-align:center}
+.target h2{color:#ff8c00;font-size:1.2rem;margin-bottom:10px}
+.target .num{font-size:2.5rem;font-weight:700;color:#ff6a00}
+.target .info{display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap}
+.target .info div{text-align:center}
+.target .info .v{font-size:1.2rem;font-weight:600;color:#fff}
+.target .info .l{font-size:0.8rem;color:#888}
+.phase-box{background:linear-gradient(135deg,rgba(33,150,243,0.15),rgba(33,150,243,0.05));border:2px solid #2196f3;border-radius:10px;padding:15px;margin-bottom:15px}
+.phase-box h3{color:#64b5f6;margin-bottom:8px;text-align:center}
+.phase-box .desc{color:#aaa;font-size:0.85rem;margin-top:5px;text-align:center}
+.kpi-box{background:linear-gradient(135deg,rgba(76,175,80,0.15),rgba(76,175,80,0.05));border:2px solid #4caf50;border-radius:10px;padding:15px;margin-bottom:15px;text-align:center}
+.kpi-box h3{color:#8bc34a;margin-bottom:8px}
+.kpi-box .num{font-size:1.8rem;font-weight:700;color:#4caf50}
+.kpi-box .desc{color:#888;font-size:0.85rem;margin-top:5px}
+.quarter-tabs{display:flex;gap:10px;margin-bottom:20px;justify-content:center}
+.quarter-tab{padding:10px 20px;background:#1a1a1a;border:2px solid #333;border-radius:8px;cursor:pointer;font-weight:600;color:#aaa}
+.quarter-tab:hover,.quarter-tab.active{background:#ff6a00;color:#000;border-color:#ff6a00}
+.quarter-content{display:none}
+.quarter-content.active{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:20px}
+.stat{background:#1a1a1a;border-radius:8px;padding:12px;text-align:center;border:1px solid #333}
+.stat .v{font-size:1.3rem;font-weight:700;color:#ff6a00}
+.stat .l{color:#888;font-size:0.7rem;margin-top:3px}
+.stat .t{font-size:0.6rem;color:#ff8c00;margin-top:5px;padding:2px 6px;background:rgba(255,106,0,0.2);border-radius:3px;display:inline-block}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+th,td{padding:8px;text-align:center;border-bottom:1px solid #333}
+th{background:rgba(255,106,0,0.2);color:#ff8c00}
+.list{list-style:none}
+.list li{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #222}
+.list li.done{opacity:0.5}
+.list li.done span{text-decoration:line-through}
+.chk{width:20px;height:20px;border:2px solid #ff6a00;border-radius:4px;margin-right:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chk.on{background:#ff6a00}
+.chk.on::after{content:'✓';color:#000;font-weight:bold;font-size:0.75rem}
+.list span{flex:1;color:#ccc;font-size:0.85rem}
+.list em{color:#ff8c00;font-size:0.75rem;font-style:normal}
+.alert{background:rgba(244,67,54,0.1);border:1px solid #f44336;border-radius:8px;padding:12px;margin-bottom:15px}
+.alert h4{color:#f44336;margin-bottom:8px;font-size:0.9rem}
+.alert p{font-size:0.85rem;color:#ccc;padding:5px 0;border-bottom:1px solid rgba(244,67,54,0.2)}
+.alert p:last-child{border-bottom:none}
+.highlight{background:rgba(255,193,7,0.2);border:1px solid #ffc107;border-radius:8px;padding:12px;margin-bottom:15px}
+.highlight h4{color:#ffc107;margin-bottom:8px;font-size:0.9rem}
+.highlight p{font-size:0.85rem;color:#ccc;padding:3px 0}
+.info-box{background:rgba(255,106,0,0.1);border:1px solid #ff6a00;border-radius:8px;padding:12px;margin-bottom:15px}
+.info-box h4{color:#ff6a00;margin-bottom:8px;font-size:0.9rem}
+.info-box p{font-size:0.85rem;color:#ccc;padding:3px 0}
+.input-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;padding:10px;background:#111;border-radius:6px}
+.input-row label{color:#888;font-size:0.8rem;margin-right:5px}
+.input-row input{width:80px;padding:6px 8px;background:#222;border:1px solid #444;border-radius:4px;color:#fff;font-size:0.85rem}
+.input-row input:focus{outline:none;border-color:#ff6a00}
+.input-row .unit{color:#666;font-size:0.8rem;margin-right:15px}
+.btns{display:flex;gap:10px;justify-content:center;margin-top:20px}
+.btn{padding:10px 25px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:0.9rem}
+.btn-p{background:#ff6a00;color:#000}
+.btn-s{background:#333;color:#fff}
+.btn:hover{opacity:0.9}
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 20px;background:#ff6a00;border-radius:6px;color:#000;font-weight:600;transform:translateX(200%);transition:transform 0.3s;z-index:999}
+.toast.show{transform:translateX(0)}
+@media(max-width:768px){.stats{grid-template-columns:repeat(3,1fr)}.quarter-tabs{flex-direction:column}}
+.timezone-box{background:linear-gradient(135deg,rgba(33,150,243,0.15),rgba(33,150,243,0.05));border:2px solid #2196f3;border-radius:10px;padding:15px;margin-bottom:15px}
+.timezone-box h3{color:#64b5f6;margin-bottom:12px;text-align:center}
+.timezone-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.timezone-card{background:#1a1a1a;border-radius:8px;padding:12px;text-align:center;border:1px solid #333}
+.timezone-card .country{font-size:1.2rem;margin-bottom:5px}
+.timezone-card .time-diff{color:#64b5f6;font-weight:700;font-size:1.1rem}
+.timezone-card .active-time{color:#4caf50;font-size:0.8rem;margin-top:5px}
+.timezone-card .my-action{color:#ffc107;font-size:0.75rem;margin-top:3px;padding:3px 6px;background:rgba(255,193,7,0.2);border-radius:4px;display:inline-block}
+.time-rule{background:rgba(244,67,54,0.1);border:2px solid #f44336;border-radius:10px;padding:15px;margin-bottom:15px}
+.time-rule h3{color:#f44336;margin-bottom:10px;text-align:center}
+.time-rule-item{display:flex;align-items:center;gap:10px;padding:10px;background:#1a1a1a;border-radius:6px;margin-bottom:8px}
+.time-rule-item:last-child{margin-bottom:0}
+.time-rule-icon{font-size:1.5rem}
+.time-rule-content{flex:1}
+.time-rule-content b{color:#ff8c00;display:block;margin-bottom:3px}
+.time-rule-content span{color:#aaa;font-size:0.85rem}
+.schedule-box{background:#1a1a1a;border-radius:10px;padding:15px;margin-bottom:15px;border:1px solid #333}
+.schedule-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #333}
+.schedule-header h4{color:#ff8c00}
+.schedule-header .time-badge{background:#ff6a00;color:#000;padding:4px 10px;border-radius:4px;font-weight:600;font-size:0.85rem}
+.schedule-task{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #222}
+.schedule-task:last-child{border-bottom:none}
+.schedule-task .region{min-width:60px;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;text-align:center}
+.schedule-task .region.asia{background:rgba(33,150,243,0.3);color:#64b5f6}
+.schedule-task .region.eu{background:rgba(156,39,176,0.3);color:#ba68c8}
+.schedule-task .region.us{background:rgba(76,175,80,0.3);color:#81c784}
+.schedule-task .region.me{background:rgba(255,152,0,0.3);color:#ffb74d}
+.schedule-task .task-desc{flex:1;color:#ccc;font-size:0.85rem}
+.mega-buyer-alert{background:rgba(255,193,7,0.2);border:2px solid #ffc107;border-radius:10px;padding:15px;margin-bottom:15px}
+.mega-buyer-alert h4{color:#ffc107;margin-bottom:8px}
+.mega-buyer-alert p{color:#ccc;font-size:0.85rem}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>🌏 알리바바 해외제조사업부 2026 KPI</h1>
+<div class="subtitle">1~2분기: 구축 | 3~4분기: 매출 5억</div>
+<div class="date" id="date"></div>
+</div>
+
+<div class="nav">
+<button class="on" onclick="show('main')">📊 연간 개요</button>
+<button onclick="show('timezone')">🕐 시간관리</button>
+<button onclick="show('lead')">📈 선행지표</button>
+<button onclick="show('lag')">📉 후행지표</button>
+<button onclick="show('q12')">🔧 1~2분기</button>
+<button onclick="show('q34')">💰 3~4분기</button>
+<button onclick="show('success')">🏆 성공공식</button>
+<button onclick="show('daily')">📅 일일</button>
+<button onclick="show('weekly')">📆 주간</button>
+</div>
+
+<!-- 연간 개요 -->
+<div id="main" class="section on">
+<div class="target">
+<h2>🎯 2026년 연간 목표</h2>
+<div class="num">5억 원</div>
+<div class="info">
+<div><div class="v">1~2분기</div><div class="l">인프라 구축</div></div>
+<div><div class="v">3~4분기</div><div class="l">매출 집중</div></div>
+<div><div class="v">4,100만/월</div><div class="l">하반기 평균</div></div>
+</div>
+</div>
+
+<div class="grid">
+<div class="phase-box">
+<h3>🔧 1~2분기: 구축 단계 (1~6월)</h3>
+<div class="desc">
+<p style="margin:5px 0">✔️ 알리바바 스토어 최적화</p>
+<p style="margin:5px 0">✔️ RTS 상품 30개 등록</p>
+<p style="margin:5px 0">✔️ RFQ/4P 광고 세팅</p>
+<p style="margin:5px 0">✔️ 샘플 프로세스 구축</p>
+<p style="margin:5px 0"><b>목표: 시스템 완성 + 초기 매출</b></p>
+</div>
+</div>
+
+<div class="phase-box" style="border-color:#4caf50">
+<h3 style="color:#8bc34a">💰 3~4분기: 매출 집중 (7~12월)</h3>
+<div class="desc">
+<p style="margin:5px 0">✔️ 월 매출 4,100만원</p>
+<p style="margin:5px 0">✔️ 월 계약 3~4건</p>
+<p style="margin:5px 0">✔️ 평균 객단가 1,000~1,500만</p>
+<p style="margin:5px 0">✔️ 바이어 관계 심화</p>
+<p style="margin:5px 0"><b>목표: 6개월 매출 5억</b></p>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h3>📊 2026년 분기별 로드맵</h3>
+<table>
+<thead><tr><th>분기</th><th>기간</th><th>핵심 목표</th><th>예상 매출</th></tr></thead>
+<tbody>
+<tr style="background:rgba(33,150,243,0.1)">
+<td><b>Q1</b></td>
+<td>1~3월</td>
+<td>스토어 구축 + RTS 등록</td>
+<td>0~500만</td>
+</tr>
+<tr style="background:rgba(33,150,243,0.05)">
+<td><b>Q2</b></td>
+<td>4~6월</td>
+<td>광고 최적화 + 샘플 프로세스</td>
+<td>1,000만~</td>
+</tr>
+<tr style="background:rgba(76,175,80,0.1)">
+<td><b>Q3</b></td>
+<td>7~9월</td>
+<td>월 매출 4,000만 돌파</td>
+<td><b>1.2억</b></td>
+</tr>
+<tr style="background:rgba(76,175,80,0.15)">
+<td><b>Q4</b></td>
+<td>10~12월</td>
+<td>안정적 매출 + 재계약</td>
+<td><b>3.8억</b></td>
+</tr>
+<tr style="background:rgba(255,106,0,0.15)">
+<td colspan="3"><b>연간 합계</b></td>
+<td><b>5억+</b></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="highlight">
+<h4>💡 2026년 전략 핵심</h4>
+<p>상반기(1~6월): 매출보다는 <b>시스템 구축</b>에 집중</p>
+<p>하반기(7~12월): 완성된 시스템으로 <b>매출 극대화</b></p>
+<p>전체: <b>속도 + RTS + Trade Assurance</b> = 알리바바 성공 3요소</p>
+</div>
+</div>
+
+<!-- 시간관리 -->
+<div id="timezone" class="section">
+<div class="target">
+<h2>🕐 해외사업부 시간관리 전략</h2>
+<div style="font-size:1rem;color:#aaa;margin-top:8px">정해진 시간에 정해진 일을 한다</div>
+</div>
+
+<div class="time-rule">
+<h3>📌 해외사업부 시간관리 핵심 원칙</h3>
+<div class="time-rule-item">
+<div class="time-rule-icon">⏰</div>
+<div class="time-rule-content">
+<b>시간대별 업무 고정</b>
+<span>정해진 시간에 정해진 업무를 수행한다. 국가별로 시간대가 다르기 때문에, 각 지역을 담당할 시간이 고정되어 있지 않으면 업무 효율이 급격히 떨어진다.</span>
+</div>
+</div>
+<div class="time-rule-item">
+<div class="time-rule-icon">💬</div>
+<div class="time-rule-content">
+<b>채팅 응대 시간 설정</b>
+<span>메가 바이어가 아닌 이상, 자신의 시간관리 안에서 비대면 채팅 시간을 미리 정해야 한다. 바이어 문의가 올 때마다 즉시 응답하는 게 아니라, 정해진 시간에 모아서 처리한다.</span>
+</div>
+</div>
+<div class="time-rule-item">
+<div class="time-rule-icon">🌍</div>
+<div class="time-rule-content">
+<b>시차 기반 응답 전략</b>
+<span>바이어의 시차를 미리 파악하고, 바이어가 일하는 시간(현지 오전~오후)에 내 답변이 도착할 수 있도록 업무 시간을 역산해서 설계해야 한다.</span>
+</div>
+</div>
+</div>
+
+<div class="card" style="border:2px solid #ff6a00;margin-bottom:15px">
+<h3>🎯 시간관리 4대 원칙</h3>
+<table>
+<thead><tr><th>원칙</th><th>뜻</th><th>실행 방법</th></tr></thead>
+<tbody>
+<tr>
+<td><b style="color:#ff6a00">시간대 고정</b></td>
+<td>정해진 시간에 정해진 일만 한다</td>
+<td>국가별/지역별 전용 시간대 배정</td>
+</tr>
+<tr>
+<td><b style="color:#ff6a00">응대 시간 설정</b></td>
+<td>바이어 응대 가능 시간을 미리 정한다</td>
+<td>채팅/이메일 응답 시간 고정</td>
+</tr>
+<tr>
+<td><b style="color:#ff6a00">시차 파악</b></td>
+<td>바이어 현지 시간 기준으로 일한다</td>
+<td>바이어 오전에 답변 도착하도록 역산</td>
+</tr>
+<tr>
+<td><b style="color:#ff6a00">우선순위 구분</b></td>
+<td>바이어 등급별 대응 방식 차등</td>
+<td>메가 바이어는 예외, 나머지는 정해진 시간에</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="info-box">
+<h4>💡 왜 시간대 고정이 중요한가?</h4>
+<p>• 해외 바이어는 <b>시차가 다르다</b> → 모든 문의에 바로 응답하면 24시간 대기해야 함</p>
+<p>• 시간대별 업무가 <b>고정되지 않으면</b> → 이것저것 왔다갔다, 집중력 저하, 생산성 하락</p>
+<p>• <b>바이어 활동시간에 응답</b>해야 → 바로 대화 가능, 계약 전환율 상승</p>
+<p>• 결론: <b>"내가 언제 일할지"</b>가 아니라 <b>"바이어가 언제 볼지"</b> 기준으로 설계</p>
+</div>
+
+<div class="mega-buyer-alert">
+<h4>⭐ 바이어 등급별 대응 전략</h4>
+<p>• <b>메가 바이어 (L4 이상, 예상 계약 5,000만원+):</b> 시간 상관없이 <u>즉시 대응</u> (새벽이라도 응대)</p>
+<p>• <b>일반 바이어 (L1~L3):</b> 정해진 시간대에 <u>모아서 처리</u></p>
+<p>• <b>핵심:</b> 모든 바이어에게 똑같이 시간 쓰면 안 됨. 큰 계약 가능성 있는 바이어에게 더 집중해야 함</p>
+</div>
+
+<div class="card">
+<h3>🌍 주요 국가별 시차표 (한국 기준)</h3>
+<table>
+<thead><tr><th>지역</th><th>국가</th><th>시차</th><th>바이어 근무시간</th><th>내 응답 시간</th></tr></thead>
+<tbody>
+<tr style="background:rgba(33,150,243,0.1)">
+<td rowspan="3"><b style="color:#64b5f6">아시아</b></td>
+<td>🇯🇵 일본</td><td>0시간</td><td>09~18시</td><td style="color:#4caf50"><b>09~18시</b></td>
+</tr>
+<tr style="background:rgba(33,150,243,0.05)">
+<td>🇻🇳 베트남</td><td>-2시간</td><td>09~18시</td><td style="color:#4caf50"><b>11~20시</b></td>
+</tr>
+<tr style="background:rgba(33,150,243,0.1)">
+<td>🇮🇳 인도</td><td>-3.5시간</td><td>09~18시</td><td style="color:#4caf50"><b>12:30~21:30</b></td>
+</tr>
+<tr style="background:rgba(255,152,0,0.1)">
+<td rowspan="2"><b style="color:#ffb74d">중동</b></td>
+<td>🇦🇪 UAE</td><td>-5시간</td><td>09~18시</td><td style="color:#ffc107"><b>14~23시</b></td>
+</tr>
+<tr style="background:rgba(255,152,0,0.05)">
+<td>🇸🇦 사우디</td><td>-6시간</td><td>09~18시</td><td style="color:#ffc107"><b>15~24시</b></td>
+</tr>
+<tr style="background:rgba(156,39,176,0.1)">
+<td rowspan="2"><b style="color:#ba68c8">유럽</b></td>
+<td>🇬🇧 영국</td><td>-9시간</td><td>09~18시</td><td style="color:#9c27b0"><b>18~03시</b></td>
+</tr>
+<tr style="background:rgba(156,39,176,0.05)">
+<td>🇩🇪 독일</td><td>-8시간</td><td>09~18시</td><td style="color:#9c27b0"><b>17~02시</b></td>
+</tr>
+<tr style="background:rgba(76,175,80,0.1)">
+<td rowspan="2"><b style="color:#81c784">미국</b></td>
+<td>🇺🇸 뉴욕</td><td>-14시간</td><td>09~18시</td><td style="color:#4caf50"><b>23~08시</b></td>
+</tr>
+<tr style="background:rgba(76,175,80,0.05)">
+<td>🇺🇸 LA</td><td>-17시간</td><td>09~18시</td><td style="color:#4caf50"><b>02~11시</b></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>📅 하루 시간대별 업무표</h3>
+<table>
+<thead><tr><th>시간대</th><th>담당 지역</th><th>업무 내용</th><th>바이어 현지시간</th></tr></thead>
+<tbody>
+<tr style="background:rgba(33,150,243,0.15)">
+<td><b>08:00~10:00</b></td>
+<td style="color:#64b5f6">🌏 아시아</td>
+<td>일본/베트남/인도 응대</td>
+<td>08~12시 (오전)</td>
+</tr>
+<tr>
+<td><b>10:00~12:00</b></td>
+<td style="color:#ff8c00">🔧 내부업무</td>
+<td>상품관리/광고/견적서 작성</td>
+<td>-</td>
+</tr>
+<tr style="background:rgba(255,152,0,0.15)">
+<td><b>14:00~16:00</b></td>
+<td style="color:#ffb74d">🏜️ 중동</td>
+<td>UAE/사우디 응대</td>
+<td>09~11시 (오전)</td>
+</tr>
+<tr style="background:rgba(156,39,176,0.15)">
+<td><b>17:00~19:00</b></td>
+<td style="color:#ba68c8">🇪🇺 유럽</td>
+<td>영국/독일 응대</td>
+<td>08~11시 (오전)</td>
+</tr>
+<tr>
+<td><b>19:00~20:00</b></td>
+<td style="color:#ff8c00">📊 마감정리</td>
+<td>일일 보고 / 내일 준비</td>
+<td>-</td>
+</tr>
+<tr style="background:rgba(76,175,80,0.15)">
+<td><b>21:00~23:00</b></td>
+<td style="color:#81c784">🇺🇸 미국 (선택)</td>
+<td>미국 동부 응대</td>
+<td>07~09시 (오전)</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="highlight">
+<h4>💡 시간관리 핵심 포인트</h4>
+<p>• <b>오전 (08~12시):</b> 아시아 집중 + 내부 업무 → 가장 생산적인 시간</p>
+<p>• <b>오후 (14~19시):</b> 중동 → 유럽 순서로 응대 (시차 순서대로)</p>
+<p>• <b>야간 (21~23시):</b> 미국 대응 필요할 때만 (선택사항)</p>
+<p>• <b>핵심 원칙:</b> 바이어 오전 시간에 답변 도착 = 당일 바로 대화 가능 = 계약 전환율 상승</p>
+</div>
+
+<div class="info-box">
+<h4>✅ 매일 점검사항</h4>
+<p>☐ 새 바이어 → 국가/시차 확인했는가?</p>
+<p>☐ 바이어 근무시간에 맞춰 답변 보냈는가?</p>
+<p>☐ 오늘 시간대별 업무를 지켰는가?</p>
+<p>☐ 메가 바이어는 예외 처리했는가?</p>
+</div>
+</div>
+
+<!-- 선행지표 -->
+<div id="lead" class="section">
+<div class="target">
+<h2>📈 선행지표 (행동 체크)</h2>
+<div style="font-size:0.95rem;color:#aaa;margin-top:8px">이 행동을 해야 → 후행지표(결과)가 나온다</div>
+</div>
+
+<!-- 선행↔후행 연결 구조 -->
+<div class="card" style="border:2px solid #ff6a00;margin-bottom:20px">
+<h3>🔗 선행지표 → 후행지표 연결 구조</h3>
+<table>
+<thead><tr><th>후행지표 (결과)</th><th>목표</th><th>선행지표 (행동)</th><th>행동 목표</th></tr></thead>
+<tbody>
+<tr style="background:rgba(33,150,243,0.1)">
+<td><b style="color:#2196f3">유입수</b></td>
+<td>100건/월</td>
+<td>RTS 등록 + 4P 광고 + 키워드 최적화</td>
+<td>RTS 30개, 광고 CTR 1.5%+</td>
+</tr>
+<tr style="background:rgba(156,39,176,0.1)">
+<td><b style="color:#9c27b0">응답률</b></td>
+<td>95%</td>
+<td>4시간 내 응답 + 시간대별 업무 준수</td>
+<td>4시간 응답률 90%+</td>
+</tr>
+<tr style="background:rgba(255,152,0,0.1)">
+<td><b style="color:#ff9800">견적전환율</b></td>
+<td>18%</td>
+<td>24시간 내 견적 + 가격 경쟁력 + MOQ 유연화</td>
+<td>24시간 견적률 100%</td>
+</tr>
+<tr style="background:rgba(76,175,80,0.1)">
+<td><b style="color:#4caf50">계약전환율</b></td>
+<td>22%</td>
+<td>7일 내 샘플 + Follow-up 3회 + TA 적용</td>
+<td>샘플 7일 이행률 100%</td>
+</tr>
+<tr style="background:rgba(244,67,54,0.1)">
+<td><b style="color:#f44336">SKU</b></td>
+<td>30개</td>
+<td>주 2개 상품 등록 + RTS 전환</td>
+<td>월 8개 신규 등록</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- 유입수 선행지표 -->
+<div class="card">
+<h3 style="color:#2196f3">📦 유입수 100건 달성을 위한 선행지표</h3>
+<div class="input-row">
+<label>RTS 상품 수</label><input type="number" id="leadRTS" placeholder="0" onchange="calcLead()"><span class="unit">개</span>
+<label>4P 광고 CTR</label><input type="number" id="leadCTR" placeholder="0" step="0.1" onchange="calcLead()"><span class="unit">%</span>
+<label>RFQ 응답 수</label><input type="number" id="leadRFQ" placeholder="0" onchange="calcLead()"><span class="unit">건</span>
+</div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>RTS 상품 30개 등록 완료</span><em>목표: 30개</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>4P 광고 CTR 1.5% 이상 유지</span><em>목표: 1.5%+</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>RFQ 마켓 매일 체크 및 응답</span><em>목표: 일 5건+</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>상품 키워드 최적화 (주 1회)</span><em>목표: 주 1회</em></li>
+</ul>
+</div>
+
+<!-- 응답률 선행지표 -->
+<div class="card">
+<h3 style="color:#9c27b0">💬 응답률 95% 달성을 위한 선행지표</h3>
+<div class="input-row">
+<label>4시간 내 응답</label><input type="number" id="lead4h" placeholder="0" onchange="calcLead()"><span class="unit">건</span>
+<label>총 Inquiry</label><input type="number" id="leadInq" placeholder="0" onchange="calcLead()"><span class="unit">건</span>
+<label>4시간 응답률</label><span class="unit" id="lead4hRate" style="color:#ff6a00;font-weight:bold">-%</span>
+</div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>아시아 바이어: 08~10시 응답</span><em>시간대 준수</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>중동 바이어: 14~16시 응답</span><em>시간대 준수</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>유럽 바이어: 17~19시 응답</span><em>시간대 준수</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>알리바바 앱 알림 항상 켜두기</span><em>필수</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>미응답 0건으로 하루 마감</span><em>목표: 0건</em></li>
+</ul>
+</div>
+
+<!-- 견적전환 선행지표 -->
+<div class="card">
+<h3 style="color:#ff9800">📝 견적전환 18% 달성을 위한 선행지표</h3>
+<div class="input-row">
+<label>24시간 내 견적</label><input type="number" id="lead24q" placeholder="0" onchange="calcLead()"><span class="unit">건</span>
+<label>총 견적요청</label><input type="number" id="leadQreq" placeholder="0" onchange="calcLead()"><span class="unit">건</span>
+<label>24시간 견적률</label><span class="unit" id="lead24qRate" style="color:#ff6a00;font-weight:bold">-%</span>
+</div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>견적 요청 → 24시간 내 발송</span><em>목표: 100%</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>경쟁사 대비 가격 경쟁력 확보</span><em>±10% 이내</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>MOQ 유연하게 제시</span><em>소량 가능</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>견적서에 상세 스펙 포함</span><em>필수</em></li>
+</ul>
+</div>
+
+<!-- 계약전환 선행지표 -->
+<div class="card">
+<h3 style="color:#4caf50">🤝 계약전환 22% 달성을 위한 선행지표</h3>
+<div class="input-row">
+<label>7일 내 샘플발송</label><input type="number" id="lead7s" placeholder="0" onchange="calcLead()"><span class="unit">건</span>
+<label>총 샘플요청</label><input type="number" id="leadSreq" placeholder="0" onchange="calcLead()"><span class="unit">건</span>
+<label>7일 이행률</label><span class="unit" id="lead7sRate" style="color:#ff6a00;font-weight:bold">-%</span>
+</div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>샘플 요청 → 7일 내 발송</span><em>목표: 100%</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>샘플 발송 후 3일 내 추적번호 공유</span><em>필수</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>샘플 도착 후 24시간 내 Follow-up</span><em>1차</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>3일 후 추가 Follow-up</span><em>2차</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>7일 후 최종 Follow-up</span><em>3차</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>Trade Assurance 적용 제안</span><em>신뢰 확보</em></li>
+</ul>
+</div>
+
+<!-- SKU 선행지표 -->
+<div class="card">
+<h3 style="color:#f44336">📦 SKU 30개 달성을 위한 선행지표</h3>
+<div class="input-row">
+<label>이번 주 등록</label><input type="number" id="leadNewSKU" placeholder="0" onchange="calcLead()"><span class="unit">개</span>
+<label>RTS 전환</label><input type="number" id="leadRTSconv" placeholder="0" onchange="calcLead()"><span class="unit">개</span>
+</div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>주 2개 신규 상품 등록</span><em>목표: 월 8개</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>기존 상품 → RTS 전환</span><em>목표: 30% 비중</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>상품 이미지 5장 이상</span><em>필수</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>상품 상세페이지 100점 만점</span><em>필수</em></li>
+</ul>
+</div>
+
+<div class="btns" style="margin-top:20px">
+<button class="btn btn-p" onclick="saveLead()">💾 선행지표 저장</button>
+</div>
+</div>
+
+<!-- 후행지표 -->
+<div id="lag" class="section">
+<div class="target">
+<h2>📉 후행지표 (결과 입력)</h2>
+<div style="font-size:0.95rem;color:#aaa;margin-top:8px">이번 달 결과를 입력하면 → 성공/주의/실패 자동 판정</div>
+</div>
+
+<!-- 후행지표 요약 카드 -->
+<div class="stats">
+<div class="stat" id="lagStatInq"><div class="v" id="lagInqV">-</div><div class="l">유입수</div><div class="t">목표 100건</div></div>
+<div class="stat" id="lagStatResp"><div class="v" id="lagRespV">-</div><div class="l">응답률</div><div class="t">목표 95%</div></div>
+<div class="stat" id="lagStatQuote"><div class="v" id="lagQuoteV">-</div><div class="l">견적전환</div><div class="t">목표 18%</div></div>
+<div class="stat" id="lagStatContract"><div class="v" id="lagContractV">-</div><div class="l">계약전환</div><div class="t">목표 22%</div></div>
+<div class="stat" id="lagStatSKU"><div class="v" id="lagSKUV">-</div><div class="l">SKU</div><div class="t">목표 30개</div></div>
+</div>
+
+<!-- 종합 판정 -->
+<div id="lagJudgment" class="card" style="border:3px solid #333;text-align:center;padding:20px;display:none">
+<h3 id="lagJudgTitle">종합 판정</h3>
+<div id="lagJudgIcon" style="font-size:3rem;margin:10px 0">-</div>
+<div id="lagJudgText" style="font-size:1.1rem;color:#aaa">결과를 입력하세요</div>
+<div id="lagJudgScore" style="margin-top:10px;font-size:1.5rem;font-weight:bold">-/5 달성</div>
+</div>
+
+<!-- 후행지표 입력 -->
+<div class="grid">
+<div class="card">
+<h3>📊 이번 달 결과 입력</h3>
+<div class="input-row">
+<label>총 유입수 (Inquiry)</label><input type="number" id="lagInq" placeholder="0" onchange="calcLag()"><span class="unit">건</span>
+</div>
+<div class="input-row">
+<label>응답 완료</label><input type="number" id="lagResp" placeholder="0" onchange="calcLag()"><span class="unit">건</span>
+<label>응답률</label><span class="unit" id="lagRespRate" style="color:#ff6a00;font-weight:bold">-%</span>
+</div>
+<div class="input-row">
+<label>견적 발송</label><input type="number" id="lagQuote" placeholder="0" onchange="calcLag()"><span class="unit">건</span>
+<label>견적전환율</label><span class="unit" id="lagQuoteRate" style="color:#ff6a00;font-weight:bold">-%</span>
+</div>
+<div class="input-row">
+<label>계약 체결</label><input type="number" id="lagContract" placeholder="0" onchange="calcLag()"><span class="unit">건</span>
+<label>계약전환율</label><span class="unit" id="lagContractRate" style="color:#ff6a00;font-weight:bold">-%</span>
+</div>
+<div class="input-row">
+<label>현재 SKU (RTS)</label><input type="number" id="lagSKU" placeholder="0" onchange="calcLag()"><span class="unit">개</span>
+</div>
+<div class="input-row">
+<label>이번 달 매출</label><input type="number" id="lagRevenue" placeholder="0" onchange="calcLag()"><span class="unit">만원</span>
+</div>
+</div>
+
+<div class="card">
+<h3>🎯 목표 대비 달성 현황</h3>
+<table id="lagResultTable">
+<thead><tr><th>지표</th><th>목표</th><th>실적</th><th>달성률</th><th>판정</th></tr></thead>
+<tbody>
+<tr id="lagRowInq"><td>유입수</td><td>100건</td><td id="lagResInq">-</td><td id="lagRateInq">-</td><td id="lagJudgInq">-</td></tr>
+<tr id="lagRowResp"><td>응답률</td><td>95%</td><td id="lagResResp">-</td><td id="lagRateResp">-</td><td id="lagJudgResp">-</td></tr>
+<tr id="lagRowQuote"><td>견적전환</td><td>18%</td><td id="lagResQuote">-</td><td id="lagRateQuote">-</td><td id="lagJudgQuote">-</td></tr>
+<tr id="lagRowContract"><td>계약전환</td><td>22%</td><td id="lagResContract">-</td><td id="lagRateContract">-</td><td id="lagJudgContract">-</td></tr>
+<tr id="lagRowSKU"><td>SKU</td><td>30개</td><td id="lagResSKU">-</td><td id="lagRateSKU">-</td><td id="lagJudgSKU">-</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- 실패 항목별 대책 -->
+<div id="lagActionSection" style="display:none">
+<div class="alert">
+<h4>🔧 미달 항목 개선 대책</h4>
+<div id="lagActions"></div>
+</div>
+</div>
+
+<!-- 선행지표 점검 -->
+<div id="lagLeadCheck" style="display:none">
+<div class="card" style="border:2px solid #ffc107">
+<h3 style="color:#ffc107">⚠️ 선행지표 점검 필요</h3>
+<div id="lagLeadActions"></div>
+</div>
+</div>
+
+<div class="btns" style="margin-top:20px">
+<button class="btn btn-p" onclick="saveLag()">💾 후행지표 저장</button>
+<button class="btn btn-s" onclick="exportLagReport()">📤 리포트 내보내기</button>
+</div>
+</div>
+
+<!-- 1~2분기 (구축) -->
+<div id="q12" class="section">
+<div class="target">
+<h2>🔧 1~2분기: 구축 단계 (1~6월)</h2>
+<div class="num">인프라 완성</div>
+<div class="info">
+<div><div class="v">RTS 30개</div><div class="l">즉시배송 상품</div></div>
+<div><div class="v">Inquiry 50건</div><div class="l">월 평균 목표</div></div>
+<div><div class="v">1,000만</div><div class="l">6개월 목표</div></div>
+</div>
+</div>
+
+<div class="grid">
+<div class="card">
+<h3>🎯 1분기 목표 (1~3월)</h3>
+<ul class="list">
+<li><div class="chk" onclick="toggle(this)"></div><span>알리바바 스토어 개설 완료 <em>1월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>상품 카탈로그 30개 등록 <em>1~2월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>RTS 뱃지 10개 확보 <em>2월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>Trade Assurance 활성화 <em>2월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>4P 광고 세팅 및 테스트 <em>3월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>샘플 발송 프로세스 구축 <em>3월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>첫 계약 체결 <em>목표: 3월</em></span></li>
+</ul>
+</div>
+
+<div class="card">
+<h3>🎯 2분기 목표 (4~6월)</h3>
+<ul class="list">
+<li><div class="chk" onclick="toggle(this)"></div><span>RTS 상품 30개로 확대 <em>4~5월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>RFQ 응답률 90% 달성 <em>지속</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>월 Inquiry 50건 달성 <em>5월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>4P 광고 ROI 최적화 <em>4~6월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>L3 바이어 컨택 시작 <em>5월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>Fast Sample (7일) 프로세스 정립 <em>6월</em></span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>분기 매출 1,000만원 달성 <em>목표</em></span></li>
+</ul>
+</div>
+</div>
+
+<div class="card">
+<h3>📊 1~2분기 핵심 KPI</h3>
+<table>
+<thead><tr><th>지표</th><th>1분기</th><th>2분기</th><th>목표</th></tr></thead>
+<tbody>
+<tr><td>RTS 상품 수</td><td>10개</td><td>30개</td><td style="color:#4caf50">30%+ 비중</td></tr>
+<tr><td>월 Inquiry</td><td>20~30건</td><td>50건</td><td style="color:#4caf50">증가 추세</td></tr>
+<tr><td>4시간 응답률</td><td>70%+</td><td>90%+</td><td style="color:#4caf50">속도 개선</td></tr>
+<tr><td>TA 적용률</td><td>50%</td><td>80%</td><td style="color:#4caf50">신뢰 구축</td></tr>
+<tr><td>계약 건수</td><td>0~1건</td><td>2~3건</td><td style="color:#4caf50">분기 4건</td></tr>
+<tr><td>분기 매출</td><td>0~500만</td><td>1,000만</td><td style="color:#4caf50">시스템 검증</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="alert">
+<h4>⚠️ 1~2분기 주의사항</h4>
+<p>매출에 조급하지 말 것 - <b>인프라가 우선</b></p>
+<p>RTS 비중 30% 반드시 달성 - 이게 없으면 Inquiry 안 들어옴</p>
+<p>응답 속도 훈련 - 4시간 이내 응답 습관화</p>
+<p>초기 바이어 관리 철저 - 첫 10명이 평판 결정</p>
+</div>
+</div>
+
+<!-- 3~4분기 (매출) -->
+<div id="q34" class="section">
+<div class="target">
+<h2>💰 3~4분기: 매출 집중 (7~12월)</h2>
+<div class="num">5억 원</div>
+<div class="info">
+<div><div class="v">4,100만/월</div><div class="l">평균 매출</div></div>
+<div><div class="v">3~4건/월</div><div class="l">계약 수</div></div>
+<div><div class="v">1,200만</div><div class="l">평균 객단가</div></div>
+</div>
+</div>
+
+<div class="grid">
+<div class="kpi-box">
+<h3>📩 월 Inquiry</h3>
+<div class="num">100건</div>
+<div class="desc">문의 유입 목표</div>
+</div>
+<div class="kpi-box">
+<h3>📋 월 견적</h3>
+<div class="num">15~20건</div>
+<div class="desc">견적 발행 목표</div>
+</div>
+<div class="kpi-box">
+<h3>🤝 월 계약</h3>
+<div class="num">3~4건</div>
+<div class="desc">실제 계약 체결</div>
+</div>
+</div>
+
+<div class="stats">
+<div class="stat"><div class="v" id="sInquiry">-</div><div class="l">Inquiry</div><div class="t">100건</div></div>
+<div class="stat"><div class="v" id="sQuote">-</div><div class="l">견적</div><div class="t">15~20건</div></div>
+<div class="stat"><div class="v" id="sContract">-</div><div class="l">계약</div><div class="t">3~4건</div></div>
+<div class="stat"><div class="v" id="sAOV">-</div><div class="l">평균객단가</div><div class="t">1,200만</div></div>
+<div class="stat"><div class="v" id="sRevenue">-</div><div class="l">월 매출</div><div class="t">4,100만</div></div>
+<div class="stat"><div class="v" id="sRTS">-</div><div class="l">RTS 비중</div><div class="t">30%+</div></div>
+</div>
+
+<div class="card">
+<h3>📝 이번달 실적 입력</h3>
+<div class="input-row">
+<label>Inquiry</label><input type="number" id="iInquiry" placeholder="100" onchange="updateMain()"><span class="unit">건</span>
+<label>견적</label><input type="number" id="iQuote" placeholder="18" onchange="updateMain()"><span class="unit">건</span>
+<label>계약</label><input type="number" id="iContract" placeholder="3" onchange="updateMain()"><span class="unit">건</span>
+<label>매출</label><input type="number" id="iRevenue" placeholder="4100" onchange="updateMain()"><span class="unit">만</span>
+</div>
+</div>
+
+<div class="card">
+<h3>📊 3~4분기 월별 목표</h3>
+<table>
+<thead><tr><th>월</th><th>Inquiry</th><th>계약</th><th>매출</th><th>비고</th></tr></thead>
+<tbody>
+<tr><td>7월</td><td>80건</td><td>2건</td><td>2,500만</td><td>하반기 워밍업</td></tr>
+<tr><td>8월</td><td>90건</td><td>3건</td><td>3,500만</td><td>본격 가동</td></tr>
+<tr><td>9월</td><td>100건</td><td>3건</td><td>4,000만</td><td>Q3 마감</td></tr>
+<tr style="background:rgba(255,106,0,0.05)"><td>Q3 소계</td><td>270건</td><td>8건</td><td><b>1억</b></td><td></td></tr>
+<tr><td>10월</td><td>100건</td><td>4건</td><td>4,500만</td><td>최대 매출</td></tr>
+<tr><td>11월</td><td>100건</td><td>3건</td><td>4,000만</td><td>재계약 시작</td></tr>
+<tr><td>12월</td><td>100건</td><td>4건</td><td>4,500만</td><td>연말 총력</td></tr>
+<tr style="background:rgba(255,106,0,0.1)"><td>Q4 소계</td><td>300건</td><td>11건</td><td><b>1.3억</b></td><td></td></tr>
+<tr style="background:rgba(76,175,80,0.15)"><td><b>하반기 합계</b></td><td><b>570건</b></td><td><b>19건</b></td><td><b>2.3억</b></td><td></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>🔄 3~4분기 퍼널 구조</h3>
+<table>
+<thead><tr><th>단계</th><th>전환율</th><th>월 목표</th></tr></thead>
+<tbody>
+<tr><td>Inquiry</td><td>-</td><td><b>100건</b></td></tr>
+<tr><td>견적 발행</td><td>15~20%</td><td><b>15~20건</b></td></tr>
+<tr><td>실제 계약</td><td>20~30%</td><td><b>3~4건</b></td></tr>
+<tr><td>평균 객단가</td><td>-</td><td><b>1,200만원</b></td></tr>
+<tr style="background:rgba(76,175,80,0.1)"><td><b>월 매출</b></td><td>-</td><td><b>4,100만원</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="info-box">
+<h4>✅ 3~4분기 핵심 활동</h4>
+<p>✔️ 월 Inquiry <b>100건</b> 안정화</p>
+<p>✔️ 4시간 응답률 <b>95%</b> 유지</p>
+<p>✔️ Fast Sample (7일) <b>100%</b> 이행</p>
+<p>✔️ 기존 바이어 <b>재계약</b> 집중</p>
+<p>✔️ L3+ 바이어 <b>대량 거래</b> 타겟팅</p>
+</div>
+
+<div class="alert">
+<h4>⚠️ 3~4분기 리스크</h4>
+<p>샘플 비용 급증 - 월 100만원 이상 예상</p>
+<p>응답 지연 시 전환율 급락 - 속도 절대 포기 금지</p>
+<p>바이어 분산 필수 - 1개 바이어 의존도 30% 이하</p>
+</div>
+</div>
+
+<!-- 성공공식 -->
+<div id="success" class="section">
+<div class="target">
+<h2>🏆 2026년 알리바바 성공 공식</h2>
+<div class="num" style="font-size:1.3rem">월 매출 4,100만원 = 계약 4건 × 객단가 1,000만원</div>
+<div style="margin-top:10px;color:#aaa;font-size:0.95rem">이걸 달성하려면 아래 5가지 지표가 <b style="color:#4caf50">목표치</b>를 충족해야 함</div>
+</div>
+
+<!-- 성공 기준 정의 -->
+<div class="card" style="border:3px solid #4caf50;margin-bottom:20px">
+<h3 style="color:#4caf50">✅ 성공의 정의</h3>
+<table>
+<thead><tr><th>구분</th><th>기준</th><th>의미</th></tr></thead>
+<tbody>
+<tr style="background:rgba(76,175,80,0.2)">
+<td><b style="color:#4caf50">성공 ✅</b></td>
+<td>5개 지표 중 <b>4개 이상</b> 목표 달성</td>
+<td>월 매출 4,100만원 달성 가능</td>
+</tr>
+<tr style="background:rgba(255,193,7,0.2)">
+<td><b style="color:#ffc107">주의 ⚠️</b></td>
+<td>5개 지표 중 <b>2~3개</b> 목표 달성</td>
+<td>매출 목표 50~80% 수준</td>
+</tr>
+<tr style="background:rgba(244,67,54,0.2)">
+<td><b style="color:#f44336">실패 ❌</b></td>
+<td>5개 지표 중 <b>1개 이하</b> 목표 달성</td>
+<td>구조적 문제, 전면 재검토 필요</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- 5대 지표와 목표 기준 -->
+<div class="card" style="border:2px solid #ff6a00;margin-bottom:20px">
+<h3>🎯 5대 지표별 목표 기준</h3>
+<table>
+<thead><tr><th>지표</th><th>목표</th><th>성공 ✅</th><th>주의 ⚠️</th><th>실패 ❌</th></tr></thead>
+<tbody>
+<tr style="background:rgba(33,150,243,0.1)">
+<td><b style="color:#2196f3">① 유입수</b></td>
+<td><b>100건/월</b></td>
+<td>100건 이상</td>
+<td>50~99건</td>
+<td style="color:#f44336">50건 미만</td>
+</tr>
+<tr style="background:rgba(156,39,176,0.1)">
+<td><b style="color:#9c27b0">② 응답률</b></td>
+<td><b>95%</b></td>
+<td>95% 이상</td>
+<td>80~94%</td>
+<td style="color:#f44336">80% 미만</td>
+</tr>
+<tr style="background:rgba(255,152,0,0.1)">
+<td><b style="color:#ff9800">③ 견적전환율</b></td>
+<td><b>18%</b></td>
+<td>18% 이상</td>
+<td>10~17%</td>
+<td style="color:#f44336">10% 미만</td>
+</tr>
+<tr style="background:rgba(76,175,80,0.1)">
+<td><b style="color:#4caf50">④ 계약전환율</b></td>
+<td><b>22%</b></td>
+<td>22% 이상</td>
+<td>15~21%</td>
+<td style="color:#f44336">15% 미만</td>
+</tr>
+<tr style="background:rgba(244,67,54,0.1)">
+<td><b style="color:#f44336">⑤ SKU (RTS)</b></td>
+<td><b>30개</b></td>
+<td>30개 이상</td>
+<td>15~29개</td>
+<td style="color:#f44336">15개 미만</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- 왜 이 목표인가 -->
+<div class="highlight" style="margin-bottom:20px">
+<h4>💡 왜 이 수치가 목표인가?</h4>
+<p>• <b>유입 100건:</b> RTS 30개 × 월 3건 = 90건 + 광고 10건 → 현실적 최소치</p>
+<p>• <b>응답률 95%:</b> 알리바바 권장 90% + 경쟁력 확보 위해 5%p 상향</p>
+<p>• <b>견적전환 18%:</b> B2B 업계 평균 13~20% 중간값</p>
+<p>• <b>계약전환 22%:</b> B2B 업계 평균 22~30% 하단 (보수적)</p>
+<p>• <b>SKU 30개:</b> 알리바바 상위 셀러 평균 30~50개의 최소치</p>
+</div>
+
+<!-- 업계 평균 비교 -->
+<div class="card" style="border:2px solid #ff6a00;margin-bottom:20px">
+<h3>📊 우리 목표 vs 업계 평균 (근거 데이터)</h3>
+<table>
+<thead><tr><th>단계</th><th>우리 목표</th><th>업계 평균</th><th>출처</th><th>판정</th></tr></thead>
+<tbody>
+<tr style="background:rgba(33,150,243,0.1)">
+<td><b style="color:#2196f3">유입 → 상담</b></td>
+<td><b>95%</b></td>
+<td>70~90%</td>
+<td>알리바바 권장 90%+</td>
+<td style="color:#4caf50">✅ 도전적</td>
+</tr>
+<tr style="background:rgba(255,152,0,0.1)">
+<td><b style="color:#ff9800">상담 → 견적</b></td>
+<td><b>15~20%</b></td>
+<td>13~20%</td>
+<td>B2B MQL→SQL 평균</td>
+<td style="color:#4caf50">✅ 적정</td>
+</tr>
+<tr style="background:rgba(76,175,80,0.1)">
+<td><b style="color:#4caf50">견적 → 계약</b></td>
+<td><b>20~25%</b></td>
+<td>22~30%</td>
+<td>B2B 기회→계약 평균</td>
+<td style="color:#4caf50">✅ 적정</td>
+</tr>
+<tr style="background:rgba(156,39,176,0.1)">
+<td><b style="color:#9c27b0">전체 전환율</b></td>
+<td><b>4%</b></td>
+<td>2~4.3%</td>
+<td>B2B 평균 전환율</td>
+<td style="color:#4caf50">✅ 상위권</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="info-box">
+<h4>📊 성공공식 5대 요소</h4>
+<p><b style="color:#2196f3">1. 유입수:</b> Inquiry 100건/월 → 리드 확보</p>
+<p><b style="color:#9c27b0">2. 바이어상담수:</b> 응답률 95% → 신뢰 구축</p>
+<p><b style="color:#ff9800">3. 견적서발송수:</b> 15~20건/월 → 구체화</p>
+<p><b style="color:#4caf50">4. 계약수:</b> 3~4건/월 → 매출 발생</p>
+<p><b style="color:#f44336">5. SKU:</b> RTS 30개 → 경쟁력</p>
+</div>
+
+<!-- 전환율 근거 상세 -->
+<div class="grid">
+<div class="card">
+<h3>📈 전환율 근거 (업계 데이터)</h3>
+<table>
+<thead><tr><th>지표</th><th>수치</th><th>근거</th></tr></thead>
+<tbody>
+<tr>
+<td>B2B 평균 전환율</td>
+<td><b>2.23~4.31%</b></td>
+<td>Growcode 연구</td>
+</tr>
+<tr>
+<td>MQL→SQL 전환율</td>
+<td><b>13~25%</b></td>
+<td>First Page Sage 2025</td>
+</tr>
+<tr>
+<td>기회→계약 전환율</td>
+<td><b>22~30%</b></td>
+<td>Tendril Research</td>
+</tr>
+<tr>
+<td>알리바바 권장 응답률</td>
+<td><b>90%+</b></td>
+<td>알리바바 셀러센터</td>
+</tr>
+<tr>
+<td>바이어 응답률 중시도</td>
+<td><b>88%</b></td>
+<td>알리바바 바이어 설문</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>🧮 우리 목표 계산 검증</h3>
+<div style="background:#111;padding:15px;border-radius:8px;font-family:monospace">
+<p style="color:#64b5f6;margin:5px 0">유입 100건</p>
+<p style="color:#888;margin:5px 0">  ↓ × 95% (응답률)</p>
+<p style="color:#ba68c8;margin:5px 0">상담 95건</p>
+<p style="color:#888;margin:5px 0">  ↓ × 18% (견적전환)</p>
+<p style="color:#ffb74d;margin:5px 0">견적 17건</p>
+<p style="color:#888;margin:5px 0">  ↓ × 22% (계약전환)</p>
+<p style="color:#81c784;margin:5px 0">계약 3.7건 ≒ <b>4건/월</b></p>
+<p style="color:#ff6a00;margin:10px 0;font-size:1.1rem">━━━━━━━━━━━━━━</p>
+<p style="color:#4caf50;margin:5px 0;font-size:1.1rem"><b>전체 전환율: 4% (업계 상위권)</b></p>
+</div>
+</div>
+</div>
+
+<div class="grid">
+<div class="card">
+<h3>📈 1~2분기 성공공식</h3>
+<table>
+<thead><tr><th>요소</th><th>1분기</th><th>2분기</th><th>핵심</th></tr></thead>
+<tbody>
+<tr style="background:rgba(33,150,243,0.1)">
+<td><b style="color:#2196f3">유입수</b></td>
+<td>20~30건/월</td>
+<td>50건/월</td>
+<td>4P 광고 + RFQ</td>
+</tr>
+<tr style="background:rgba(156,39,176,0.1)">
+<td><b style="color:#9c27b0">바이어상담수</b></td>
+<td>15~20건/월</td>
+<td>40~45건/월</td>
+<td>4시간 응답률 70%→90%</td>
+</tr>
+<tr style="background:rgba(255,152,0,0.1)">
+<td><b style="color:#ff9800">견적서발송수</b></td>
+<td>3~5건/월</td>
+<td>8~10건/월</td>
+<td>24시간 내 발송</td>
+</tr>
+<tr style="background:rgba(76,175,80,0.1)">
+<td><b style="color:#4caf50">계약수</b></td>
+<td>0~1건/월</td>
+<td>1~2건/월</td>
+<td>7일 샘플 + Follow-up</td>
+</tr>
+<tr style="background:rgba(244,67,54,0.1)">
+<td><b style="color:#f44336">SKU</b></td>
+<td>10개 (RTS)</td>
+<td>30개 (RTS)</td>
+<td>30% 비중 달성</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>💰 3~4분기 성공공식</h3>
+<table>
+<thead><tr><th>요소</th><th>월 목표</th><th>업계평균</th><th>핵심</th></tr></thead>
+<tbody>
+<tr style="background:rgba(33,150,243,0.1)">
+<td><b style="color:#2196f3">유입수</b></td>
+<td>100건/월</td>
+<td>50~150건</td>
+<td>RTS 30개 + 광고</td>
+</tr>
+<tr style="background:rgba(156,39,176,0.1)">
+<td><b style="color:#9c27b0">응답률</b></td>
+<td>95%</td>
+<td>70~90%</td>
+<td>4시간 내 응답</td>
+</tr>
+<tr style="background:rgba(255,152,0,0.1)">
+<td><b style="color:#ff9800">견적전환</b></td>
+<td>18%</td>
+<td>13~20%</td>
+<td>24시간 내 발송</td>
+</tr>
+<tr style="background:rgba(76,175,80,0.1)">
+<td><b style="color:#4caf50">계약전환</b></td>
+<td>22%</td>
+<td>22~30%</td>
+<td>7일 샘플 + F/U</td>
+</tr>
+<tr style="background:rgba(244,67,54,0.1)">
+<td><b style="color:#f44336">SKU</b></td>
+<td>30개+</td>
+<td>20~50개</td>
+<td>다양성 확보</td>
+</tr>
+<tr style="background:rgba(76,175,80,0.2)">
+<td colspan="2"><b>월 매출</b></td>
+<td colspan="2"><b style="color:#4caf50">4,100만원</b></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="card">
+<h3>🔄 성공공식 흐름도 (업계 평균 대비)</h3>
+<div style="padding:15px;background:#111;border-radius:8px">
+<div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;justify-content:center">
+<div style="padding:10px 15px;background:rgba(33,150,243,0.2);border-radius:6px;border:2px solid #2196f3">
+<b style="color:#64b5f6">1. 유입수</b><br>
+<span style="font-size:0.9rem;color:#fff">100건/월</span><br>
+<span style="font-size:0.7rem;color:#888">평균 50~150건</span>
+</div>
+<div style="color:#ff6a00;font-size:1.5rem">→</div>
+<div style="padding:10px 15px;background:rgba(156,39,176,0.2);border-radius:6px;border:2px solid #9c27b0">
+<b style="color:#ba68c8">2. 응답률</b><br>
+<span style="font-size:0.9rem;color:#fff">95%</span><br>
+<span style="font-size:0.7rem;color:#888">평균 70~90%</span>
+</div>
+<div style="color:#ff6a00;font-size:1.5rem">→</div>
+<div style="padding:10px 15px;background:rgba(255,152,0,0.2);border-radius:6px;border:2px solid #ff9800">
+<b style="color:#ffb74d">3. 견적전환</b><br>
+<span style="font-size:0.9rem;color:#fff">18%</span><br>
+<span style="font-size:0.7rem;color:#888">평균 13~20%</span>
+</div>
+<div style="color:#ff6a00;font-size:1.5rem">→</div>
+<div style="padding:10px 15px;background:rgba(76,175,80,0.2);border-radius:6px;border:2px solid #4caf50">
+<b style="color:#81c784">4. 계약전환</b><br>
+<span style="font-size:0.9rem;color:#fff">22%</span><br>
+<span style="font-size:0.7rem;color:#888">평균 22~30%</span>
+</div>
+<div style="color:#ff6a00;font-size:1.5rem">×</div>
+<div style="padding:10px 15px;background:rgba(244,67,54,0.2);border-radius:6px;border:2px solid #f44336">
+<b style="color:#e57373">5. 객단가</b><br>
+<span style="font-size:0.9rem;color:#fff">1,000만</span><br>
+<span style="font-size:0.7rem;color:#888">목표 범위</span>
+</div>
+<div style="color:#4caf50;font-size:1.5rem">=</div>
+<div style="padding:15px 20px;background:rgba(76,175,80,0.3);border-radius:6px;border:3px solid #4caf50">
+<b style="color:#4caf50;font-size:1.2rem">월 4,100만원</b><br>
+<span style="font-size:0.8rem;color:#8bc34a">전체 전환율 4%</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="highlight">
+<h4>💡 왜 이 수치가 현실적인가?</h4>
+<p>• <b>응답률 95%:</b> 알리바바가 권장하는 90%보다 높지만, 88% 바이어가 응답률을 공급자 선택 기준으로 봄 → 경쟁력 확보 필수</p>
+<p>• <b>견적전환 18%:</b> B2B 평균 13~20% 범위 내 → 현실적 목표</p>
+<p>• <b>계약전환 22%:</b> B2B 평균 22~30% 하단 → 보수적 계산</p>
+<p>• <b>전체 4%:</b> B2B 평균 2.23~4.31% 상위권 → 도전적이지만 달성 가능</p>
+</div>
+
+<!-- 성공 판정 예시 -->
+<div class="card" style="border:2px solid #ffc107;margin-bottom:20px">
+<h3 style="color:#ffc107">🧮 성공 판정 예시</h3>
+<table>
+<thead><tr><th>상황</th><th>유입</th><th>응답률</th><th>견적전환</th><th>계약전환</th><th>SKU</th><th>달성</th><th>판정</th></tr></thead>
+<tbody>
+<tr style="background:rgba(76,175,80,0.15)">
+<td><b>예시A</b></td>
+<td style="color:#4caf50">120건 ✅</td>
+<td style="color:#4caf50">96% ✅</td>
+<td style="color:#4caf50">20% ✅</td>
+<td style="color:#ffc107">18% ⚠️</td>
+<td style="color:#4caf50">35개 ✅</td>
+<td><b>4/5</b></td>
+<td style="color:#4caf50"><b>성공 ✅</b></td>
+</tr>
+<tr style="background:rgba(255,193,7,0.15)">
+<td><b>예시B</b></td>
+<td style="color:#4caf50">100건 ✅</td>
+<td style="color:#ffc107">88% ⚠️</td>
+<td style="color:#ffc107">15% ⚠️</td>
+<td style="color:#4caf50">25% ✅</td>
+<td style="color:#4caf50">30개 ✅</td>
+<td><b>3/5</b></td>
+<td style="color:#ffc107"><b>주의 ⚠️</b></td>
+</tr>
+<tr style="background:rgba(244,67,54,0.15)">
+<td><b>예시C</b></td>
+<td style="color:#f44336">40건 ❌</td>
+<td style="color:#ffc107">85% ⚠️</td>
+<td style="color:#f44336">8% ❌</td>
+<td style="color:#f44336">12% ❌</td>
+<td style="color:#ffc107">20개 ⚠️</td>
+<td><b>0/5</b></td>
+<td style="color:#f44336"><b>실패 ❌</b></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>✅ 각 요소별 성공/실패 기준</h3>
+<table>
+<thead><tr><th>요소</th><th>성공 ✅</th><th>주의 ⚠️</th><th>실패 ❌</th><th>업계기준</th></tr></thead>
+<tbody>
+<tr><td style="color:#2196f3"><b>유입수</b></td><td>100건+</td><td>50~99건</td><td style="color:#f44336">50건 미만</td><td>평균 50~150</td></tr>
+<tr><td style="color:#9c27b0"><b>응답률</b></td><td>95%+</td><td>80~94%</td><td style="color:#f44336">70% 미만</td><td>권장 90%+</td></tr>
+<tr><td style="color:#ff9800"><b>견적전환</b></td><td>18%+</td><td>10~17%</td><td style="color:#f44336">10% 미만</td><td>평균 13~20%</td></tr>
+<tr><td style="color:#4caf50"><b>계약전환</b></td><td>22%+</td><td>15~21%</td><td style="color:#f44336">15% 미만</td><td>평균 22~30%</td></tr>
+<tr><td style="color:#f44336"><b>SKU</b></td><td>30개+</td><td>15~29개</td><td style="color:#f44336">15개 미만</td><td>권장 20개+</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="alert">
+<h4>⚠️ 전환율 하락 시 원인 분석</h4>
+<p><b>응답률 저조 (95% 미달):</b> 시간대별 업무 미준수, 알림 미확인, 인력 부족</p>
+<p><b>견적전환 저조 (18% 미달):</b> 가격 경쟁력 부족, MOQ 높음, 상세 설명 부족</p>
+<p><b>계약전환 저조 (22% 미달):</b> 샘플 지연(7일 초과), Follow-up 부족, 결제조건 불리</p>
+<p><b>유입수 부족 (100건 미달):</b> RTS 부족, 광고 미최적화, 키워드 경쟁력 없음</p>
+</div>
+
+<div class="info-box">
+<h4>📚 데이터 출처</h4>
+<p>• 알리바바 셀러센터 (seller.alibaba.com) - 응답률 권장, 바이어 설문</p>
+<p>• First Page Sage 2025 - B2B 전환율 벤치마크</p>
+<p>• Growcode 연구 - B2B 평균 전환율 2.23~4.31%</p>
+<p>• Tendril Research - 기회→계약 전환율 22~30%</p>
+<p>• LinkedIn B2B 벤치마크 - MQL→SQL 전환율</p>
+</div>
+</div>
+
+<!-- 일일 -->
+<div id="daily" class="section">
+<h2 style="color:#ff8c00;margin-bottom:20px">📅 일일 체크리스트 - 시차 기반 시간관리</h2>
+
+<div class="time-rule">
+<h3>⏰ 해외사업부 시간관리 원칙</h3>
+<div class="time-rule-item">
+<div class="time-rule-icon">📌</div>
+<div class="time-rule-content">
+<b>정해진 시간에 정해진 일을 한다</b>
+<span>국가별 시차가 다르므로 시간대별 업무가 고정되어야 함</span>
+</div>
+</div>
+<div class="time-rule-item">
+<div class="time-rule-icon">🕐</div>
+<div class="time-rule-content">
+<b>바이어 활동시간에 맞춰 응답한다</b>
+<span>바이어가 깨어있는 시간에 답변해야 실시간 대화 가능</span>
+</div>
+</div>
+<div class="time-rule-item">
+<div class="time-rule-icon">💬</div>
+<div class="time-rule-content">
+<b>비대면 채팅시간을 고정한다</b>
+<span>메가 바이어가 아니면 내 시간관리 안에서 채팅시간 설정</span>
+</div>
+</div>
+</div>
+
+<div class="timezone-box">
+<h3>🌍 주요 국가별 시차 & 대응시간</h3>
+<div class="timezone-grid">
+<div class="timezone-card">
+<div class="country">🇺🇸 미국(LA)</div>
+<div class="time-diff">-17시간</div>
+<div class="active-time">바이어 활동: 09~18시</div>
+<div class="my-action">내 대응: 오전 2~11시</div>
+</div>
+<div class="timezone-card">
+<div class="country">🇺🇸 미국(NY)</div>
+<div class="time-diff">-14시간</div>
+<div class="active-time">바이어 활동: 09~18시</div>
+<div class="my-action">내 대응: 오전 5~14시</div>
+</div>
+<div class="timezone-card">
+<div class="country">🇬🇧 영국</div>
+<div class="time-diff">-9시간</div>
+<div class="active-time">바이어 활동: 09~18시</div>
+<div class="my-action">내 대응: 18~03시</div>
+</div>
+<div class="timezone-card">
+<div class="country">🇩🇪 독일</div>
+<div class="time-diff">-8시간</div>
+<div class="active-time">바이어 활동: 09~18시</div>
+<div class="my-action">내 대응: 17~02시</div>
+</div>
+<div class="timezone-card">
+<div class="country">🇦🇪 UAE</div>
+<div class="time-diff">-5시간</div>
+<div class="active-time">바이어 활동: 09~18시</div>
+<div class="my-action">내 대응: 14~23시</div>
+</div>
+<div class="timezone-card">
+<div class="country">🇮🇳 인도</div>
+<div class="time-diff">-3.5시간</div>
+<div class="active-time">바이어 활동: 09~18시</div>
+<div class="my-action">내 대응: 12:30~21:30</div>
+</div>
+<div class="timezone-card">
+<div class="country">🇻🇳 베트남</div>
+<div class="time-diff">-2시간</div>
+<div class="active-time">바이어 활동: 09~18시</div>
+<div class="my-action">내 대응: 11~20시</div>
+</div>
+<div class="timezone-card">
+<div class="country">🇯🇵 일본</div>
+<div class="time-diff">0시간</div>
+<div class="active-time">바이어 활동: 09~18시</div>
+<div class="my-action">내 대응: 09~18시</div>
+</div>
+</div>
+</div>
+
+<div class="mega-buyer-alert">
+<h4>⭐ 메가 바이어 예외 규칙</h4>
+<p>• 대형 바이어(L4 이상, 예상 계약 5,000만원+)는 <b>바이어 시간에 맞춰 즉시 대응</b></p>
+<p>• 일반 바이어는 <b>내 시간관리 프레임 안에서</b> 정해진 시간에 일괄 응대</p>
+</div>
+
+<div class="schedule-box">
+<div class="schedule-header">
+<h4>🌅 08:00~10:00 - 아시아 집중 타임</h4>
+<div class="time-badge">아시아 오전</div>
+</div>
+<div class="schedule-task"><div class="region asia">아시아</div><div class="task-desc">일본/베트남/인도 바이어 Inquiry 확인 및 즉시 응답</div></div>
+<div class="schedule-task"><div class="region asia">아시아</div><div class="task-desc">아시아권 RFQ 신규 요청 우선 처리</div></div>
+<div class="schedule-task"><div class="region asia">아시아</div><div class="task-desc">전날 미응답 아시아 건 정리</div></div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>아시아 Inquiry 전체 확인</span><em>08:00</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>일본/베트남/인도 우선 응답</span><em>09:00</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>아시아 RFQ 처리 완료</span><em>10:00</em></li>
+</ul>
+</div>
+
+<div class="schedule-box">
+<div class="schedule-header">
+<h4>☀️ 10:00~12:00 - 상품/광고 관리</h4>
+<div class="time-badge">내부 업무</div>
+</div>
+<div class="schedule-task"><div class="region" style="background:rgba(255,106,0,0.3);color:#ff8c00">내부</div><div class="task-desc">RTS 상품 재고 및 가격 업데이트</div></div>
+<div class="schedule-task"><div class="region" style="background:rgba(255,106,0,0.3);color:#ff8c00">내부</div><div class="task-desc">4P 광고 성과 체크 및 키워드 조정</div></div>
+<div class="schedule-task"><div class="region" style="background:rgba(255,106,0,0.3);color:#ff8c00">내부</div><div class="task-desc">견적서 작성 및 발송 준비</div></div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>RTS 상품 상태 점검</span><em>10:00</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>광고 CTR/노출 확인</span><em>10:30</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>견적서 작성</span><em>11:00</em></li>
+</ul>
+</div>
+
+<div class="schedule-box">
+<div class="schedule-header">
+<h4>🌤️ 14:00~16:00 - 중동 집중 타임</h4>
+<div class="time-badge">중동 오전</div>
+</div>
+<div class="schedule-task"><div class="region me">중동</div><div class="task-desc">UAE/사우디 바이어 실시간 채팅 응대</div></div>
+<div class="schedule-task"><div class="region me">중동</div><div class="task-desc">중동 RFQ 및 견적 요청 처리</div></div>
+<div class="schedule-task"><div class="region me">중동</div><div class="task-desc">중동 바이어 Follow-up 메시지</div></div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>UAE/사우디 Inquiry 확인</span><em>14:00</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>중동 바이어 채팅 응대</span><em>14:30</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>중동 견적 발송</span><em>15:30</em></li>
+</ul>
+</div>
+
+<div class="schedule-box">
+<div class="schedule-header">
+<h4>🌆 17:00~19:00 - 유럽 집중 타임</h4>
+<div class="time-badge">유럽 오전</div>
+</div>
+<div class="schedule-task"><div class="region eu">유럽</div><div class="task-desc">영국/독일/프랑스 바이어 실시간 응대</div></div>
+<div class="schedule-task"><div class="region eu">유럽</div><div class="task-desc">유럽 RFQ 우선 처리 (그들의 오전)</div></div>
+<div class="schedule-task"><div class="region eu">유럽</div><div class="task-desc">유럽 바이어 Follow-up</div></div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>유럽 Inquiry 전체 확인</span><em>17:00</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>영국/독일 바이어 채팅</span><em>17:30</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>유럽 견적 발송</span><em>18:30</em></li>
+</ul>
+</div>
+
+<div class="schedule-box">
+<div class="schedule-header">
+<h4>🌙 21:00~23:00 - 미국 집중 타임 (선택)</h4>
+<div class="time-badge">미국 오전</div>
+</div>
+<div class="schedule-task"><div class="region us">미국</div><div class="task-desc">미국 동부(NY) 바이어 실시간 응대</div></div>
+<div class="schedule-task"><div class="region us">미국</div><div class="task-desc">미국 RFQ 처리 (그들의 오전 시작)</div></div>
+<div class="schedule-task"><div class="region us">미국</div><div class="task-desc">미국 바이어 답변 예약 발송</div></div>
+<ul class="list" style="margin-top:10px">
+<li><div class="chk" onclick="toggle(this)"></div><span>미국 Inquiry 확인</span><em>21:00</em></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>미국 바이어 응대/예약발송</span><em>22:00</em></li>
+</ul>
+</div>
+
+<div class="card">
+<h3>📊 일일 마감 정리 (19:00 또는 23:00)</h3>
+<ul class="list">
+<li><div class="chk" onclick="toggle(this)"></div><span>일일 Inquiry 수 기록</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>국가별 응답 현황 정리</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>미응답 건 확인 (다음날 우선처리)</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>내일 시간대별 우선 바이어 정리</span></li>
+</ul>
+</div>
+
+<div class="alert">
+<h4>⚠️ 일일 절대 규칙</h4>
+<p><b>바이어 활동시간 파악:</b> 새 바이어는 반드시 국가/시차 먼저 확인</p>
+<p><b>정해진 시간에 응답:</b> 해당 지역 시간대에 맞춰 일괄 응대</p>
+<p><b>메가 바이어 예외:</b> L4 이상은 즉시 응대 (시간 상관없이)</p>
+<p><b>4시간 응답 원칙:</b> RFQ와 L3+ 바이어는 4시간 내 필수</p>
+</div>
+</div>
+
+<!-- 주간 -->
+<div id="weekly" class="section">
+<h2 style="color:#ff8c00;margin-bottom:20px">📆 주간 체크리스트</h2>
+
+<div class="card">
+<h3>📊 주간 성과 분석 (금요일)</h3>
+<ul class="list">
+<li><div class="chk" onclick="toggle(this)"></div><span>주간 Inquiry 수 집계 (목표: 25건)</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>주간 견적 발행 수 (목표: 4~5건)</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>주간 계약 체결 건수 (목표: 1건)</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>견적 전환율 계산 (목표: 15%+)</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>4시간 응답률 체크 (목표: 90%+)</span></li>
+</ul>
+</div>
+
+<div class="card">
+<h3>🔄 상품 & 광고 관리</h3>
+<ul class="list">
+<li><div class="chk" onclick="toggle(this)"></div><span>RTS 상품 재고 확인 및 업데이트</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>4P 광고 CTR 확인 (목표: 1.5%+)</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>저성과 광고 키워드 교체</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>상품 노출 순위 체크</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>경쟁사 가격 모니터링</span></li>
+</ul>
+</div>
+
+<div class="card">
+<h3>💬 바이어 관계 관리</h3>
+<ul class="list">
+<li><div class="chk" onclick="toggle(this)"></div><span>진행 중인 바이어 상태 업데이트</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>샘플 발송 후 7일 경과 바이어 Follow-up</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>계약 완료 바이어 만족도 체크</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>재구매 가능 바이어 리스트 작성</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>L3+ 바이어 신규 컨택 (주 2~3명)</span></li>
+</ul>
+</div>
+
+<div class="card">
+<h3>📦 샘플 & 물류</h3>
+<ul class="list">
+<li><div class="chk" onclick="toggle(this)"></div><span>샘플 발송 건수 및 비용 집계</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>7일 내 발송률 체크 (목표: 100%)</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>샘플 재고 확인 및 보충</span></li>
+<li><div class="chk" onclick="toggle(this)"></div><span>물류 파트너 배송 속도 점검</span></li>
+</ul>
+</div>
+
+<div class="highlight">
+<h4>💡 주간 개선 회의</h4>
+<p>• 이번 주 성과 리뷰</p>
+<p>• 전환율 낮은 원인 분석</p>
+<p>• 다음 주 개선 액션 아이템 3가지</p>
+</div>
+</div>
+
+<div class="btns">
+<button class="btn btn-p" onclick="saveAll()">💾 전체 저장</button>
+<button class="btn btn-s" onclick="resetAll()">🔄 초기화</button>
+</div>
+
+<div id="toast" class="toast"></div>
+</div>
+
+<script>
+const now=new Date();
+document.getElementById('date').textContent=now.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+function show(id){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
+document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
+document.getElementById(id).classList.add('on');
+event.target.classList.add('on');
+}
+
+function toggle(el){
+el.classList.toggle('on');
+const li=el.closest('li');
+if(li)li.classList.toggle('done');
+}
+
+// 선행지표 계산
+function calcLead(){
+const lead4h=Number(document.getElementById('lead4h').value||0);
+const leadInq=Number(document.getElementById('leadInq').value||0);
+const lead24q=Number(document.getElementById('lead24q').value||0);
+const leadQreq=Number(document.getElementById('leadQreq').value||0);
+const lead7s=Number(document.getElementById('lead7s').value||0);
+const leadSreq=Number(document.getElementById('leadSreq').value||0);
+
+if(leadInq>0){
+const rate=Math.round((lead4h/leadInq)*100);
+document.getElementById('lead4hRate').textContent=rate+'%';
+document.getElementById('lead4hRate').style.color=rate>=90?'#4caf50':rate>=70?'#ffc107':'#f44336';
+}
+if(leadQreq>0){
+const rate=Math.round((lead24q/leadQreq)*100);
+document.getElementById('lead24qRate').textContent=rate+'%';
+document.getElementById('lead24qRate').style.color=rate>=100?'#4caf50':rate>=80?'#ffc107':'#f44336';
+}
+if(leadSreq>0){
+const rate=Math.round((lead7s/leadSreq)*100);
+document.getElementById('lead7sRate').textContent=rate+'%';
+document.getElementById('lead7sRate').style.color=rate>=100?'#4caf50':rate>=80?'#ffc107':'#f44336';
+}
+}
+
+function saveLead(){
+const data={
+leadRTS:document.getElementById('leadRTS').value,
+leadCTR:document.getElementById('leadCTR').value,
+leadRFQ:document.getElementById('leadRFQ').value,
+lead4h:document.getElementById('lead4h').value,
+leadInq:document.getElementById('leadInq').value,
+lead24q:document.getElementById('lead24q').value,
+leadQreq:document.getElementById('leadQreq').value,
+lead7s:document.getElementById('lead7s').value,
+leadSreq:document.getElementById('leadSreq').value,
+leadNewSKU:document.getElementById('leadNewSKU').value,
+leadRTSconv:document.getElementById('leadRTSconv').value
+};
+localStorage.setItem('alibabaLead',JSON.stringify(data));
+toast('선행지표 저장됨!');
+}
+
+function loadLead(){
+const s=localStorage.getItem('alibabaLead');
+if(!s)return;
+const d=JSON.parse(s);
+Object.keys(d).forEach(k=>{
+const el=document.getElementById(k);
+if(el&&d[k])el.value=d[k];
+});
+calcLead();
+}
+
+// 후행지표 계산
+function calcLag(){
+const inq=Number(document.getElementById('lagInq').value||0);
+const resp=Number(document.getElementById('lagResp').value||0);
+const quote=Number(document.getElementById('lagQuote').value||0);
+const contract=Number(document.getElementById('lagContract').value||0);
+const sku=Number(document.getElementById('lagSKU').value||0);
+const revenue=Number(document.getElementById('lagRevenue').value||0);
+
+// 전환율 계산
+const respRate=inq>0?Math.round((resp/inq)*100):0;
+const quoteRate=resp>0?Math.round((quote/resp)*100):0;
+const contractRate=quote>0?Math.round((contract/quote)*100):0;
+
+document.getElementById('lagRespRate').textContent=respRate+'%';
+document.getElementById('lagQuoteRate').textContent=quoteRate+'%';
+document.getElementById('lagContractRate').textContent=contractRate+'%';
+
+// 요약 카드 업데이트
+document.getElementById('lagInqV').textContent=inq>0?inq+'건':'-';
+document.getElementById('lagRespV').textContent=respRate>0?respRate+'%':'-';
+document.getElementById('lagQuoteV').textContent=quoteRate>0?quoteRate+'%':'-';
+document.getElementById('lagContractV').textContent=contractRate>0?contractRate+'%':'-';
+document.getElementById('lagSKUV').textContent=sku>0?sku+'개':'-';
+
+// 목표 대비 판정
+const targets={inq:100,resp:95,quote:18,contract:22,sku:30};
+const results={inq:inq,resp:respRate,quote:quoteRate,contract:contractRate,sku:sku};
+const warnings={inq:50,resp:80,quote:10,contract:15,sku:15};
+
+let successCount=0;
+let failItems=[];
+let warnItems=[];
+const actions={
+inq:'RTS 상품 추가 등록, 4P 광고 예산 증액, 키워드 재최적화',
+resp:'시간대별 업무 재점검, 알림 설정 확인, 응답 템플릿 준비',
+quote:'가격 경쟁력 재검토, MOQ 유연화, 견적서 품질 개선',
+contract:'샘플 발송 속도 개선, Follow-up 횟수 증가, TA 적용 확대',
+sku:'주간 상품 등록 목표 상향, RTS 전환 가속화'
+};
+
+const leadActions={
+inq:'선행지표 점검: RTS 30개 달성했는가? 4P 광고 CTR 1.5% 이상인가?',
+resp:'선행지표 점검: 시간대별 업무 준수했는가? 4시간 응답률 90% 이상인가?',
+quote:'선행지표 점검: 24시간 내 견적 100% 발송했는가? 가격 경쟁력 있는가?',
+contract:'선행지표 점검: 7일 내 샘플 100% 발송했는가? Follow-up 3회 했는가?',
+sku:'선행지표 점검: 주 2개 상품 등록했는가? RTS 전환 진행했는가?'
+};
+
+['inq','resp','quote','contract','sku'].forEach(key=>{
+const res=results[key];
+const target=targets[key];
+const warn=warnings[key];
+const rowEl=document.getElementById('lagRow'+key.charAt(0).toUpperCase()+key.slice(1));
+const resEl=document.getElementById('lagRes'+key.charAt(0).toUpperCase()+key.slice(1));
+const rateEl=document.getElementById('lagRate'+key.charAt(0).toUpperCase()+key.slice(1));
+const judgEl=document.getElementById('lagJudg'+key.charAt(0).toUpperCase()+key.slice(1));
+const statEl=document.getElementById('lagStat'+key.charAt(0).toUpperCase()+key.slice(1));
+
+if(res>0){
+resEl.textContent=key==='inq'||key==='sku'?res+(key==='inq'?'건':'개'):res+'%';
+const achievement=Math.round((res/target)*100);
+rateEl.textContent=achievement+'%';
+
+if(res>=target){
+judgEl.innerHTML='<span style="color:#4caf50">✅ 성공</span>';
+rowEl.style.background='rgba(76,175,80,0.1)';
+statEl.style.borderColor='#4caf50';
+successCount++;
+}else if(res>=warn){
+judgEl.innerHTML='<span style="color:#ffc107">⚠️ 주의</span>';
+rowEl.style.background='rgba(255,193,7,0.1)';
+statEl.style.borderColor='#ffc107';
+warnItems.push({key:key,action:actions[key],lead:leadActions[key]});
+}else{
+judgEl.innerHTML='<span style="color:#f44336">❌ 실패</span>';
+rowEl.style.background='rgba(244,67,54,0.1)';
+statEl.style.borderColor='#f44336';
+failItems.push({key:key,action:actions[key],lead:leadActions[key]});
+}
+}
+});
+
+// 종합 판정
+const judgmentEl=document.getElementById('lagJudgment');
+const hasData=inq>0||sku>0;
+
+if(hasData){
+judgmentEl.style.display='block';
+const titleEl=document.getElementById('lagJudgTitle');
+const iconEl=document.getElementById('lagJudgIcon');
+const textEl=document.getElementById('lagJudgText');
+const scoreEl=document.getElementById('lagJudgScore');
+
+scoreEl.textContent=successCount+'/5 달성';
+
+if(successCount>=4){
+judgmentEl.style.borderColor='#4caf50';
+titleEl.style.color='#4caf50';
+iconEl.textContent='✅';
+iconEl.style.color='#4caf50';
+textEl.textContent='성공! 목표 달성 가능';
+textEl.style.color='#4caf50';
+}else if(successCount>=2){
+judgmentEl.style.borderColor='#ffc107';
+titleEl.style.color='#ffc107';
+iconEl.textContent='⚠️';
+iconEl.style.color='#ffc107';
+textEl.textContent='주의! 일부 항목 개선 필요';
+textEl.style.color='#ffc107';
+}else{
+judgmentEl.style.borderColor='#f44336';
+titleEl.style.color='#f44336';
+iconEl.textContent='❌';
+iconEl.style.color='#f44336';
+textEl.textContent='실패! 전면 재검토 필요';
+textEl.style.color='#f44336';
+}
+
+// 대책 표시
+const actionSection=document.getElementById('lagActionSection');
+const actionsEl=document.getElementById('lagActions');
+const leadSection=document.getElementById('lagLeadCheck');
+const leadActionsEl=document.getElementById('lagLeadActions');
+
+if(failItems.length>0||warnItems.length>0){
+actionSection.style.display='block';
+leadSection.style.display='block';
+let actionHtml='';
+let leadHtml='';
+[...failItems,...warnItems].forEach(item=>{
+const label=item.key==='inq'?'유입수':item.key==='resp'?'응답률':item.key==='quote'?'견적전환':item.key==='contract'?'계약전환':'SKU';
+const icon=failItems.includes(item)?'❌':'⚠️';
+actionHtml+=`<p><b>${icon} ${label}:</b> ${item.action}</p>`;
+leadHtml+=`<p><b>${label}:</b> ${item.lead}</p>`;
+});
+actionsEl.innerHTML=actionHtml;
+leadActionsEl.innerHTML=leadHtml;
+}else{
+actionSection.style.display='none';
+leadSection.style.display='none';
+}
+}
+}
+
+function saveLag(){
+const data={
+lagInq:document.getElementById('lagInq').value,
+lagResp:document.getElementById('lagResp').value,
+lagQuote:document.getElementById('lagQuote').value,
+lagContract:document.getElementById('lagContract').value,
+lagSKU:document.getElementById('lagSKU').value,
+lagRevenue:document.getElementById('lagRevenue').value
+};
+localStorage.setItem('alibabaLag',JSON.stringify(data));
+toast('후행지표 저장됨!');
+}
+
+function loadLag(){
+const s=localStorage.getItem('alibabaLag');
+if(!s)return;
+const d=JSON.parse(s);
+Object.keys(d).forEach(k=>{
+const el=document.getElementById(k);
+if(el&&d[k])el.value=d[k];
+});
+calcLag();
+}
+
+function exportLagReport(){
+const inq=document.getElementById('lagInq').value||0;
+const resp=document.getElementById('lagResp').value||0;
+const quote=document.getElementById('lagQuote').value||0;
+const contract=document.getElementById('lagContract').value||0;
+const sku=document.getElementById('lagSKU').value||0;
+const revenue=document.getElementById('lagRevenue').value||0;
+
+const d=new Date().toISOString().split('T')[0];
+const txt=`알리바바 해외사업부 월간 리포트 (${d})
+
+[후행지표 결과]
+- 유입수: ${inq}건 (목표 100건)
+- 응답률: ${document.getElementById('lagRespRate').textContent} (목표 95%)
+- 견적전환율: ${document.getElementById('lagQuoteRate').textContent} (목표 18%)
+- 계약전환율: ${document.getElementById('lagContractRate').textContent} (목표 22%)
+- SKU: ${sku}개 (목표 30개)
+- 매출: ${revenue}만원
+
+[종합 판정]
+${document.getElementById('lagJudgScore').textContent}
+${document.getElementById('lagJudgText').textContent}
+`;
+const blob=new Blob([txt],{type:'text/plain'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;a.download='alibaba-report-'+d+'.txt';a.click();
+toast('리포트 내보내기 완료!');
+}
+
+function updateMain(){
+const inquiry=Number(document.getElementById('iInquiry').value||0);
+const quote=Number(document.getElementById('iQuote').value||0);
+const contract=Number(document.getElementById('iContract').value||0);
+const revenue=Number(document.getElementById('iRevenue').value||0);
+
+document.getElementById('sInquiry').textContent=inquiry>0?inquiry+'건':'-';
+document.getElementById('sQuote').textContent=quote>0?quote+'건':'-';
+document.getElementById('sContract').textContent=contract>0?contract+'건':'-';
+document.getElementById('sRevenue').textContent=revenue>0?revenue.toLocaleString()+'만':'-';
+
+if(contract>0 && revenue>0){
+const aov=Math.round(revenue/contract);
+document.getElementById('sAOV').textContent=aov.toLocaleString()+'만';
+}else{
+document.getElementById('sAOV').textContent='-';
+}
+}
+
+function saveAll(){
+const data={chk:[]};
+document.querySelectorAll('.chk').forEach((c,i)=>data.chk[i]=c.classList.contains('on'));
+localStorage.setItem('alibaba2026',JSON.stringify(data));
+saveLead();
+saveLag();
+toast('전체 저장 완료!');
+}
+
+function resetAll(){
+if(confirm('모든 데이터를 초기화할까요?')){
+localStorage.removeItem('alibaba2026');
+localStorage.removeItem('alibabaLead');
+localStorage.removeItem('alibabaLag');
+location.reload();
+}
+}
+
+function toast(msg){
+const t=document.getElementById('toast');
+t.textContent=msg;
+t.classList.add('show');
+setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+window.onload=function(){
+const s=localStorage.getItem('alibaba2026');
+if(s){
+const d=JSON.parse(s);
+document.querySelectorAll('.chk').forEach((c,i)=>{
+if(d.chk[i]){
+c.classList.add('on');
+const li=c.closest('li');
+if(li)li.classList.add('done');
+}
+});
+}
+loadLead();
+loadLag();
+};
+</script>
+</body>
+</html>

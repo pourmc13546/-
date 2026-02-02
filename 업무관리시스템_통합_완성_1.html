@@ -1,0 +1,2926 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>업무관리시스템 - 해외입점사업</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            toss: {
+              blue: '#202454',
+              'blue-light': '#3182f6',
+              'gray-900': '#191f28',
+              'gray-700': '#333d4b',
+              'gray-500': '#6b7684',
+              'gray-400': '#8b95a1',
+              'gray-300': '#d1d6db',
+              'gray-200': '#e5e8eb',
+              'gray-100': '#f2f4f6',
+              'gray-50': '#f9fafb',
+            },
+            navy: {
+              400: '#3d4a7a',
+              500: '#202454',
+              600: '#191c40',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    * { font-family: 'Pretendard', -apple-system, sans-serif; }
+
+    /* 사이드바 */
+    .sidebar {
+      width: 220px;
+      background: white;
+      border-right: 1px solid #e5e8eb;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+    }
+    .main-content {
+      margin-left: 220px;
+      min-height: 100vh;
+      background: #f9fafb;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      color: #6b7684;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-radius: 8px;
+      margin: 2px 8px;
+    }
+    .nav-item:hover { background: #f2f4f6; color: #333d4b; }
+    .nav-item.active { background: #202454; color: white; }
+    .nav-item.active:hover { background: #191c40; }
+    .nav-sub-item {
+      display: block;
+      padding: 8px 16px 8px 44px;
+      color: #8b95a1;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-radius: 6px;
+      margin: 1px 8px;
+    }
+    .nav-sub-item:hover { background: #f2f4f6; color: #333d4b; }
+    .nav-sub-item.active { background: #e8f4ff; color: #202454; font-weight: 500; }
+
+    /* 테이블 */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6b7684;
+      border-bottom: 1px solid #e5e8eb;
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 14px 16px;
+      font-size: 14px;
+      color: #333d4b;
+      border-bottom: 1px solid #f2f4f6;
+    }
+    .data-table tr:hover td { background: #f9fafb; }
+
+    /* 상태 뱃지 */
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    /* 레벨 뱃지 */
+    .level-badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-block; }
+    .level-VIP { background: linear-gradient(135deg, #ffd700 0%, #ffb800 100%); color: #7c5800; }
+    .level-L4 { background: #fee2e2; color: #dc2626; }
+    .level-L3 { background: #fef3c7; color: #d97706; }
+    .level-L2 { background: #dbeafe; color: #2563eb; }
+    .level-L1 { background: #f1f5f9; color: #64748b; }
+
+    /* 버튼 */
+    .btn-primary {
+      padding: 10px 20px;
+      background: #202454;
+      color: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary:hover { background: #191c40; }
+    .btn-outline {
+      padding: 10px 20px;
+      background: white;
+      color: #333d4b;
+      border: 1px solid #d1d6db;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    .btn-outline:hover { background: #f2f4f6; }
+
+    /* 모달 */
+    .modal-overlay {
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-container {
+      transform: scale(0.95) translateY(10px);
+      transition: all 0.2s ease;
+    }
+    .modal-overlay.show .modal-container {
+      transform: scale(1) translateY(0);
+    }
+
+    /* 탭 숨김 */
+    .operation-tab-content { display: none; }
+    .operation-tab-content.active { display: block; }
+
+    /* 토스트 */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #333d4b;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 9999;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* 파이프라인 카드 */
+    .pipeline-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 8px;
+      border: 1px solid #e5e8eb;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pipeline-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+
+    /* 프로세스 이벤트 - Shipment Event 스타일 */
+    .process-event {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .process-step {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .process-step.completed { background: #202454; }
+    .process-step.completed svg { stroke: white; }
+    .process-step.current { background: white; border: 2px solid #202454; }
+    .process-step.current svg { stroke: #202454; }
+    .process-step.pending { background: white; border: 2px solid #d1d6db; }
+    .process-step.pending svg { stroke: #d1d6db; }
+    .process-step svg { width: 12px; height: 12px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .process-line { width: 12px; height: 2px; background: #d1d6db; flex-shrink: 0; }
+    .process-line.completed { background: #202454; }
+
+    /* 상태 필터 버튼 */
+    .status-filter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6b7684;
+      background: white;
+      border: 1px solid #e5e8eb;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .status-filter:hover { border-color: #d1d6db; background: #f9fafb; }
+    .status-filter.active { background: #202454; color: white; border-color: #202454; }
+    .status-filter.active svg { stroke: white; }
+
+    /* 확장거래관리 탭 */
+    .trade-tab-content { display: none; }
+    .trade-tab-content.active { display: block; }
+
+    /* 모달 스타일 (확장거래관리) */
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-overlay.active .modal-container { transform: scale(1) translateY(0); }
+
+    /* 폼 스타일 */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: #333d4b; margin-bottom: 6px; }
+    .form-label .required { color: #dc2626; margin-left: 2px; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e5e8eb;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #202454; }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #e5e8eb; }
+    .modal-header h2 { font-size: 18px; font-weight: 600; color: #191f28; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+    .modal-close:hover { background: #f2f4f6; }
+    .modal-body { padding: 24px; max-height: 60vh; overflow-y: auto; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid #e5e8eb; }
+    .btn-cancel { padding: 10px 20px; background: white; color: #6b7684; border: 1px solid #d1d6db; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .btn-cancel:hover { background: #f9fafb; }
+    .btn-submit { padding: 10px 20px; background: #202454; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .btn-submit:hover { background: #1a1d45; }
+
+    /* 검색 인풋 */
+    .search-input {
+      padding: 8px 12px 8px 36px;
+      border: 1px solid #e5e8eb;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 280px;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { outline: none; border-color: #202454; }
+    .search-input::placeholder { color: #b0b8c1; }
+  </style>
+</head>
+<body class="bg-toss-gray-50">
+
+  <!-- 사이드바 -->
+  <aside class="sidebar">
+    <div class="p-4 border-b border-toss-gray-200">
+      <h1 class="text-base font-bold text-toss-blue">업무관리시스템</h1>
+      <p class="text-xs text-toss-gray-400 mt-0.5">해외입점사업</p>
+    </div>
+
+    <nav class="py-4">
+      <p class="px-4 text-xs text-toss-gray-400 font-medium mb-2">메인</p>
+      <div class="nav-item">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        대시보드
+      </div>
+      <div class="nav-item">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+        공지/결정사항
+      </div>
+      <div class="nav-item">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        프로세스현황
+      </div>
+
+      <p class="px-4 text-xs text-toss-gray-400 font-medium mb-2 mt-6">관리</p>
+      
+      <!-- 운영관리 (현재 활성) -->
+      <div class="nav-item active" onclick="toggleSideMenu('operation')" id="operation-menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        운영관리
+        <svg class="w-4 h-4 ml-auto transform rotate-180 transition-transform" id="operation-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+      <div id="operation-submenu">
+        <div class="nav-sub-item active" onclick="switchSubTab('cs')">CS관리</div>
+        <div class="nav-sub-item" onclick="switchSubTab('buyer')">바이어관리</div>
+        <div class="nav-sub-item" onclick="switchSubTab('product')">상품/리스팅관리</div>
+        <div class="nav-sub-item" onclick="switchSubTab('quote')">견적/협상관리</div>
+      </div>
+
+      <!-- 확장/거래관리 -->
+      <div class="nav-item" onclick="toggleSideMenu('trade')" id="trade-menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        확장/거래관리
+        <svg class="w-4 h-4 ml-auto transform transition-transform" id="trade-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+      <div id="trade-submenu" class="hidden">
+        <div class="nav-sub-item" onclick="switchSubTab('order')">주문서관리</div>
+        <div class="nav-sub-item" onclick="switchSubTab('shipping')">배송/물류관리</div>
+        <div class="nav-sub-item" onclick="switchSubTab('issue')">이슈/클레임</div>
+        <div class="nav-sub-item" onclick="switchSubTab('settlement')">정산관리</div>
+      </div>
+
+      <div class="nav-item">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        기획/보고
+      </div>
+    </nav>
+  </aside>
+
+  <!-- 메인 콘텐츠 -->
+  <div class="main-content">
+    <div class="px-8 py-6">
+
+      <!-- ==================== CS관리 탭 ==================== -->
+      <div id="csTab" class="operation-tab-content active">
+        <!-- 헤더 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">CS관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">고객 문의 및 클레임 관리</p>
+          </div>
+        </div>
+        
+        <!-- 요약 카드 -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체 문의</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1" id="cs-total">7</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-red-200">
+            <p class="text-sm text-red-600">미처리</p>
+            <p class="text-2xl font-bold text-red-600 mt-1" id="cs-pending">3</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-amber-200">
+            <p class="text-sm text-amber-600">처리중</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1" id="cs-progress">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <p class="text-sm text-green-600">완료</p>
+            <p class="text-2xl font-bold text-green-600 mt-1" id="cs-completed">2</p>
+          </div>
+        </div>
+
+        <!-- 테이블 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select id="cs-filter-status" onchange="renderCSTable()" class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="pending">미처리</option>
+                <option value="progress">처리중</option>
+                <option value="completed">완료</option>
+              </select>
+              <select id="cs-filter-priority" onchange="renderCSTable()" class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 우선순위</option>
+                <option value="high">긴급</option>
+                <option value="medium">보통</option>
+                <option value="low">낮음</option>
+              </select>
+              <select id="cs-filter-type" onchange="renderCSTable()" class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 유형</option>
+                <option value="상품 문의">상품 문의</option>
+                <option value="배송 문의">배송 문의</option>
+                <option value="클레임">클레임</option>
+                <option value="반품/교환">반품/교환</option>
+                <option value="서류 요청">서류 요청</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <input type="text" id="cs-search" onkeyup="renderCSTable()" placeholder="바이어, 제목 검색..." class="text-sm border border-toss-gray-200 rounded-lg pl-9 pr-3 py-2 w-60">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+              <button onclick="openCSRegisterModal()" class="btn-primary text-sm">+ 문의 등록</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="w-[50px]">No</th>
+                <th class="w-[70px]">우선순위</th>
+                <th class="w-[80px]">상태</th>
+                <th class="w-[90px]">유형</th>
+                <th>제목</th>
+                <th class="w-[130px]">바이어</th>
+                <th class="w-[80px]">담당</th>
+                <th class="w-[100px]">등록일</th>
+              </tr>
+            </thead>
+            <tbody id="cs-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 바이어관리 탭 ==================== -->
+      <div id="buyerTab" class="operation-tab-content">
+        <!-- 헤더 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">바이어관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">바이어 정보 및 등급 관리</p>
+          </div>
+        </div>
+        
+        <!-- 요약 카드 -->
+        <div class="grid grid-cols-5 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체 바이어</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1">8</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-amber-200">
+            <p class="text-sm text-amber-600">VIP</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-red-200">
+            <p class="text-sm text-red-600">L4 (대형)</p>
+            <p class="text-2xl font-bold text-red-600 mt-1">3</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-blue-200">
+            <p class="text-sm text-blue-600">L3 (중형)</p>
+            <p class="text-2xl font-bold text-blue-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">L2/L1</p>
+            <p class="text-2xl font-bold text-toss-gray-700 mt-1">1</p>
+          </div>
+        </div>
+
+        <!-- 테이블 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select id="buyer-filter-level" onchange="renderBuyerTable()" class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 등급</option>
+                <option value="VIP">VIP</option>
+                <option value="L4">L4</option>
+                <option value="L3">L3</option>
+                <option value="L2">L2</option>
+                <option value="L1">L1</option>
+              </select>
+              <select id="buyer-filter-status" onchange="renderBuyerTable()" class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="active">활성</option>
+                <option value="negotiation">협상중</option>
+                <option value="dormant">휴면</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <input type="text" id="buyer-search" onkeyup="renderBuyerTable()" placeholder="회사명, 담당자 검색..." class="text-sm border border-toss-gray-200 rounded-lg pl-9 pr-3 py-2 w-60">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+              <button onclick="openBuyerRegisterModal()" class="btn-primary text-sm">+ 바이어 등록</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="w-[50px]">No</th>
+                <th class="w-[60px]">등급</th>
+                <th>회사명</th>
+                <th class="w-[100px]">담당자</th>
+                <th class="w-[80px]">국가</th>
+                <th class="w-[120px]">예상거래액</th>
+                <th class="w-[80px]">상태</th>
+                <th class="w-[100px]">최근연락</th>
+                <th class="w-[80px]">담당</th>
+              </tr>
+            </thead>
+            <tbody id="buyer-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 상품/리스팅관리 탭 ==================== -->
+      <div id="productTab" class="operation-tab-content">
+        <!-- 헤더 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">상품/리스팅관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">상품 등록 및 리스팅 현황</p>
+          </div>
+        </div>
+        
+        <!-- 요약 카드 -->
+        <div class="grid grid-cols-5 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-toss-gray-500">전체 상품</p>
+                <p class="text-2xl font-bold text-toss-gray-900 mt-1">48</p>
+              </div>
+              <div class="w-10 h-10 bg-toss-gray-100 rounded-lg flex items-center justify-center text-lg">📦</div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-blue-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-blue-600">수용성 특수 도료</p>
+                <p class="text-2xl font-bold text-blue-600 mt-1">11</p>
+              </div>
+              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-lg">🪣</div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-purple-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-purple-600">특수기능성 도료</p>
+                <p class="text-2xl font-bold text-purple-600 mt-1">11</p>
+              </div>
+              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-lg">🛢️</div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-green-600">유성 특수도료</p>
+                <p class="text-2xl font-bold text-green-600 mt-1">9</p>
+              </div>
+              <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-lg">🧪</div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-amber-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-amber-600">파우더/시트</p>
+                <p class="text-2xl font-bold text-amber-600 mt-1">17</p>
+              </div>
+              <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-lg">📋</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 테이블 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select id="product-filter-category" onchange="renderProductTable()" class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 카테고리</option>
+                <option value="수용성 특수 도료">수용성 특수 도료</option>
+                <option value="특수기능성 도료">특수기능성 도료</option>
+                <option value="유성 특수도료">유성 특수도료</option>
+                <option value="파우더">파우더</option>
+                <option value="특수시트">특수시트</option>
+              </select>
+              <select id="product-filter-status" onchange="renderProductTable()" class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="active">활성</option>
+                <option value="review">검수중</option>
+                <option value="inactive">비활성</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <input type="text" id="product-search" onkeyup="renderProductTable()" placeholder="상품명 검색..." class="text-sm border border-toss-gray-200 rounded-lg pl-9 pr-3 py-2 w-60">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="w-[50px]">No</th>
+                <th class="w-[50px]"></th>
+                <th>상품명</th>
+                <th class="w-[140px]">카테고리</th>
+                <th class="w-[100px]">규격</th>
+                <th class="w-[100px]">도포량</th>
+                <th class="w-[80px]">상태</th>
+                <th class="w-[80px]">조회수</th>
+                <th class="w-[80px]">문의수</th>
+              </tr>
+            </thead>
+            <tbody id="product-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 견적/협상관리 탭 ==================== -->
+      <div id="quoteTab" class="operation-tab-content">
+        <!-- 헤더 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">견적/협상관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">견적 요청 및 협상 현황</p>
+          </div>
+        </div>
+
+        <!-- 파이프라인 뷰 -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <!-- 견적 요청 -->
+          <div class="bg-toss-gray-100 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-toss-gray-700">📋 견적 요청</h3>
+              <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full" id="pipeline-request">2</span>
+            </div>
+            <div id="pipeline-request-list" class="space-y-2"></div>
+          </div>
+          <!-- 협상중 -->
+          <div class="bg-toss-gray-100 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-toss-gray-700">💬 협상중</h3>
+              <span class="text-xs bg-amber-100 text-amber-600 px-2 py-1 rounded-full" id="pipeline-negotiation">3</span>
+            </div>
+            <div id="pipeline-negotiation-list" class="space-y-2"></div>
+          </div>
+          <!-- 계약 진행 -->
+          <div class="bg-toss-gray-100 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-toss-gray-700">📝 계약 진행</h3>
+              <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full" id="pipeline-contract">2</span>
+            </div>
+            <div id="pipeline-contract-list" class="space-y-2"></div>
+          </div>
+          <!-- 완료 -->
+          <div class="bg-toss-gray-100 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-toss-gray-700">✅ 완료</h3>
+              <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full" id="pipeline-complete">1</span>
+            </div>
+            <div id="pipeline-complete-list" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- 테이블 영역 -->
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select id="quote-filter-status" onchange="renderQuoteTable()" class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="request">견적 요청</option>
+                <option value="negotiation">협상중</option>
+                <option value="contract">계약 진행</option>
+                <option value="complete">완료</option>
+              </select>
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option>전체 기간</option>
+                <option>이번 주</option>
+                <option>이번 달</option>
+                <option>3개월</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <input type="text" id="quote-search" onkeyup="renderQuoteTable()" placeholder="바이어, 상품 검색..." class="text-sm border border-toss-gray-200 rounded-lg pl-9 pr-3 py-2 w-60">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+              <button onclick="openQuoteRegisterModal()" class="btn-primary text-sm">+ 견적 등록</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="w-[100px]">견적번호</th>
+                <th>바이어</th>
+                <th>상품</th>
+                <th class="w-[80px]">수량</th>
+                <th class="w-[120px]">견적금액</th>
+                <th class="w-[100px]">상태</th>
+                <th class="w-[100px]">요청일</th>
+                <th class="w-[80px]">담당</th>
+              </tr>
+            </thead>
+            <tbody id="quote-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 주문서관리 탭 ==================== -->
+      <div id="orderTab" class="trade-tab-content">
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">주문서관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">해외 바이어 주문 현황 및 진행 관리</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-5 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체 주문</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1">8</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-red-200">
+            <p class="text-sm text-red-600">신규</p>
+            <p class="text-2xl font-bold text-red-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-amber-200">
+            <p class="text-sm text-amber-600">진행중</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1">3</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <p class="text-sm text-green-600">완료</p>
+            <p class="text-2xl font-bold text-green-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-purple-200">
+            <p class="text-sm text-purple-600">이번달 거래액</p>
+            <p class="text-2xl font-bold text-purple-600 mt-1">$93,200</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="new">신규</option>
+                <option value="progress">진행중</option>
+                <option value="completed">완료</option>
+                <option value="issue">이슈</option>
+              </select>
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 담당자</option>
+                <option value="kim">김운영</option>
+                <option value="lee">이매니저</option>
+                <option value="park">박담당</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="주문번호, 바이어명 검색..." class="search-input">
+              </div>
+              <button class="btn-primary text-sm" onclick="openTradeModal('order')">+ 주문 등록</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>주문번호</th>
+                <th>바이어</th>
+                <th>주문일</th>
+                <th>납기일</th>
+                <th>상품</th>
+                <th class="text-right">수량</th>
+                <th class="text-right">금액</th>
+                <th>담당자</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody id="order-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 배송/물류관리 탭 ==================== -->
+      <div id="shippingTab" class="trade-tab-content">
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">배송/물류관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">수출 물류 전 과정 추적 및 통관/배송 현황 관리</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-6 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1">7</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-slate-200">
+            <p class="text-sm text-slate-600">국내운송</p>
+            <p class="text-2xl font-bold text-slate-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-blue-200">
+            <p class="text-sm text-blue-600">수출통관</p>
+            <p class="text-2xl font-bold text-blue-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-indigo-200">
+            <p class="text-sm text-indigo-600">선적</p>
+            <p class="text-2xl font-bold text-indigo-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-amber-200">
+            <p class="text-sm text-amber-600">해외운송</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1">2</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <p class="text-sm text-green-600">배송완료</p>
+            <p class="text-2xl font-bold text-green-600 mt-1">2</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <button class="status-filter active" onclick="filterShippingStatus(this, 'all')">전체</button>
+              <button class="status-filter" onclick="filterShippingStatus(this, 'progress')">진행중</button>
+              <button class="status-filter" onclick="filterShippingStatus(this, 'completed')">완료</button>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="주문번호, B/L No. 검색..." class="search-input">
+              </div>
+              <button class="btn-outline text-sm">엑셀 다운로드</button>
+              <button class="btn-primary text-sm" onclick="openTradeModal('shipping')">+ 배송 등록</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="w-[90px]">주문번호</th>
+                <th class="w-[120px]">바이어</th>
+                <th class="w-[200px]">배송 진행상황</th>
+                <th class="w-[75px]">현재 상태</th>
+                <th class="w-[85px]">B/L No.</th>
+                <th class="w-[75px]">목적지</th>
+                <th class="w-[85px]">출발일</th>
+                <th class="w-[85px]">도착예정</th>
+                <th class="w-[80px]">운송사</th>
+                <th class="w-[60px]">담당자</th>
+              </tr>
+            </thead>
+            <tbody id="shipping-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 이슈/클레임 탭 ==================== -->
+      <div id="issueTab" class="trade-tab-content">
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">이슈/클레임</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">거래 중 발생한 이슈 및 클레임 처리</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체 이슈</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1">3</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-red-200">
+            <p class="text-sm text-red-600">미처리</p>
+            <p class="text-2xl font-bold text-red-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-amber-200">
+            <p class="text-sm text-amber-600">처리중</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <p class="text-sm text-green-600">해결</p>
+            <p class="text-2xl font-bold text-green-600 mt-1">1</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="pending">미처리</option>
+                <option value="progress">처리중</option>
+                <option value="resolved">해결</option>
+              </select>
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 우선순위</option>
+                <option value="urgent">긴급</option>
+                <option value="high">높음</option>
+                <option value="normal">보통</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="이슈번호, 제목 검색..." class="search-input">
+              </div>
+              <button class="btn-primary text-sm" onclick="openTradeModal('issue')">+ 이슈 등록</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>이슈번호</th>
+                <th>우선순위</th>
+                <th>상태</th>
+                <th>유형</th>
+                <th>제목</th>
+                <th>관련 주문</th>
+                <th>바이어</th>
+                <th>담당자</th>
+                <th>등록일</th>
+              </tr>
+            </thead>
+            <tbody id="issue-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 정산관리 탭 ==================== -->
+      <div id="settlementTab" class="trade-tab-content">
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+            <h1 class="text-2xl font-bold text-toss-gray-900">정산관리</h1>
+            <p class="text-sm text-toss-gray-500 mt-1">거래 정산 현황 및 입금 관리</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-xl p-5 border border-toss-gray-200">
+            <p class="text-sm text-toss-gray-500">전체 정산</p>
+            <p class="text-2xl font-bold text-toss-gray-900 mt-1">3</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-slate-200">
+            <p class="text-sm text-slate-600">대기</p>
+            <p class="text-2xl font-bold text-slate-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-blue-200">
+            <p class="text-sm text-blue-600">처리중</p>
+            <p class="text-2xl font-bold text-blue-600 mt-1">1</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 border border-green-200">
+            <p class="text-sm text-green-600">완료</p>
+            <p class="text-2xl font-bold text-green-600 mt-1">1</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm">
+          <div class="px-6 py-4 border-b border-toss-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <select class="text-sm border border-toss-gray-200 rounded-lg px-3 py-2 bg-white">
+                <option value="">전체 상태</option>
+                <option value="waiting">대기</option>
+                <option value="progress">처리중</option>
+                <option value="completed">완료</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <svg class="w-4 h-4 text-toss-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="정산번호, 바이어 검색..." class="search-input">
+              </div>
+              <button class="btn-outline text-sm">엑셀 다운로드</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>정산번호</th>
+                <th>주문번호</th>
+                <th>바이어</th>
+                <th class="text-right">주문금액</th>
+                <th class="text-right">수수료</th>
+                <th class="text-right">정산금액</th>
+                <th>상태</th>
+                <th>정산예정일</th>
+                <th>완료일</th>
+              </tr>
+            </thead>
+            <tbody id="settlement-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div id="detail-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeDetailModal(event)">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="modal-container relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 rounded-t-2xl">
+        <div class="flex items-center gap-2">
+          <span id="modal-icon" class="text-xl">📋</span>
+          <span class="font-semibold text-slate-700" id="modal-type">상세 정보</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <button id="modal-edit-btn" onclick="openCSEditMode()" class="p-2 hover:bg-slate-200 rounded-xl transition-colors hidden" title="수정">
+            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </button>
+          <button onclick="closeDetailModal()" class="p-2 hover:bg-slate-200 rounded-xl transition-colors">
+            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto p-6" id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- 멀티유즈 상품 상세 모달 -->
+  <div id="multiuse-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeMultiuseModal(event)">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="modal-container relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+      <div class="px-6 py-4 border-b border-slate-200 bg-white rounded-t-2xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-slate-800" id="multiuse-title">POUR 코트재 I</h2>
+              <p class="text-xs text-slate-400" id="multiuse-subtitle">수용성 아크릴 폴리머 · 멀티유즈 20개 제품</p>
+            </div>
+          </div>
+          <button onclick="closeMultiuseModal()" class="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="multiuse-common-info" class="bg-slate-50 rounded-xl p-4">
+          <p class="text-xs text-slate-500 mb-2">공통 내용 <span class="text-slate-400">(최소 1톤)</span></p>
+          <div class="flex items-center gap-2 text-xs">
+            <div class="flex-1 bg-white rounded-lg px-3 py-2 text-center border border-slate-200">
+              <p class="text-slate-400 mb-0.5">1kg</p>
+              <p class="font-semibold text-slate-700">₩7,100</p>
+              <p class="text-slate-400">×1,000</p>
+            </div>
+            <div class="flex-1 bg-white rounded-lg px-3 py-2 text-center border border-slate-200">
+              <p class="text-slate-400 mb-0.5">5kg</p>
+              <p class="font-semibold text-slate-700">₩35,500</p>
+              <p class="text-slate-400">×200</p>
+            </div>
+            <div class="flex-1 bg-white rounded-lg px-3 py-2 text-center border border-slate-200">
+              <p class="text-slate-400 mb-0.5">10kg</p>
+              <p class="font-semibold text-slate-700">₩71,000</p>
+              <p class="text-slate-400">×100</p>
+            </div>
+            <div class="flex-1 bg-slate-700 rounded-lg px-3 py-2 text-center">
+              <p class="text-slate-300 mb-0.5">20kg</p>
+              <p class="font-semibold text-white">₩142,000</p>
+              <p class="text-slate-400">×50</p>
+            </div>
+            <div class="flex-1 bg-white rounded-lg px-3 py-2 text-center border border-slate-200">
+              <p class="text-slate-400 mb-0.5">IBC</p>
+              <p class="font-semibold text-slate-700">₩7.1M</p>
+              <p class="text-slate-400">×1</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-1 overflow-hidden">
+        <div class="w-64 border-r border-slate-200 flex flex-col bg-slate-50/50">
+          <div class="p-3 border-b border-slate-100">
+            <p class="text-xs text-slate-500 mb-2">멀티유즈 제품 (<span id="multiuse-count">20</span>)</p>
+            <div class="relative">
+              <input type="text" id="multiuseSearchInput" onkeyup="filterMultiuseProducts()" placeholder="검색..." class="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-300 focus:border-slate-300 bg-white">
+              <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+          </div>
+          <div class="flex-1 overflow-y-auto p-2 space-y-0.5" id="multiuseProductList"></div>
+        </div>
+        <div class="flex-1 overflow-y-auto bg-white">
+          <div class="p-6" id="multiuseDetailContent"></div>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-200 bg-white rounded-b-2xl flex items-center gap-3">
+        <button class="flex-1 px-4 py-2.5 text-sm bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium">리스팅 수정</button>
+        <button class="flex-1 px-4 py-2.5 text-sm bg-white text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors font-medium">성과 분석</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CS 문의 등록 모달 -->
+  <div id="cs-register-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeCSRegisterModal(event)">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="modal-container relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-rose-50 to-orange-50 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
+            <span class="text-xl">📝</span>
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-800">CS 문의 등록</h3>
+            <p class="text-xs text-slate-500">바이어 요청, 팀과 함께 빠르게 해결합니다</p>
+          </div>
+        </div>
+        <button onclick="closeCSRegisterModal()" class="p-2 hover:bg-white/60 rounded-xl transition-colors">
+          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-6">
+        <form id="cs-register-form" class="space-y-5">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">우선순위 <span class="text-rose-500">*</span></label>
+              <select id="cs-reg-priority" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 bg-white">
+                <option value="">선택하세요</option>
+                <option value="high">🔴 긴급</option>
+                <option value="medium">🟡 보통</option>
+                <option value="low">🟢 낮음</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">문의 유형 <span class="text-rose-500">*</span></label>
+              <select id="cs-reg-type" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 bg-white">
+                <option value="">선택하세요</option>
+                <option value="상품 문의">📦 상품 문의</option>
+                <option value="배송 문의">🚚 배송 문의</option>
+                <option value="클레임">⚠️ 클레임</option>
+                <option value="반품/교환">🔄 반품/교환</option>
+                <option value="서류 요청">📄 서류 요청</option>
+                <option value="기타">💬 기타</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">제목 <span class="text-rose-500">*</span></label>
+            <input type="text" id="cs-reg-title" placeholder="문의 제목을 입력하세요" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400">
+          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">바이어명 <span class="text-rose-500">*</span></label>
+              <input type="text" id="cs-reg-buyer" placeholder="회사명 입력" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">바이어 등급</label>
+              <select id="cs-reg-buyer-level" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 bg-white">
+                <option value="unknown">알수없음</option>
+                <option value="L1">L1</option>
+                <option value="L2">L2</option>
+                <option value="L3">L3</option>
+                <option value="L4">L4</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">국가</label>
+              <select id="cs-reg-country" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 bg-white">
+                <option value="🌐">선택하세요</option>
+                <option value="🇺🇸">🇺🇸 미국</option>
+                <option value="🇩🇪">🇩🇪 독일</option>
+                <option value="🇬🇧">🇬🇧 영국</option>
+                <option value="🇯🇵">🇯🇵 일본</option>
+                <option value="🇦🇺">🇦🇺 호주</option>
+                <option value="🇨🇦">🇨🇦 캐나다</option>
+                <option value="🇫🇷">🇫🇷 프랑스</option>
+                <option value="🇸🇬">🇸🇬 싱가포르</option>
+                <option value="🇨🇳">🇨🇳 중국</option>
+                <option value="🇮🇳">🇮🇳 인도</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">문의 내용 <span class="text-rose-500">*</span></label>
+            <textarea id="cs-reg-content" rows="4" placeholder="바이어의 문의 내용을 상세히 입력하세요" class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 resize-none"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">담당자 <span class="text-rose-500">*</span></label>
+              <select id="cs-reg-assignee" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 bg-white">
+                <option value="">담당자 선택</option>
+                <option value="김운영">김운영</option>
+                <option value="이매니저">이매니저</option>
+                <option value="박담당">박담당</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">상태</label>
+              <select id="cs-reg-status" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 bg-white">
+                <option value="pending" selected>🔴 미처리</option>
+                <option value="progress">🟡 처리중</option>
+                <option value="completed">🟢 완료</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex items-center justify-end gap-3">
+        <button onclick="closeCSRegisterModal()" class="px-5 py-2.5 border border-slate-300 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">취소</button>
+        <button onclick="submitCSRegister()" class="px-5 py-2.5 bg-rose-500 text-white rounded-xl text-sm font-medium hover:bg-rose-600 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          등록하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 바이어 등록 모달 -->
+  <div id="buyer-register-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeBuyerRegisterModal(event)">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="modal-container relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <span class="text-xl">👥</span>
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-800">바이어 등록</h3>
+            <p class="text-xs text-slate-500">새로운 바이어 정보를 등록합니다</p>
+          </div>
+        </div>
+        <button onclick="closeBuyerRegisterModal()" class="p-2 hover:bg-white/60 rounded-xl transition-colors">
+          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-6">
+        <form id="buyer-register-form" class="space-y-5">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">바이어 등급 <span class="text-rose-500">*</span></label>
+              <select id="buyer-reg-level" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white">
+                <option value="">선택하세요</option>
+                <option value="VIP">👑 VIP</option>
+                <option value="L4">🔴 L4 (대형)</option>
+                <option value="L3">🟡 L3 (중형)</option>
+                <option value="L2">🔵 L2 (소형)</option>
+                <option value="L1">⚪ L1 (신규)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">상태</label>
+              <select id="buyer-reg-status" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white">
+                <option value="active">🟢 활성</option>
+                <option value="negotiation">🟡 협상중</option>
+                <option value="dormant">⚪ 휴면</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">회사명 <span class="text-rose-500">*</span></label>
+            <input type="text" id="buyer-reg-company" placeholder="회사명을 입력하세요" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">담당자명 <span class="text-rose-500">*</span></label>
+              <input type="text" id="buyer-reg-contact" placeholder="담당자명 입력" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">국가 <span class="text-rose-500">*</span></label>
+              <select id="buyer-reg-country" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white">
+                <option value="">선택하세요</option>
+                <option value="🇺🇸" data-name="미국">🇺🇸 미국</option>
+                <option value="🇩🇪" data-name="독일">🇩🇪 독일</option>
+                <option value="🇬🇧" data-name="영국">🇬🇧 영국</option>
+                <option value="🇯🇵" data-name="일본">🇯🇵 일본</option>
+                <option value="🇦🇺" data-name="호주">🇦🇺 호주</option>
+                <option value="🇨🇦" data-name="캐나다">🇨🇦 캐나다</option>
+                <option value="🇫🇷" data-name="프랑스">🇫🇷 프랑스</option>
+                <option value="🇸🇬" data-name="싱가포르">🇸🇬 싱가포르</option>
+                <option value="🇨🇳" data-name="중국">🇨🇳 중국</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">예상 거래액</label>
+              <input type="text" id="buyer-reg-amount" placeholder="예: $50,000" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">담당자 <span class="text-rose-500">*</span></label>
+              <select id="buyer-reg-assignee" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white">
+                <option value="">선택하세요</option>
+                <option value="김운영">김운영</option>
+                <option value="이매니저">이매니저</option>
+                <option value="박담당">박담당</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">메모</label>
+            <textarea id="buyer-reg-memo" rows="3" placeholder="바이어 관련 메모를 입력하세요" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 resize-none"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex items-center justify-end gap-3">
+        <button onclick="closeBuyerRegisterModal()" class="px-5 py-2.5 border border-slate-300 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">취소</button>
+        <button onclick="submitBuyerRegister()" class="px-5 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          등록하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 견적 등록 모달 -->
+  <div id="quote-register-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeQuoteRegisterModal(event)">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="modal-container relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+            <span class="text-xl">💰</span>
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-800">견적 등록</h3>
+            <p class="text-xs text-slate-500">새로운 견적 정보를 등록합니다</p>
+          </div>
+        </div>
+        <button onclick="closeQuoteRegisterModal()" class="p-2 hover:bg-white/60 rounded-xl transition-colors">
+          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-6">
+        <form id="quote-register-form" class="space-y-5">
+          <!-- 바이어 선택 -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">바이어 <span class="text-rose-500">*</span></label>
+            <div class="relative">
+              <select id="quote-reg-buyer" onchange="onQuoteBuyerChange()" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 bg-white">
+                <option value="">바이어를 선택하세요</option>
+                <option value="__new__">➕ 신규 바이어 직접 입력</option>
+              </select>
+            </div>
+            <!-- 신규 바이어 입력 필드 (숨김) -->
+            <div id="new-buyer-input-wrap" class="hidden mt-2">
+              <input type="text" id="quote-reg-new-buyer" placeholder="신규 바이어명 입력" class="w-full px-4 py-2.5 border border-amber-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 bg-amber-50">
+              <p class="text-xs text-amber-600 mt-1">⚠️ 바이어 관리에 등록되지 않은 신규 바이어입니다</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">상품명 <span class="text-rose-500">*</span></label>
+              <select id="quote-reg-product" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 bg-white">
+                <option value="">선택하세요</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">수량 <span class="text-rose-500">*</span></label>
+              <input type="text" id="quote-reg-qty" placeholder="예: 1,000" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">견적금액 <span class="text-rose-500">*</span></label>
+              <input type="text" id="quote-reg-amount" placeholder="예: $10,000" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">상태</label>
+              <select id="quote-reg-status" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 bg-white">
+                <option value="request">📋 견적 요청</option>
+                <option value="negotiation">💬 협상중</option>
+                <option value="contract">📝 계약 진행</option>
+                <option value="complete">✅ 완료</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">담당자 <span class="text-rose-500">*</span></label>
+            <select id="quote-reg-assignee" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 bg-white">
+              <option value="">선택하세요</option>
+              <option value="김운영">김운영</option>
+              <option value="이매니저">이매니저</option>
+              <option value="박담당">박담당</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">메모</label>
+            <textarea id="quote-reg-memo" rows="2" placeholder="견적 관련 메모" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 resize-none"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl flex items-center justify-end gap-3">
+        <button onclick="closeQuoteRegisterModal()" class="px-5 py-2.5 border border-slate-300 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">취소</button>
+        <button onclick="submitQuoteRegister()" class="px-5 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          등록하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 신규 바이어 확인 모달 -->
+  <div id="new-buyer-confirm-modal" class="modal-overlay fixed inset-0 z-[60] flex items-center justify-center p-4" onclick="closeNewBuyerConfirmModal(event)">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="modal-container relative bg-white rounded-2xl shadow-2xl w-full max-w-sm" onclick="event.stopPropagation()">
+      <div class="p-6 text-center">
+        <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <span class="text-3xl">🆕</span>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-800 mb-2">신규 바이어입니다</h3>
+        <p class="text-sm text-slate-500 mb-1" id="new-buyer-name-display"></p>
+        <p class="text-sm text-slate-600 mb-6">바이어 등록을 먼저 진행할까요?</p>
+        <div class="flex gap-3">
+          <button onclick="skipBuyerRegister()" class="flex-1 py-2.5 border border-slate-300 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">
+            나중에 등록
+          </button>
+          <button onclick="proceedBuyerRegister()" class="flex-1 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors">
+            바이어 등록
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주문 등록 모달 -->
+  <div id="orderModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeTradeModalOnOverlay(event, 'order')">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="modal-container relative bg-white rounded-2xl shadow-2xl w-full max-w-xl" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>새 주문 등록</h2>
+        <div class="modal-close" onclick="closeTradeModal('order')">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">바이어 선택<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">바이어를 선택하세요</option>
+            <option value="globaltech">GlobalTech Inc. (미국)</option>
+            <option value="eurotrade">EuroTrade GmbH (독일)</option>
+            <option value="asiapac">AsiaPac Ltd. (싱가포르)</option>
+            <option value="canadacorp">CanadaCorp (캐나다)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">주문일<span class="required">*</span></label>
+            <input type="date" class="form-input" value="2025-03-26">
+          </div>
+          <div class="form-group">
+            <label class="form-label">납기일<span class="required">*</span></label>
+            <input type="date" class="form-input" value="2025-04-26">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">상품명<span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="상품명을 입력하세요">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">수량<span class="required">*</span></label>
+            <input type="number" class="form-input" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">단가 (USD)<span class="required">*</span></label>
+            <input type="number" class="form-input" placeholder="0.00" step="0.01">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">담당자<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">담당자를 선택하세요</option>
+            <option value="kim">김운영</option>
+            <option value="lee">이매니저</option>
+            <option value="park">박담당</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">비고</label>
+          <textarea class="form-textarea" placeholder="추가 메모를 입력하세요"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeTradeModal('order')">취소</button>
+        <button class="btn-submit" onclick="submitTradeOrder()">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 배송 등록 모달 -->
+  <div id="shippingModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeTradeModalOnOverlay(event, 'shipping')">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="modal-container relative bg-white rounded-2xl shadow-2xl w-full max-w-xl" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>새 배송 등록</h2>
+        <div class="modal-close" onclick="closeTradeModal('shipping')">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">주문번호 선택<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">주문번호를 선택하세요</option>
+            <option value="ORD-2025-048">ORD-2025-048 (GlobalTech Inc.)</option>
+            <option value="ORD-2025-047">ORD-2025-047 (EuroTrade GmbH)</option>
+            <option value="ORD-2025-046">ORD-2025-046 (AsiaPac Ltd.)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">B/L No.<span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="예: BL-2025-009">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">운송 방식<span class="required">*</span></label>
+            <select class="form-select">
+              <option value="">선택하세요</option>
+              <option value="sea">해상운송</option>
+              <option value="air">항공운송</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">운송사<span class="required">*</span></label>
+            <select class="form-select">
+              <option value="">선택하세요</option>
+              <option value="maersk">Maersk</option>
+              <option value="msc">MSC</option>
+              <option value="evergreen">Evergreen</option>
+              <option value="fedex">FedEx</option>
+              <option value="dhl">DHL</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">출발일<span class="required">*</span></label>
+            <input type="date" class="form-input" value="2025-03-26">
+          </div>
+          <div class="form-group">
+            <label class="form-label">도착예정일<span class="required">*</span></label>
+            <input type="date" class="form-input" value="2025-04-10">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">담당자<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">담당자를 선택하세요</option>
+            <option value="kim">김운영</option>
+            <option value="lee">이매니저</option>
+            <option value="park">박담당</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeTradeModal('shipping')">취소</button>
+        <button class="btn-submit" onclick="submitTradeShipping()">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이슈 등록 모달 -->
+  <div id="issueModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeTradeModalOnOverlay(event, 'issue')">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="modal-container relative bg-white rounded-2xl shadow-2xl w-full max-w-xl" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>새 이슈 등록</h2>
+        <div class="modal-close" onclick="closeTradeModal('issue')">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">우선순위<span class="required">*</span></label>
+            <select class="form-select">
+              <option value="">선택하세요</option>
+              <option value="high">긴급</option>
+              <option value="medium">보통</option>
+              <option value="low">낮음</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">이슈 유형<span class="required">*</span></label>
+            <select class="form-select">
+              <option value="">선택하세요</option>
+              <option value="quality">품질 불량</option>
+              <option value="delivery">배송 지연</option>
+              <option value="customs">통관 이슈</option>
+              <option value="payment">결제 문제</option>
+              <option value="other">기타</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">관련 주문<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">주문번호를 선택하세요</option>
+            <option value="ORD-2025-048">ORD-2025-048 (GlobalTech Inc.)</option>
+            <option value="ORD-2025-047">ORD-2025-047 (EuroTrade GmbH)</option>
+            <option value="ORD-2025-046">ORD-2025-046 (AsiaPac Ltd.)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">이슈 제목<span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="이슈 제목을 입력하세요">
+        </div>
+        <div class="form-group">
+          <label class="form-label">상세 내용<span class="required">*</span></label>
+          <textarea class="form-textarea" placeholder="이슈 내용을 상세히 입력하세요" style="min-height: 120px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">담당자<span class="required">*</span></label>
+          <select class="form-select">
+            <option value="">담당자를 선택하세요</option>
+            <option value="kim">김운영</option>
+            <option value="lee">이매니저</option>
+            <option value="park">박담당</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeTradeModal('issue')">취소</button>
+        <button class="btn-submit" onclick="submitTradeIssue()">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 토스트 -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // ==================== 데이터 ====================
+    const csData = [
+      { id: 1, priority: 'high', type: '클레임', title: '제품 파손 - 긴급 처리 요청', buyer: 'Global Trade Co.', buyerLevel: 'L4', status: 'pending', assignee: '김운영', date: '2025-03-25', country: '🇺🇸', content: '고객님께서 주문하신 제품이 배송 중 파손되어 도착했습니다.', reply: '' },
+      { id: 2, priority: 'high', type: '배송 문의', title: '배송 지연 문의 (2주 경과)', buyer: 'Euro Imports GmbH', buyerLevel: 'L3', status: 'pending', assignee: '이매니저', date: '2025-03-24', country: '🇩🇪', content: '주문한 지 2주가 지났는데 아직 배송이 시작되지 않았습니다.', reply: '' },
+      { id: 3, priority: 'medium', type: '상품 문의', title: '대량 주문 시 할인율 문의', buyer: 'Pacific Traders', buyerLevel: 'VIP', status: 'progress', assignee: '김운영', date: '2025-03-24', country: '🇦🇺', content: '10,000개 이상 대량 주문 시 추가 할인이 가능한지 문의드립니다.', reply: '확인 중입니다.' },
+      { id: 4, priority: 'high', type: '반품/교환', title: '색상 불량 - 교환 요청', buyer: 'UK Distributors', buyerLevel: 'L3', status: 'pending', assignee: '박담당', date: '2025-03-23', country: '🇬🇧', content: '받은 제품의 색상이 주문한 것과 다릅니다.', reply: '' },
+      { id: 5, priority: 'medium', type: '상품 문의', title: 'MOQ 조정 가능 여부 문의', buyer: 'Japan Beauty Inc.', buyerLevel: 'L2', status: 'progress', assignee: '이매니저', date: '2025-03-23', country: '🇯🇵', content: 'MOQ 500개에서 300개로 조정 가능할까요?', reply: '본사 확인 후 회신드리겠습니다.' },
+      { id: 6, priority: 'low', type: '상품 문의', title: '성분표 영문 버전 요청', buyer: 'Canada Health Ltd.', buyerLevel: 'L1', status: 'completed', assignee: '김운영', date: '2025-03-22', country: '🇨🇦', content: '제품 성분표 영문 버전 파일 요청드립니다.', reply: '영문 성분표 파일 이메일로 발송 완료했습니다.' },
+      { id: 7, priority: 'medium', type: '배송 문의', title: 'DDP 배송 가능 여부', buyer: 'French Cosmetics', buyerLevel: 'L2', status: 'completed', assignee: '박담당', date: '2025-03-21', country: '🇫🇷', content: 'DDP 조건으로 배송 가능한지 문의드립니다.', reply: 'DDP 배송 가능합니다.' },
+    ];
+
+    const buyerData = [
+      { id: 1, level: 'VIP', company: 'Pacific Traders Pty Ltd', contact: 'John Smith', country: '🇦🇺', countryName: '호주', amount: '$150,000', status: 'active', lastContact: '2025-03-25', assignee: '김운영' },
+      { id: 2, level: 'VIP', company: 'Global Beauty Holdings', contact: 'Sarah Chen', country: '🇺🇸', countryName: '미국', amount: '$200,000', status: 'negotiation', lastContact: '2025-03-24', assignee: '이매니저' },
+      { id: 3, level: 'L4', company: 'Euro Imports GmbH', contact: 'Hans Mueller', country: '🇩🇪', countryName: '독일', amount: '$80,000', status: 'active', lastContact: '2025-03-24', assignee: '김운영' },
+      { id: 4, level: 'L4', company: 'UK Distributors Ltd', contact: 'James Wilson', country: '🇬🇧', countryName: '영국', amount: '$65,000', status: 'active', lastContact: '2025-03-23', assignee: '박담당' },
+      { id: 5, level: 'L4', company: 'Tokyo Beauty Co.', contact: 'Yuki Tanaka', country: '🇯🇵', countryName: '일본', amount: '$55,000', status: 'negotiation', lastContact: '2025-03-22', assignee: '이매니저' },
+      { id: 6, level: 'L3', company: 'Canada Health Ltd', contact: 'Mike Brown', country: '🇨🇦', countryName: '캐나다', amount: '$35,000', status: 'active', lastContact: '2025-03-21', assignee: '김운영' },
+      { id: 7, level: 'L3', company: 'French Cosmetics SARL', contact: 'Pierre Dubois', country: '🇫🇷', countryName: '프랑스', amount: '$28,000', status: 'dormant', lastContact: '2025-03-10', assignee: '박담당' },
+      { id: 8, level: 'L2', company: 'Singapore Trading Pte', contact: 'Lee Wei', country: '🇸🇬', countryName: '싱가포르', amount: '$15,000', status: 'active', lastContact: '2025-03-20', assignee: '이매니저' },
+    ];
+
+    const productData = [
+      { id: 1, image: '🪣', name: 'POUR 써밋바인더', nameEn: 'Pour Summit Binder', category: '수용성 특수 도료', unit: '18kg', coverage: '약 350㎡', status: 'active', views: 1250, inquiries: 23 },
+      { id: 2, image: '🪣', name: 'POUR 써밋페인트Plus+', nameEn: 'Pour Summit paint Plus+', category: '수용성 특수 도료', unit: '18L', coverage: '약 126㎡', status: 'active', views: 1180, inquiries: 21 },
+      { id: 3, image: '🪣', name: 'POUR 코트재 I', nameEn: 'Pour coat material I', category: '수용성 특수 도료', unit: '20kg', coverage: '약 20㎡', status: 'active', views: 980, inquiries: 18 },
+      { id: 4, image: '🪣', name: 'POUR 코트재 II', nameEn: 'Pour medium coat material II', category: '수용성 특수 도료', unit: '20kg', coverage: '약 83㎡', status: 'active', views: 920, inquiries: 15 },
+      { id: 5, image: '🪣', name: 'POUR 상도코트재', nameEn: 'Pour top coat material', category: '수용성 특수 도료', unit: '20kg', coverage: '약 40㎡', status: 'active', views: 890, inquiries: 14 },
+      { id: 12, image: '🛢️', name: 'POUR 발수코팅제', nameEn: 'Pour water repellent', category: '특수기능성 도료', unit: '18kg', coverage: '약 60㎡', status: 'active', views: 950, inquiries: 16 },
+      { id: 13, image: '🛢️', name: 'POUR 외벽 발수&방수 코팅제', nameEn: 'Pour water-repellent coating', category: '특수기능성 도료', unit: '18kg', coverage: '약 60㎡', status: 'active', views: 920, inquiries: 15 },
+      { id: 23, image: '🧪', name: 'POUR 써밋에폭시 하도', nameEn: 'Pour Summit epoxy primer', category: '유성 특수도료', unit: '13.5kg', coverage: '약 72㎡', status: 'active', views: 880, inquiries: 14 },
+      { id: 32, image: '📦', name: 'POUR 106파우더', nameEn: 'Pour 106powder', category: '파우더', unit: '20kg', coverage: '약 5㎡', status: 'active', views: 720, inquiries: 10 },
+      { id: 40, image: '📋', name: 'POUR 슈퍼복합압축시트', nameEn: 'Pour Super Composite Sheet', category: '특수시트', unit: '1롤', coverage: '-', status: 'active', views: 820, inquiries: 12 },
+    ];
+
+    const quoteData = [
+      { id: 'Q-2025-001', buyer: 'Pacific Traders Pty Ltd', buyerLevel: 'VIP', product: 'POUR 써밋바인더', qty: '500개', amount: '$45,000', status: 'request', date: '2025-03-25', assignee: '김운영' },
+      { id: 'Q-2025-002', buyer: 'Global Beauty Holdings', buyerLevel: 'VIP', product: 'POUR 발수코팅제', qty: '1,000개', amount: '$80,000', status: 'negotiation', date: '2025-03-24', assignee: '이매니저' },
+      { id: 'Q-2025-003', buyer: 'Euro Imports GmbH', buyerLevel: 'L4', product: 'POUR 코트재 I', qty: '300개', amount: '$25,000', status: 'negotiation', date: '2025-03-23', assignee: '김운영' },
+      { id: 'Q-2025-004', buyer: 'UK Distributors Ltd', buyerLevel: 'L4', product: 'POUR 써밋에폭시 하도', qty: '200개', amount: '$18,000', status: 'contract', date: '2025-03-22', assignee: '박담당' },
+      { id: 'Q-2025-005', buyer: 'Tokyo Beauty Co.', buyerLevel: 'L4', product: 'POUR 106파우더', qty: '400개', amount: '$32,000', status: 'negotiation', date: '2025-03-21', assignee: '이매니저' },
+      { id: 'Q-2025-006', buyer: 'Canada Health Ltd', buyerLevel: 'L3', product: 'POUR 상도코트재', qty: '150개', amount: '$12,000', status: 'contract', date: '2025-03-20', assignee: '김운영' },
+      { id: 'Q-2025-007', buyer: 'French Cosmetics SARL', buyerLevel: 'L3', product: 'POUR 써밋페인트Plus+', qty: '100개', amount: '$8,500', status: 'complete', date: '2025-03-15', assignee: '박담당' },
+      { id: 'Q-2025-008', buyer: 'Singapore Trading Pte', buyerLevel: 'L2', product: 'POUR 슈퍼복합압축시트', qty: '50개', amount: '$5,000', status: 'request', date: '2025-03-25', assignee: '이매니저' },
+    ];
+
+    // 멀티유즈 데이터
+    const multiUseProducts = [
+      { id: 1, category: 'steel', nameEn: 'Steel Structure Protective Coating', nameKo: '철골 구조물 보호 코팅재', materialEn: 'Water-Based Acrylic Polymer', materialKo: '수용성 아크릴 폴리머', useEn: 'Outdoor Steel Frame Protection', useKo: '야외 철골 프레임 보호', featureEn: 'High Adhesion / Rust Prevention / Weather Resistance', featureKo: '고접착 / 방청 / 내후성', advantageEn: 'Long-term protection against corrosion', advantageKo: '부식에 대한 장기 보호', keywordsEn: ['steel coating', 'rust prevention', 'protective'] },
+      { id: 2, category: 'container', nameEn: 'Container Exterior Protective Paint', nameKo: '컨테이너 외부 보호 도료', materialEn: 'Water-Based Acrylic Polymer', materialKo: '수용성 아크릴 폴리머', useEn: 'Container Exterior Anti-Corrosion', useKo: '컨테이너 외부 방청', featureEn: 'UV Resistance / Anti-Corrosion', featureKo: 'UV 저항 / 방청', advantageEn: 'Protects against marine environment', advantageKo: '해양 환경으로부터 보호', keywordsEn: ['container', 'marine coating', 'anti-corrosion'] },
+    ];
+
+    const categoryNames = { steel: '철골/금속', container: '컨테이너', wood: '목재', concrete: '콘크리트', industrial: '산업용' };
+
+    let currentCSId = null;
+    let selectedMultiuseProduct = null;
+    let currentMultiuseData = null;
+
+    // ==================== 사이드바 네비게이션 ====================
+    function toggleSideMenu(menu) {
+      const operationMenu = document.getElementById('operation-menu');
+      const operationSubmenu = document.getElementById('operation-submenu');
+      const operationArrow = document.getElementById('operation-arrow');
+      const tradeMenu = document.getElementById('trade-menu');
+      const tradeSubmenu = document.getElementById('trade-submenu');
+      const tradeArrow = document.getElementById('trade-arrow');
+
+      // 모든 탭 숨김
+      document.querySelectorAll('.operation-tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelectorAll('.trade-tab-content').forEach(content => content.classList.remove('active'));
+      // 모든 서브아이템 비활성화
+      document.querySelectorAll('.nav-sub-item').forEach(item => item.classList.remove('active'));
+
+      if (menu === 'operation') {
+        operationMenu.classList.add('active');
+        operationSubmenu.classList.remove('hidden');
+        operationArrow.style.transform = 'rotate(180deg)';
+        tradeMenu.classList.remove('active');
+        tradeSubmenu.classList.add('hidden');
+        tradeArrow.style.transform = 'rotate(0deg)';
+        // 첫 번째 탭 활성화
+        document.getElementById('csTab').classList.add('active');
+        operationSubmenu.querySelector('.nav-sub-item').classList.add('active');
+      } else if (menu === 'trade') {
+        tradeMenu.classList.add('active');
+        tradeSubmenu.classList.remove('hidden');
+        tradeArrow.style.transform = 'rotate(180deg)';
+        operationMenu.classList.remove('active');
+        operationSubmenu.classList.add('hidden');
+        operationArrow.style.transform = 'rotate(0deg)';
+        // 첫 번째 탭 활성화
+        document.getElementById('orderTab').classList.add('active');
+        tradeSubmenu.querySelector('.nav-sub-item').classList.add('active');
+      }
+    }
+
+    function switchSubTab(tab) {
+      // 모든 서브아이템 비활성화
+      document.querySelectorAll('.nav-sub-item').forEach(item => item.classList.remove('active'));
+      // 모든 탭 숨김
+      document.querySelectorAll('.operation-tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelectorAll('.trade-tab-content').forEach(content => content.classList.remove('active'));
+      
+      // 운영관리 탭
+      const operationTabMap = { cs: 'csTab', buyer: 'buyerTab', product: 'productTab', quote: 'quoteTab' };
+      // 확장/거래관리 탭
+      const tradeTabMap = { order: 'orderTab', shipping: 'shippingTab', issue: 'issueTab', settlement: 'settlementTab' };
+      
+      if (operationTabMap[tab]) {
+        document.getElementById(operationTabMap[tab]).classList.add('active');
+        // 메뉴 상태 업데이트 (탭 활성화 없이)
+        document.getElementById('operation-menu').classList.add('active');
+        document.getElementById('operation-submenu').classList.remove('hidden');
+        document.getElementById('trade-menu').classList.remove('active');
+        document.getElementById('trade-submenu').classList.add('hidden');
+      } else if (tradeTabMap[tab]) {
+        document.getElementById(tradeTabMap[tab]).classList.add('active');
+        // 메뉴 상태 업데이트 (탭 활성화 없이)
+        document.getElementById('trade-menu').classList.add('active');
+        document.getElementById('trade-submenu').classList.remove('hidden');
+        document.getElementById('operation-menu').classList.remove('active');
+        document.getElementById('operation-submenu').classList.add('hidden');
+      }
+      
+      // 클릭된 서브아이템 활성화
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
+    }
+
+    // ==================== 토스트 ====================
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ==================== 상태 뱃지 함수 ====================
+    function getStatusBadge(status, type = 'general') {
+      const statusMap = {
+        pending: { bg: '#fee2e2', color: '#dc2626', text: '미처리' },
+        progress: { bg: '#fef3c7', color: '#d97706', text: '처리중' },
+        completed: { bg: '#dcfce7', color: '#16a34a', text: '완료' },
+        active: { bg: '#dcfce7', color: '#16a34a', text: '활성' },
+        negotiation: { bg: '#fef3c7', color: '#d97706', text: '협상중' },
+        dormant: { bg: '#f1f5f9', color: '#64748b', text: '휴면' },
+        review: { bg: '#dbeafe', color: '#2563eb', text: '검수중' },
+        inactive: { bg: '#f1f5f9', color: '#64748b', text: '비활성' },
+        request: { bg: '#dbeafe', color: '#2563eb', text: '견적 요청' },
+        contract: { bg: '#f3e8ff', color: '#9333ea', text: '계약 진행' },
+        complete: { bg: '#dcfce7', color: '#16a34a', text: '완료' },
+      };
+      const style = statusMap[status] || { bg: '#f1f5f9', color: '#64748b', text: status };
+      return `<span class="status-badge" style="background: ${style.bg}; color: ${style.color};">${style.text}</span>`;
+    }
+
+    function getPriorityBadge(priority) {
+      const priorityMap = {
+        high: { bg: '#fee2e2', color: '#dc2626', text: '긴급' },
+        medium: { bg: '#fef3c7', color: '#d97706', text: '보통' },
+        low: { bg: '#dcfce7', color: '#16a34a', text: '낮음' },
+      };
+      const style = priorityMap[priority] || { bg: '#f1f5f9', color: '#64748b', text: priority };
+      return `<span class="status-badge" style="background: ${style.bg}; color: ${style.color};">${style.text}</span>`;
+    }
+
+    // ==================== 렌더링 함수 ====================
+    function renderCSTable() {
+      const tbody = document.getElementById('cs-table-body');
+      const statusFilter = document.getElementById('cs-filter-status')?.value || '';
+      const priorityFilter = document.getElementById('cs-filter-priority')?.value || '';
+      const typeFilter = document.getElementById('cs-filter-type')?.value || '';
+      const search = document.getElementById('cs-search')?.value.toLowerCase() || '';
+      
+      const filtered = csData.filter(item => {
+        if (statusFilter && item.status !== statusFilter) return false;
+        if (priorityFilter && item.priority !== priorityFilter) return false;
+        if (typeFilter && item.type !== typeFilter) return false;
+        if (search && !item.title.toLowerCase().includes(search) && !item.buyer.toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      tbody.innerHTML = filtered.map((item, idx) => `
+        <tr class="cursor-pointer hover:bg-toss-gray-50" onclick="openCSDetail(${item.id})">
+          <td class="text-center text-toss-gray-500">${idx + 1}</td>
+          <td>${getPriorityBadge(item.priority)}</td>
+          <td>${getStatusBadge(item.status)}</td>
+          <td class="text-toss-gray-600">${item.type}</td>
+          <td class="font-medium">${item.title}</td>
+          <td><span class="level-badge level-${item.buyerLevel}">${item.buyerLevel}</span> ${item.buyer}</td>
+          <td class="text-toss-gray-600">${item.assignee}</td>
+          <td class="text-toss-gray-500">${item.date}</td>
+        </tr>
+      `).join('');
+
+      // 카운트 업데이트
+      document.getElementById('cs-total').textContent = csData.length;
+      document.getElementById('cs-pending').textContent = csData.filter(c => c.status === 'pending').length;
+      document.getElementById('cs-progress').textContent = csData.filter(c => c.status === 'progress').length;
+      document.getElementById('cs-completed').textContent = csData.filter(c => c.status === 'completed').length;
+    }
+
+    function renderBuyerTable() {
+      const tbody = document.getElementById('buyer-table-body');
+      const levelFilter = document.getElementById('buyer-filter-level')?.value || '';
+      const statusFilter = document.getElementById('buyer-filter-status')?.value || '';
+      const search = document.getElementById('buyer-search')?.value.toLowerCase() || '';
+      
+      const filtered = buyerData.filter(item => {
+        if (levelFilter && item.level !== levelFilter) return false;
+        if (statusFilter && item.status !== statusFilter) return false;
+        if (search && !item.company.toLowerCase().includes(search) && !item.contact.toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      tbody.innerHTML = filtered.map((item, idx) => `
+        <tr class="cursor-pointer hover:bg-toss-gray-50" onclick="openBuyerDetail(${item.id})">
+          <td class="text-center text-toss-gray-500">${idx + 1}</td>
+          <td><span class="level-badge level-${item.level}">${item.level}</span></td>
+          <td class="font-medium">${item.company}</td>
+          <td class="text-toss-gray-600">${item.contact}</td>
+          <td>${item.country}</td>
+          <td class="font-medium">${item.amount}</td>
+          <td>${getStatusBadge(item.status)}</td>
+          <td class="text-toss-gray-500">${item.lastContact}</td>
+          <td class="text-toss-gray-600">${item.assignee}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderProductTable() {
+      const tbody = document.getElementById('product-table-body');
+      const categoryFilter = document.getElementById('product-filter-category')?.value || '';
+      const statusFilter = document.getElementById('product-filter-status')?.value || '';
+      const search = document.getElementById('product-search')?.value.toLowerCase() || '';
+      
+      const filtered = productData.filter(item => {
+        if (categoryFilter && item.category !== categoryFilter) return false;
+        if (statusFilter && item.status !== statusFilter) return false;
+        if (search && !item.name.toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      tbody.innerHTML = filtered.map((item, idx) => `
+        <tr class="cursor-pointer hover:bg-toss-gray-50" onclick="openProductDetail(${item.id})">
+          <td class="text-center text-toss-gray-500">${idx + 1}</td>
+          <td class="text-2xl">${item.image}</td>
+          <td class="font-medium">${item.name}</td>
+          <td class="text-toss-gray-600">${item.category}</td>
+          <td class="text-toss-gray-600">${item.unit}</td>
+          <td class="text-toss-gray-600">${item.coverage}</td>
+          <td>${getStatusBadge(item.status)}</td>
+          <td class="text-toss-gray-600">${item.views.toLocaleString()}</td>
+          <td class="font-medium text-navy-500">${item.inquiries}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderQuoteTable() {
+      const tbody = document.getElementById('quote-table-body');
+      const statusFilter = document.getElementById('quote-filter-status')?.value || '';
+      const search = document.getElementById('quote-search')?.value.toLowerCase() || '';
+      
+      const filtered = quoteData.filter(item => {
+        if (statusFilter && item.status !== statusFilter) return false;
+        if (search && !item.buyer.toLowerCase().includes(search) && !item.product.toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      tbody.innerHTML = filtered.map(item => `
+        <tr class="cursor-pointer hover:bg-toss-gray-50" onclick="openQuoteDetail('${item.id}')">
+          <td class="font-mono text-navy-600">${item.id}</td>
+          <td><span class="level-badge level-${item.buyerLevel}">${item.buyerLevel}</span> ${item.buyer}</td>
+          <td class="font-medium">${item.product}</td>
+          <td class="text-toss-gray-600">${item.qty}</td>
+          <td class="font-medium">${item.amount}</td>
+          <td>${getStatusBadge(item.status)}</td>
+          <td class="text-toss-gray-500">${item.date}</td>
+          <td class="text-toss-gray-600">${item.assignee}</td>
+        </tr>
+      `).join('');
+
+      // 파이프라인 렌더링
+      renderPipeline();
+
+      // 카운트 업데이트
+      document.getElementById('quote-total').textContent = quoteData.length;
+      document.getElementById('quote-request').textContent = quoteData.filter(q => q.status === 'request').length;
+      document.getElementById('quote-negotiation').textContent = quoteData.filter(q => q.status === 'negotiation').length;
+      document.getElementById('quote-contract').textContent = quoteData.filter(q => q.status === 'contract').length;
+      document.getElementById('quote-complete').textContent = quoteData.filter(q => q.status === 'complete').length;
+    }
+
+    function renderPipeline() {
+      const statuses = ['request', 'negotiation', 'contract', 'complete'];
+      statuses.forEach(status => {
+        const list = document.getElementById(`pipeline-${status}-list`);
+        const items = quoteData.filter(q => q.status === status);
+        document.getElementById(`pipeline-${status}`).textContent = items.length;
+        
+        list.innerHTML = items.map(item => `
+          <div class="pipeline-card" onclick="openQuoteDetail('${item.id}')">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono text-toss-gray-500">${item.id}</span>
+              <span class="level-badge level-${item.buyerLevel}">${item.buyerLevel}</span>
+            </div>
+            <p class="font-medium text-sm text-toss-gray-900 mb-1">${item.buyer}</p>
+            <p class="text-xs text-toss-gray-500 mb-2">${item.product}</p>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-bold text-navy-600">${item.amount}</span>
+              <span class="text-xs text-toss-gray-400">${item.assignee}</span>
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+
+    // ==================== 상세 모달 ====================
+
+    function openCSDetail(id) {
+      const item = csData.find(c => c.id === id);
+      if (!item) return;
+      currentCSId = id;
+      
+      document.getElementById('modal-icon').textContent = '📋';
+      document.getElementById('modal-type').textContent = 'CS 문의 상세';
+      
+      // 답변이 있으면 설정 버튼 표시
+      if (item.reply) {
+        document.getElementById('modal-edit-btn').classList.remove('hidden');
+        document.getElementById('modal-edit-btn').onclick = () => openCSEditMode(id);
+      } else {
+        document.getElementById('modal-edit-btn').classList.add('hidden');
+      }
+      
+      document.getElementById('modal-content').innerHTML = `
+        <div class="space-y-5">
+          <!-- 우선순위 & 상태 & 타입 -->
+          <div class="flex items-center gap-2">
+            ${getPriorityBadge(item.priority)}
+            ${getStatusBadge(item.status)}
+            <span class="text-sm text-slate-400">${item.type}</span>
+          </div>
+          
+          <!-- 제목 & 등록일 -->
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-slate-800">${item.title}</h2>
+            <span class="text-sm text-slate-400">${item.date}</span>
+          </div>
+          
+          <!-- 바이어 정보 -->
+          <div class="p-3 bg-slate-50 rounded-xl">
+            <div class="flex items-center gap-2">
+              <span class="level-badge level-${item.buyerLevel}">${item.buyerLevel}</span>
+              <span class="font-medium text-slate-800">${item.buyer}</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">${item.country.replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '').trim() || 'KR'} · ${item.date}</p>
+          </div>
+          
+          <!-- 문의 내용 -->
+          <div>
+            <p class="text-xs text-slate-400 mb-2">문의 내용</p>
+            <div class="p-3 bg-white border border-slate-200 rounded-xl">
+              <p class="text-sm text-slate-700 leading-relaxed">${item.content || '문의 내용이 없습니다.'}</p>
+            </div>
+          </div>
+          
+          <!-- 답변 작성 -->
+          <div>
+            <p class="text-xs text-slate-400 mb-2">답변 작성</p>
+            ${item.reply ? `
+              <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <p class="text-sm text-emerald-700 leading-relaxed">${item.reply}</p>
+              </div>
+            ` : `
+              <textarea 
+                id="cs-reply-${item.id}" 
+                placeholder="답변을 입력하세요..."
+                class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-navy-500/20 focus:border-navy-400"
+                rows="4"
+              ></textarea>
+            `}
+          </div>
+          
+          <!-- 버튼 -->
+          <div class="flex gap-2">
+            ${item.reply ? `
+              <button onclick="updateCSStatus(${item.id}, 'completed')" class="flex-1 py-2.5 bg-navy-500 text-white rounded-xl text-sm font-medium hover:bg-navy-600 transition-colors">처리 완료</button>
+              <button onclick="updateCSStatus(${item.id}, 'progress')" class="flex-1 py-2.5 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">처리중</button>
+            ` : `
+              <button onclick="saveCSReplyAndRefresh(${item.id})" class="flex-1 py-2.5 bg-navy-500 text-white rounded-xl text-sm font-medium hover:bg-navy-600 transition-colors">답변 저장</button>
+              <button onclick="updateCSStatus(${item.id}, 'completed')" class="flex-1 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-medium hover:bg-emerald-600 transition-colors">처리 완료</button>
+            `}
+          </div>
+          
+          <!-- 담당자 -->
+          <p class="text-xs text-slate-400">담당자: ${item.assignee}</p>
+        </div>
+      `;
+      document.getElementById('detail-modal').classList.add('show');
+    }
+
+    // CS 수정 모드
+    function openCSEditMode(id) {
+      const item = csData.find(c => c.id === id);
+      if (!item) return;
+      
+      document.getElementById('modal-type').textContent = 'CS 문의 수정';
+      document.getElementById('modal-edit-btn').classList.add('hidden');
+      
+      document.getElementById('modal-content').innerHTML = `
+        <div class="space-y-4">
+          <!-- 우선순위 & 상태 -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">우선순위 *</label>
+              <select id="edit-priority" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-navy-500/20">
+                <option value="high" ${item.priority === 'high' ? 'selected' : ''}>긴급</option>
+                <option value="medium" ${item.priority === 'medium' ? 'selected' : ''}>보통</option>
+                <option value="low" ${item.priority === 'low' ? 'selected' : ''}>낮음</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">상태 *</label>
+              <select id="edit-status" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-navy-500/20">
+                <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>미처리</option>
+                <option value="progress" ${item.status === 'progress' ? 'selected' : ''}>처리중</option>
+                <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>완료</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- 제목 -->
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">제목 *</label>
+            <input type="text" id="edit-title" value="${item.title}" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-navy-500/20">
+          </div>
+          
+          <!-- 문의 내용 -->
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">문의 내용</label>
+            <textarea id="edit-content" rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-navy-500/20 resize-none">${item.content || ''}</textarea>
+          </div>
+          
+          <!-- 답변 -->
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">답변 / 처리내용</label>
+            <textarea id="edit-reply" rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-navy-500/20 resize-none">${item.reply || ''}</textarea>
+          </div>
+          
+          <!-- 담당자 -->
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">담당자</label>
+            <select id="edit-assignee" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-navy-500/20">
+              <option value="김운영" ${item.assignee === '김운영' ? 'selected' : ''}>김운영</option>
+              <option value="이매니저" ${item.assignee === '이매니저' ? 'selected' : ''}>이매니저</option>
+              <option value="박담당" ${item.assignee === '박담당' ? 'selected' : ''}>박담당</option>
+            </select>
+          </div>
+          
+          <!-- 버튼 -->
+          <div class="flex gap-2 pt-2">
+            <button onclick="saveCSEdit(${id})" class="flex-1 py-2.5 bg-navy-500 text-white rounded-xl text-sm font-medium hover:bg-navy-600">저장</button>
+            <button onclick="openCSDetail(${id})" class="flex-1 py-2.5 border border-slate-300 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50">취소</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // CS 수정 저장
+    function saveCSEdit(id) {
+      const item = csData.find(c => c.id === id);
+      if (!item) return;
+      
+      item.priority = document.getElementById('edit-priority').value;
+      item.status = document.getElementById('edit-status').value;
+      item.title = document.getElementById('edit-title').value;
+      item.content = document.getElementById('edit-content').value;
+      item.reply = document.getElementById('edit-reply').value;
+      item.assignee = document.getElementById('edit-assignee').value;
+      
+      renderCSTable();
+      openCSDetail(id);
+      showToast('✅ 수정이 저장되었습니다');
+    }
+
+    // 답변 저장 후 모달 새로고침
+    function saveCSReplyAndRefresh(id) {
+      const textarea = document.getElementById(`cs-reply-${id}`);
+      const item = csData.find(c => c.id === id);
+      if (item && textarea && textarea.value.trim()) {
+        item.reply = textarea.value.trim();
+        item.status = 'progress';
+        renderCSTable();
+        openCSDetail(id); // 모달 새로고침
+        showToast('💾 답변이 저장되었습니다');
+      } else {
+        showToast('⚠️ 답변 내용을 입력해주세요');
+      }
+    }
+
+    function openBuyerDetail(id) {
+      const item = buyerData.find(b => b.id === id);
+      if (!item) return;
+      
+      // 해당 바이어의 거래내역 찾기
+      const buyerQuotes = quoteData.filter(q => q.buyer === item.company);
+      const quotesHtml = buyerQuotes.length > 0 
+        ? buyerQuotes.map(q => {
+            const statusColors = { request: 'bg-blue-100 text-blue-700', negotiation: 'bg-amber-100 text-amber-700', contract: 'bg-purple-100 text-purple-700', complete: 'bg-emerald-100 text-emerald-700' };
+            const statusTexts = { request: '견적 요청', negotiation: '협상중', contract: '계약 진행', complete: '완료' };
+            return `
+              <div class="p-3 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors" onclick="goToQuoteDetail('${q.id}')">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="font-medium text-slate-800 text-sm">${q.product}</p>
+                    <p class="text-xs text-slate-500 mt-0.5">${q.id} · ${q.date}</p>
+                  </div>
+                  <div class="text-right">
+                    <span class="status-badge text-xs ${statusColors[q.status]}">${statusTexts[q.status]}</span>
+                    <p class="text-sm font-medium text-slate-700 mt-1">${q.amount}</p>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')
+        : '<p class="text-sm text-slate-400 text-center py-4">거래내역이 없습니다</p>';
+      
+      document.getElementById('modal-icon').textContent = '👥';
+      document.getElementById('modal-type').textContent = '바이어 상세';
+      document.getElementById('modal-edit-btn').classList.add('hidden');
+      document.getElementById('modal-content').innerHTML = `
+        <div class="space-y-6">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-navy-400 to-navy-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
+              ${item.company.charAt(0)}
+            </div>
+            <div>
+              <span class="level-badge level-${item.level}">${item.level}</span>
+              <h2 class="text-lg font-bold text-slate-800 mt-1">${item.company}</h2>
+              <p class="text-sm text-slate-500">${item.country} ${item.countryName}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 bg-slate-50 rounded-xl">
+              <p class="text-xs text-slate-400 mb-1">예상 거래액</p>
+              <p class="text-xl font-bold text-slate-800">${item.amount}</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-xl">
+              <p class="text-xs text-slate-400 mb-1">상태</p>
+              <span class="status-badge ${item.status === 'active' ? 'bg-emerald-100 text-emerald-700' : item.status === 'negotiation' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}">${item.status === 'active' ? '활성' : item.status === 'negotiation' ? '협상중' : '휴면'}</span>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 mb-2">담당자 정보</p>
+            <div class="p-4 bg-white border border-slate-200 rounded-xl">
+              <p class="font-medium text-slate-800">${item.contact}</p>
+              <p class="text-sm text-slate-500 mt-1">📧 ${item.contact.toLowerCase().replace(' ', '.')}@company.com</p>
+              <p class="text-sm text-slate-500">📞 +1 234 567 8900</p>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-xs text-slate-400">거래내역</p>
+              <span class="text-xs text-slate-400">${buyerQuotes.length}건</span>
+            </div>
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+              <div class="max-h-40 overflow-y-auto space-y-1 p-2">
+                ${quotesHtml}
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-xs text-slate-400 mb-1">담당 매니저</p>
+              <p class="text-sm font-medium text-slate-700">${item.assignee}</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 mb-1">최근 연락</p>
+              <p class="text-sm text-slate-700">${item.lastContact}</p>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button class="flex-1 py-2.5 bg-navy-500 text-white rounded-xl text-sm font-medium hover:bg-navy-600 transition-colors">견적서 발송</button>
+            <button class="flex-1 py-2.5 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">연락하기</button>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('detail-modal').classList.add('show');
+    }
+
+    // 거래내역 클릭 시 견적 상세로 이동
+    function goToQuoteDetail(quoteId) {
+      closeDetailModal();
+      setTimeout(() => {
+        // 견적/협상관리 탭으로 전환
+        switchSubTab('quote');
+        setTimeout(() => {
+          openQuoteDetail(quoteId);
+        }, 100);
+      }, 200);
+    }
+
+    function openProductDetail(id) {
+      const item = productData.find(p => p.id === id);
+      if (!item) return;
+      
+      if (item.category === '수용성 특수 도료') {
+        openMultiuseModal(item);
+        return;
+      }
+      
+      document.getElementById('modal-icon').textContent = '📦';
+      document.getElementById('modal-type').textContent = '상품 상세';
+      document.getElementById('modal-edit-btn').classList.add('hidden');
+      document.getElementById('modal-content').innerHTML = `
+        <div class="space-y-6">
+          <div class="flex items-center gap-4">
+            <div class="w-20 h-20 bg-slate-100 rounded-xl flex items-center justify-center text-4xl">
+              ${item.image}
+            </div>
+            <div>
+              <span class="status-badge ${item.status === 'active' ? 'bg-emerald-100 text-emerald-700' : item.status === 'review' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}">${item.status === 'active' ? '활성' : item.status === 'review' ? '검수중' : '비활성'}</span>
+              <h2 class="text-lg font-bold text-slate-800 mt-1">${item.name}</h2>
+              <p class="text-sm text-slate-500">${item.category}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="p-4 bg-slate-50 rounded-xl text-center">
+              <p class="text-xs text-slate-400 mb-1">규격</p>
+              <p class="text-lg font-bold text-slate-800">${item.unit}</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-xl text-center">
+              <p class="text-xs text-slate-400 mb-1">도포량</p>
+              <p class="text-lg font-bold text-slate-800">${item.coverage}</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-xl text-center">
+              <p class="text-xs text-slate-400 mb-1">문의수</p>
+              <p class="text-lg font-bold text-navy-600">${item.inquiries}</p>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 mb-2">리스팅 성과</p>
+            <div class="p-4 bg-white border border-slate-200 rounded-xl">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-slate-600">조회수</span>
+                <span class="font-medium text-slate-800">${item.views.toLocaleString()}</span>
+              </div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-slate-600">문의 전환율</span>
+                <span class="font-medium text-emerald-600">${((item.inquiries / item.views) * 100).toFixed(1)}%</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-slate-600">평균 일일 조회</span>
+                <span class="font-medium text-slate-800">${Math.round(item.views / 30)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button class="flex-1 py-2.5 bg-navy-500 text-white rounded-xl text-sm font-medium hover:bg-navy-600 transition-colors">리스팅 수정</button>
+            <button class="flex-1 py-2.5 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">성과 분석</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('detail-modal').classList.add('show');
+    }
+
+    function openQuoteDetail(id) {
+      const item = quoteData.find(q => q.id === id);
+      if (!item) return;
+      
+      const statusColors = { request: 'bg-blue-100 text-blue-700', negotiation: 'bg-amber-100 text-amber-700', contract: 'bg-purple-100 text-purple-700', complete: 'bg-emerald-100 text-emerald-700' };
+      const statusTexts = { request: '견적 요청', negotiation: '협상중', contract: '계약 진행', complete: '완료' };
+      
+      document.getElementById('modal-icon').textContent = '💰';
+      document.getElementById('modal-type').textContent = '견적 상세';
+      document.getElementById('modal-edit-btn').classList.add('hidden');
+      document.getElementById('modal-content').innerHTML = `
+        <div class="space-y-6">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-sm font-mono text-navy-600">${item.id}</span>
+              <span class="status-badge ${statusColors[item.status]}">${statusTexts[item.status]}</span>
+            </div>
+            <h2 class="text-lg font-bold text-slate-800">${item.product}</h2>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl">
+            <p class="text-xs text-slate-400 mb-2">바이어</p>
+            <div class="flex items-center gap-2">
+              <span class="level-badge level-${item.buyerLevel}">${item.buyerLevel}</span>
+              <span class="font-medium text-slate-800">${item.buyer}</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 bg-white border border-slate-200 rounded-xl">
+              <p class="text-xs text-slate-400 mb-1">주문 수량</p>
+              <p class="text-xl font-bold text-slate-800">${item.qty}</p>
+            </div>
+            <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+              <p class="text-xs text-indigo-500 mb-1">견적 금액</p>
+              <p class="text-xl font-bold text-indigo-700">${item.amount}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-xs text-slate-400 mb-1">요청일</p>
+              <p class="text-sm font-medium text-slate-700">${item.date}</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 mb-1">담당자</p>
+              <p class="text-sm font-medium text-slate-700">${item.assignee}</p>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 mb-2">협상 이력</p>
+            <div class="space-y-2">
+              <div class="p-3 bg-white border border-slate-200 rounded-lg">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-medium text-slate-600">1차 견적 발송</span>
+                  <span class="text-xs text-slate-400">2025-03-23</span>
+                </div>
+                <p class="text-sm text-slate-700">$62,500 제안</p>
+              </div>
+              <div class="p-3 bg-white border border-slate-200 rounded-lg">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-medium text-slate-600">바이어 응답</span>
+                  <span class="text-xs text-slate-400">2025-03-24</span>
+                </div>
+                <p class="text-sm text-slate-700">5% 추가 할인 요청</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button class="flex-1 py-2.5 bg-navy-500 text-white rounded-xl text-sm font-medium hover:bg-navy-600 transition-colors">견적서 수정</button>
+            <button class="flex-1 py-2.5 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">계약서 발송</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('detail-modal').classList.add('show');
+    }
+
+    // 견적 상태 변경
+    function updateQuoteStatus(id, newStatus) {
+      const item = quoteData.find(q => q.id === id);
+      if (item) {
+        item.status = newStatus;
+        renderQuoteTable();
+        closeDetailModal();
+        showToast('✅ 견적 상태가 변경되었습니다');
+      }
+    }
+
+    function closeDetailModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('detail-modal').classList.remove('show');
+    }
+
+    // ==================== CS 기능 ====================
+    function saveCSReply(id) {
+      const textarea = document.getElementById(`cs-reply-${id}`);
+      const item = csData.find(c => c.id === id);
+      if (item && textarea && textarea.value.trim()) {
+        item.reply = textarea.value.trim();
+        item.status = 'progress';
+        renderCSTable();
+        openCSDetail(id);
+        showToast('💾 답변이 저장되었습니다');
+      } else {
+        showToast('⚠️ 답변 내용을 입력해주세요');
+      }
+    }
+
+    function updateCSStatus(id, newStatus) {
+      const item = csData.find(c => c.id === id);
+      if (item) {
+        item.status = newStatus;
+        renderCSTable();
+        closeDetailModal();
+        showToast('✅ 상태가 변경되었습니다');
+      }
+    }
+
+    // ==================== 모달 열기/닫기 ====================
+    function openCSRegisterModal() {
+      document.getElementById('cs-register-modal').classList.add('show');
+    }
+
+    function closeCSRegisterModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('cs-register-modal').classList.remove('show');
+      document.getElementById('cs-register-form').reset();
+    }
+
+    function submitCSRegister() {
+      const priority = document.getElementById('cs-reg-priority').value;
+      const type = document.getElementById('cs-reg-type').value;
+      const title = document.getElementById('cs-reg-title').value.trim();
+      const buyer = document.getElementById('cs-reg-buyer').value.trim();
+      const buyerLevel = document.getElementById('cs-reg-buyer-level').value;
+      const country = document.getElementById('cs-reg-country').value;
+      const content = document.getElementById('cs-reg-content').value.trim();
+      const assignee = document.getElementById('cs-reg-assignee').value;
+      const status = document.getElementById('cs-reg-status').value;
+
+      if (!priority || !type || !title || !buyer || !assignee) {
+        showToast('⚠️ 필수 항목을 모두 입력해주세요');
+        return;
+      }
+
+      const newCS = {
+        id: csData.length + 1,
+        priority,
+        type,
+        title,
+        buyer,
+        buyerLevel: buyerLevel === 'unknown' ? 'L1' : buyerLevel,
+        status,
+        assignee,
+        date: new Date().toISOString().split('T')[0],
+        country,
+        content,
+        reply: ''
+      };
+
+      csData.unshift(newCS);
+      renderCSTable();
+      closeCSRegisterModal();
+      showToast('✅ CS 문의가 등록되었습니다');
+    }
+
+    function openBuyerRegisterModal() {
+      document.getElementById('buyer-register-modal').classList.add('show');
+    }
+
+    function closeBuyerRegisterModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('buyer-register-modal').classList.remove('show');
+      document.getElementById('buyer-register-form').reset();
+    }
+
+    function submitBuyerRegister() {
+      const level = document.getElementById('buyer-reg-level').value;
+      const status = document.getElementById('buyer-reg-status').value;
+      const company = document.getElementById('buyer-reg-company').value.trim();
+      const contact = document.getElementById('buyer-reg-contact').value.trim();
+      const countrySelect = document.getElementById('buyer-reg-country');
+      const country = countrySelect.value;
+      const countryName = countrySelect.options[countrySelect.selectedIndex]?.dataset?.name || '';
+      const amount = document.getElementById('buyer-reg-amount').value.trim() || '-';
+      const assignee = document.getElementById('buyer-reg-assignee').value;
+
+      if (!level || !company || !contact || !country || !assignee) {
+        showToast('⚠️ 필수 항목을 모두 입력해주세요');
+        return;
+      }
+
+      const newBuyer = {
+        id: buyerData.length + 1,
+        level,
+        company,
+        contact,
+        country,
+        countryName,
+        amount,
+        status,
+        lastContact: new Date().toISOString().split('T')[0],
+        assignee
+      };
+
+      buyerData.unshift(newBuyer);
+      renderBuyerTable();
+      closeBuyerRegisterModal();
+      showToast('✅ 바이어가 등록되었습니다');
+    }
+
+    let pendingQuoteData = null;
+    let pendingNewBuyerName = '';
+
+    function openQuoteRegisterModal() {
+      // 바이어 드롭다운 옵션 채우기
+      const buyerSelect = document.getElementById('quote-reg-buyer');
+      buyerSelect.innerHTML = `
+        <option value="">바이어를 선택하세요</option>
+        <option value="__new__">➕ 신규 바이어 직접 입력</option>
+        ${buyerData.map(b => `<option value="${b.company}">${b.country} ${b.company} (${b.level})</option>`).join('')}
+      `;
+      
+      // 상품 드롭다운 옵션 채우기
+      const productSelect = document.getElementById('quote-reg-product');
+      productSelect.innerHTML = `
+        <option value="">선택하세요</option>
+        ${productData.map(p => `<option value="${p.name}">${p.name}</option>`).join('')}
+      `;
+      
+      document.getElementById('quote-register-modal').classList.add('show');
+    }
+
+    function closeQuoteRegisterModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('quote-register-modal').classList.remove('show');
+      document.getElementById('quote-register-form').reset();
+      document.getElementById('new-buyer-input-wrap').classList.add('hidden');
+      pendingQuoteData = null;
+    }
+
+    function onQuoteBuyerChange() {
+      const value = document.getElementById('quote-reg-buyer').value;
+      const newBuyerWrap = document.getElementById('new-buyer-input-wrap');
+      
+      if (value === '__new__') {
+        newBuyerWrap.classList.remove('hidden');
+      } else {
+        newBuyerWrap.classList.add('hidden');
+      }
+    }
+
+    function submitQuoteRegister() {
+      const buyerSelect = document.getElementById('quote-reg-buyer').value;
+      const newBuyerName = document.getElementById('quote-reg-new-buyer').value.trim();
+      const product = document.getElementById('quote-reg-product').value;
+      const qty = document.getElementById('quote-reg-qty').value.trim();
+      const amount = document.getElementById('quote-reg-amount').value.trim();
+      const status = document.getElementById('quote-reg-status').value;
+      const assignee = document.getElementById('quote-reg-assignee').value;
+
+      // 바이어 결정
+      let buyerName = '';
+      if (buyerSelect === '__new__') {
+        if (!newBuyerName) {
+          showToast('⚠️ 신규 바이어명을 입력해주세요');
+          return;
+        }
+        buyerName = newBuyerName;
+        
+        // 기존 바이어 중 동일 이름 체크
+        const existingBuyer = buyerData.find(b => b.company.toLowerCase() === newBuyerName.toLowerCase());
+        if (!existingBuyer) {
+          // 신규 바이어 확인 모달
+          pendingQuoteData = { product, qty, amount, status, assignee, buyerName };
+          pendingNewBuyerName = newBuyerName;
+          document.getElementById('new-buyer-name-display').textContent = `"${newBuyerName}"`;
+          document.getElementById('new-buyer-confirm-modal').classList.add('show');
+          return;
+        }
+      } else {
+        buyerName = buyerSelect;
+      }
+
+      if (!buyerName || !product || !qty || !amount || !assignee) {
+        showToast('⚠️ 필수 항목을 모두 입력해주세요');
+        return;
+      }
+
+      // 견적 등록 실행
+      registerQuote(buyerName, product, qty, amount, status, assignee);
+    }
+
+    function registerQuote(buyerName, product, qty, amount, status, assignee) {
+      // 바이어 등급 찾기
+      const buyer = buyerData.find(b => b.company === buyerName);
+      const buyerLevel = buyer ? buyer.level : 'L1';
+
+      // 새 견적번호 생성
+      const newId = `Q-2025-${String(quoteData.length + 1).padStart(3, '0')}`;
+      
+      const newQuote = {
+        id: newId,
+        buyer: buyerName,
+        buyerLevel: buyerLevel,
+        product: product,
+        qty: qty,
+        amount: amount,
+        status: status,
+        date: new Date().toISOString().split('T')[0],
+        assignee: assignee
+      };
+
+      quoteData.unshift(newQuote);
+      renderQuoteTable();
+      closeQuoteRegisterModal();
+      showToast('✅ 견적이 등록되었습니다');
+    }
+
+    // 신규 바이어 확인 모달 함수
+    function closeNewBuyerConfirmModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('new-buyer-confirm-modal').classList.remove('show');
+    }
+
+    function skipBuyerRegister() {
+      // 바이어 등록 없이 견적만 등록 (신규 바이어로)
+      document.getElementById('new-buyer-confirm-modal').classList.remove('show');
+      
+      if (pendingQuoteData) {
+        // 임시 바이어 데이터 추가 (L1 신규)
+        const tempBuyer = {
+          id: buyerData.length + 100,
+          level: 'L1',
+          company: pendingNewBuyerName,
+          contact: '-',
+          country: '🌐',
+          countryName: '미지정',
+          amount: '-',
+          status: 'active',
+          lastContact: new Date().toISOString().split('T')[0],
+          assignee: pendingQuoteData.assignee
+        };
+        buyerData.unshift(tempBuyer);
+        
+        registerQuote(
+          pendingQuoteData.buyerName,
+          pendingQuoteData.product,
+          pendingQuoteData.qty,
+          pendingQuoteData.amount,
+          pendingQuoteData.status,
+          pendingQuoteData.assignee
+        );
+      }
+      pendingQuoteData = null;
+      pendingNewBuyerName = '';
+    }
+
+    function proceedBuyerRegister() {
+      // 바이어 등록 모달 열기
+      document.getElementById('new-buyer-confirm-modal').classList.remove('show');
+      document.getElementById('quote-register-modal').classList.remove('show');
+      
+      // 바이어 등록 모달 열고 회사명 미리 채우기
+      openBuyerRegisterModal();
+      setTimeout(() => {
+        document.getElementById('buyer-reg-company').value = pendingNewBuyerName;
+      }, 100);
+    }
+
+    // ==================== 멀티유즈 모달 ====================
+    function openMultiuseModal(item) {
+      document.getElementById('multiuse-title').textContent = item.name;
+      document.getElementById('multiuse-subtitle').textContent = `${item.nameEn} · 멀티유즈 ${multiUseProducts.length}개 제품`;
+      document.getElementById('multiuse-count').textContent = multiUseProducts.length;
+      
+      selectedMultiuseProduct = multiUseProducts[0];
+      currentMultiuseData = { products: multiUseProducts };
+      renderMultiuseProductList();
+      renderMultiuseDetail();
+      
+      document.getElementById('multiuse-modal').classList.add('show');
+    }
+
+    function closeMultiuseModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('multiuse-modal').classList.remove('show');
+      document.getElementById('multiuseSearchInput').value = '';
+    }
+
+    function renderMultiuseProductList(filter = '') {
+      if (!currentMultiuseData) return;
+      const container = document.getElementById('multiuseProductList');
+      const filtered = currentMultiuseData.products.filter(p => 
+        p.nameKo.toLowerCase().includes(filter.toLowerCase()) || 
+        p.nameEn.toLowerCase().includes(filter.toLowerCase())
+      );
+      container.innerHTML = filtered.map(product => {
+        const isActive = selectedMultiuseProduct && selectedMultiuseProduct.id === product.id;
+        return `<div class="px-3 py-2 rounded-lg cursor-pointer hover:bg-slate-100 ${isActive ? 'bg-white font-semibold' : ''}" onclick="selectMultiuseProduct(${product.id})">
+          <p class="text-sm truncate text-slate-700">${product.nameKo}</p>
+          <p class="text-xs truncate text-slate-400">${product.nameEn}</p>
+        </div>`;
+      }).join('');
+    }
+
+    function selectMultiuseProduct(id) {
+      if (!currentMultiuseData) return;
+      selectedMultiuseProduct = currentMultiuseData.products.find(p => p.id === id);
+      renderMultiuseProductList(document.getElementById('multiuseSearchInput').value);
+      renderMultiuseDetail();
+    }
+
+    function renderMultiuseDetail() {
+      if (!selectedMultiuseProduct) return;
+      const p = selectedMultiuseProduct;
+      document.getElementById('multiuseDetailContent').innerHTML = `
+        <div>
+          <div class="mb-6">
+            <span class="inline-block px-2 py-0.5 bg-emerald-100 text-emerald-600 rounded text-xs font-medium mb-2">완성</span>
+            <h3 class="text-lg font-bold text-slate-800">${p.nameKo}</h3>
+            <p class="text-slate-400 text-sm">${categoryNames[p.category]}</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 mb-3">알리바바 상세정보</p>
+            <div class="border border-slate-200 rounded-xl p-4 space-y-4">
+              <div><p class="text-xs text-slate-400 mb-1">영문 제품명</p><p class="text-sm text-slate-700">${p.nameEn}</p></div>
+              <div><p class="text-xs text-slate-400 mb-1">Material / 재질</p><p class="text-sm text-slate-700">${p.materialEn}</p><p class="text-xs text-slate-500">${p.materialKo}</p></div>
+              <div><p class="text-xs text-slate-400 mb-1">Application / 용도</p><p class="text-sm text-slate-700">${p.useEn}</p><p class="text-xs text-slate-500">${p.useKo}</p></div>
+              <div><p class="text-xs text-slate-400 mb-1">Features / 특징</p><p class="text-sm text-slate-700">${p.featureEn}</p><p class="text-xs text-slate-500">${p.featureKo}</p></div>
+              <div><p class="text-xs text-slate-400 mb-1">Advantages / 장점</p><p class="text-sm text-slate-700">${p.advantageEn}</p><p class="text-xs text-slate-500">${p.advantageKo}</p></div>
+              <div><p class="text-xs text-slate-400 mb-2">Keywords (${p.keywordsEn.length})</p><div class="flex flex-wrap gap-1">${p.keywordsEn.map(k => `<span class="inline-block px-2 py-0.5 text-xs bg-slate-100 text-slate-600 rounded">${k}</span>`).join('')}</div></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function filterMultiuseProducts() {
+      if (!currentMultiuseData) return;
+      renderMultiuseProductList(document.getElementById('multiuseSearchInput').value);
+    }
+
+    // ==================== 확장/거래관리 데이터 ====================
+    const orderData = [
+      { id: 'ORD-2025-048', buyer: 'GlobalTech Inc.', orderDate: '2025.03.25', dueDate: '2025.04.10', product: '워터실드 프리미엄', qty: 500, amount: '$12,500', assignee: '김운영', status: '신규' },
+      { id: 'ORD-2025-047', buyer: 'EuroTrade GmbH', orderDate: '2025.03.24', dueDate: '2025.04.15', product: '하이템프 코팅', qty: 300, amount: '$8,400', assignee: '이매니저', status: '신규' },
+      { id: 'ORD-2025-046', buyer: 'AsiaPac Ltd.', orderDate: '2025.03.23', dueDate: '2025.04.08', product: '워터실드 스탠다드', qty: 1000, amount: '$22,000', assignee: '박담당', status: '진행중' },
+      { id: 'ORD-2025-045', buyer: 'CanadaCorp', orderDate: '2025.03.22', dueDate: '2025.04.05', product: '특수 시트 A형', qty: 200, amount: '$6,000', assignee: '김운영', status: '진행중' },
+      { id: 'ORD-2025-044', buyer: 'AussieTrade', orderDate: '2025.03.20', dueDate: '2025.04.02', product: '워터실드 프리미엄', qty: 800, amount: '$20,000', assignee: '이매니저', status: '진행중' },
+      { id: 'ORD-2025-043', buyer: 'UK Imports', orderDate: '2025.03.18', dueDate: '2025.03.30', product: '파우더 코팅제', qty: 400, amount: '$9,600', assignee: '박담당', status: '완료' },
+      { id: 'ORD-2025-042', buyer: 'FranceBuild', orderDate: '2025.03.15', dueDate: '2025.03.28', product: '보수용 퍼티', qty: 600, amount: '$7,200', assignee: '김운영', status: '이슈' },
+      { id: 'ORD-2025-041', buyer: 'GlobalTech Inc.', orderDate: '2025.03.10', dueDate: '2025.03.25', product: '워터실드 프리미엄', qty: 300, amount: '$7,500', assignee: '이매니저', status: '완료' },
+    ];
+
+    const shippingData = [
+      { orderId: 'ORD-2025-048', buyer: 'GlobalTech Inc.', blNo: 'BL-2025-008', country: '🇺🇸', countryName: '미국', status: '국내운송', departure: '2025.03.26', eta: '2025.04.10', carrier: 'CJ대한통운', assignee: '김운영', steps: [1, 0, 0, 0, 0] },
+      { orderId: 'ORD-2025-047', buyer: 'EuroTrade GmbH', blNo: 'BL-2025-007', country: '🇩🇪', countryName: '독일', status: '수출통관', departure: '2025.03.25', eta: '2025.04.15', carrier: 'MSC', assignee: '이매니저', steps: [2, 1, 0, 0, 0] },
+      { orderId: 'ORD-2025-046', buyer: 'AsiaPac Ltd.', blNo: 'BL-2025-006', country: '🇸🇬', countryName: '싱가포르', status: '선적', departure: '2025.03.24', eta: '2025.04.08', carrier: 'Evergreen', assignee: '박담당', steps: [2, 2, 1, 0, 0] },
+      { orderId: 'ORD-2025-045', buyer: 'CanadaCorp', blNo: 'BL-2025-005', country: '🇨🇦', countryName: '캐나다', status: '해외운송', departure: '2025.03.22', eta: '2025.04.05', carrier: 'FedEx', assignee: '김운영', steps: [2, 2, 2, 1, 0] },
+      { orderId: 'ORD-2025-044', buyer: 'AussieTrade', blNo: 'BL-2025-004', country: '🇦🇺', countryName: '호주', status: '해외운송', departure: '2025.03.20', eta: '2025.04.02', carrier: 'Maersk', assignee: '이매니저', steps: [2, 2, 2, 1, 0] },
+      { orderId: 'ORD-2025-043', buyer: 'UK Imports', blNo: 'BL-2025-003', country: '🇬🇧', countryName: '영국', status: '배송완료', departure: '2025.03.18', eta: '2025.03.30', carrier: 'MSC', assignee: '박담당', steps: [2, 2, 2, 2, 2] },
+      { orderId: 'ORD-2025-041', buyer: 'GlobalTech Inc.', blNo: 'BL-2025-001', country: '🇺🇸', countryName: '미국', status: '배송완료', departure: '2025.03.10', eta: '2025.03.25', carrier: 'FedEx', assignee: '김운영', steps: [2, 2, 2, 2, 2] },
+    ];
+
+    const issueData = [
+      { id: 'ISS-2025-003', priority: '긴급', status: '미처리', type: '품질', title: '도료 색상 불일치', orderId: 'ORD-2025-042', buyer: 'FranceBuild', assignee: '김운영', date: '2025.03.24' },
+      { id: 'ISS-2025-002', priority: '높음', status: '처리중', type: '배송', title: '배송 지연', orderId: 'ORD-2025-043', buyer: 'UK Imports', assignee: '이매니저', date: '2025.03.22' },
+      { id: 'ISS-2025-001', priority: '보통', status: '해결', type: '가격', title: '추가 할인 요청', orderId: 'ORD-2025-046', buyer: 'AsiaPac Ltd.', assignee: '박담당', date: '2025.03.20' },
+    ];
+
+    const settlementData = [
+      { id: 'STL-2025-007', orderId: 'ORD-2025-041', buyer: 'GlobalTech Inc.', orderAmount: '$7,500', fee: '-$375', settlement: '$7,125', status: '완료', dueDate: '2025.03.28', completeDate: '2025.03.27' },
+      { id: 'STL-2025-006', orderId: 'ORD-2025-038', buyer: 'EuroTrade GmbH', orderAmount: '$15,200', fee: '-$760', settlement: '$14,440', status: '처리중', dueDate: '2025.03.30', completeDate: '-' },
+      { id: 'STL-2025-005', orderId: 'ORD-2025-035', buyer: 'AsiaPac Ltd.', orderAmount: '$22,000', fee: '-$1,100', settlement: '$20,900', status: '대기', dueDate: '2025.04.05', completeDate: '-' },
+    ];
+
+    // ==================== 확장/거래관리 상태 뱃지 ====================
+    function getTradeStatusBadge(status) {
+      const statusMap = {
+        '신규': { bg: '#fee2e2', color: '#dc2626' },
+        '진행중': { bg: '#fef3c7', color: '#d97706' },
+        '완료': { bg: '#dcfce7', color: '#16a34a' },
+        '이슈': { bg: '#fee2e2', color: '#dc2626' },
+        '대기': { bg: '#f1f5f9', color: '#64748b' },
+        '처리중': { bg: '#dbeafe', color: '#2563eb' },
+        '국내운송': { bg: '#f1f5f9', color: '#64748b' },
+        '수출통관': { bg: '#dbeafe', color: '#2563eb' },
+        '선적': { bg: '#e0e7ff', color: '#4f46e5' },
+        '해외운송': { bg: '#fef3c7', color: '#d97706' },
+        '배송완료': { bg: '#dcfce7', color: '#16a34a' },
+        '미처리': { bg: '#fee2e2', color: '#dc2626' },
+        '해결': { bg: '#dcfce7', color: '#16a34a' },
+        '긴급': { bg: '#fee2e2', color: '#dc2626' },
+        '높음': { bg: '#fef3c7', color: '#d97706' },
+        '보통': { bg: '#f1f5f9', color: '#64748b' },
+      };
+      const style = statusMap[status] || { bg: '#f1f5f9', color: '#64748b' };
+      return `<span style="padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; background: ${style.bg}; color: ${style.color};">${status}</span>`;
+    }
+
+    // ==================== 배송 프로세스 이벤트 ====================
+    function renderProcessEvent(steps) {
+      const stepIcons = [
+        '<svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+        '<svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/></svg>',
+        '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>',
+        '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+        '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+      ];
+      let html = '<div class="process-event">';
+      steps.forEach((step, index) => {
+        let stepClass = step === 2 ? 'completed' : step === 1 ? 'current' : 'pending';
+        html += `<div class="process-step ${stepClass}">${stepIcons[index]}</div>`;
+        if (index < steps.length - 1) {
+          html += `<div class="process-line ${step === 2 ? 'completed' : ''}"></div>`;
+        }
+      });
+      html += '</div>';
+      return html;
+    }
+
+    // ==================== 확장/거래관리 렌더링 ====================
+    function renderOrderTable() {
+      const tbody = document.getElementById('order-table-body');
+      tbody.innerHTML = orderData.map(item => `
+        <tr class="cursor-pointer hover:bg-toss-gray-50">
+          <td class="font-medium text-toss-blue">${item.id}</td>
+          <td>${item.buyer}</td>
+          <td>${item.orderDate}</td>
+          <td>${item.dueDate}</td>
+          <td>${item.product}</td>
+          <td class="text-right">${item.qty.toLocaleString()}</td>
+          <td class="text-right font-medium">${item.amount}</td>
+          <td>${item.assignee}</td>
+          <td>${getTradeStatusBadge(item.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderShippingTable() {
+      const tbody = document.getElementById('shipping-table-body');
+      tbody.innerHTML = shippingData.map(item => `
+        <tr>
+          <td class="font-medium text-toss-blue">${item.orderId}</td>
+          <td>${item.buyer}</td>
+          <td>${renderProcessEvent(item.steps)}</td>
+          <td>${getTradeStatusBadge(item.status)}</td>
+          <td class="font-mono text-sm text-toss-gray-500">${item.blNo}</td>
+          <td><span class="text-lg mr-1">${item.country}</span>${item.countryName}</td>
+          <td>${item.departure}</td>
+          <td>${item.eta}</td>
+          <td>${item.carrier}</td>
+          <td>${item.assignee}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderIssueTable() {
+      const tbody = document.getElementById('issue-table-body');
+      tbody.innerHTML = issueData.map(item => `
+        <tr>
+          <td class="font-medium text-toss-blue">${item.id}</td>
+          <td>${getTradeStatusBadge(item.priority)}</td>
+          <td>${getTradeStatusBadge(item.status)}</td>
+          <td>${item.type}</td>
+          <td>${item.title}</td>
+          <td>${item.orderId}</td>
+          <td>${item.buyer}</td>
+          <td>${item.assignee}</td>
+          <td>${item.date}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderSettlementTable() {
+      const tbody = document.getElementById('settlement-table-body');
+      tbody.innerHTML = settlementData.map(item => `
+        <tr>
+          <td class="font-medium text-toss-blue">${item.id}</td>
+          <td>${item.orderId}</td>
+          <td>${item.buyer}</td>
+          <td class="text-right">${item.orderAmount}</td>
+          <td class="text-right text-toss-gray-400">${item.fee}</td>
+          <td class="text-right font-medium">${item.settlement}</td>
+          <td>${getTradeStatusBadge(item.status)}</td>
+          <td>${item.dueDate}</td>
+          <td>${item.completeDate}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ==================== 확장/거래관리 모달 ====================
+    function openTradeModal(type) {
+      document.getElementById(type + 'Modal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeTradeModal(type) {
+      document.getElementById(type + 'Modal').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+    
+    function closeTradeModalOnOverlay(event, type) {
+      if (event.target === event.currentTarget) {
+        closeTradeModal(type);
+      }
+    }
+
+    function submitTradeOrder() {
+      showToast('✅ 주문이 등록되었습니다');
+      closeTradeModal('order');
+    }
+
+    function submitTradeShipping() {
+      showToast('✅ 배송이 등록되었습니다');
+      closeTradeModal('shipping');
+    }
+
+    function submitTradeIssue() {
+      showToast('✅ 이슈가 등록되었습니다');
+      closeTradeModal('issue');
+    }
+
+    function filterShippingStatus(btn, status) {
+      document.querySelectorAll('.status-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // ==================== 초기화 ====================
+    document.addEventListener('DOMContentLoaded', function() {
+      // 운영관리 테이블 렌더링
+      renderCSTable();
+      renderBuyerTable();
+      renderProductTable();
+      renderQuoteTable();
+      // 확장/거래관리 테이블 렌더링
+      renderOrderTable();
+      renderShippingTable();
+      renderIssueTable();
+      renderSettlementTable();
+    });
+  </script>
+</body>
+</html>

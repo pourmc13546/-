@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>프로세스 진행 현황</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 50: '#f0f3ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#202454', 600: '#1a1d45', 700: '#141636', 800: '#0e1027', 900: '#080918' }
+          },
+          fontFamily: { pretendard: ['Pretendard', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Pretendard', sans-serif; }
+    .status-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+    .task-row:hover { background: #f8fafc; }
+    .group-header { cursor: pointer; user-select: none; }
+    .group-header:hover { background: #f1f5f9; }
+    .expand-icon { transition: transform 0.2s; }
+    .expand-icon.collapsed { transform: rotate(-90deg); }
+    .child-task { background: #fafbfc; }
+    .side-panel { transform: translateX(100%); transition: transform 0.3s ease; }
+    .side-panel.open { transform: translateX(0); }
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* 필터 드롭다운 스타일 */
+    .filter-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      z-index: 100;
+      min-width: 200px;
+      display: none;
+      overflow: hidden;
+    }
+    .filter-dropdown.show {
+      display: block;
+      animation: fadeIn 0.15s ease;
+    }
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .filter-item:last-child {
+      border-bottom: none;
+    }
+    .filter-item:hover {
+      background: #f8fafc;
+    }
+    .filter-item.active {
+      background: #eff6ff;
+    }
+    .filter-item .check-box {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #cbd5e1;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .filter-item.active .check-box {
+      background: #3b82f6;
+      border-color: #3b82f6;
+    }
+    .filter-item .check-box svg {
+      display: none;
+      width: 14px;
+      height: 14px;
+      color: white;
+    }
+    .filter-item.active .check-box svg {
+      display: block;
+    }
+    .filter-item .filter-label {
+      flex: 1;
+      font-size: 14px;
+      color: #334155;
+    }
+    .filter-item.active .filter-label {
+      color: #1d4ed8;
+      font-weight: 500;
+    }
+    .filter-item .filter-count {
+      font-size: 12px;
+      color: #94a3b8;
+      background: #f1f5f9;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .filter-item.active .filter-count {
+      background: #dbeafe;
+      color: #3b82f6;
+    }
+    
+    /* 토스트 메시지 */
+    .toast-message {
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    
+    /* 그룹명 편집 힌트 */
+    .group-name-text {
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .group-name-text:hover {
+      background: rgba(32, 36, 84, 0.08);
+    }
+    
+    /* 그룹명 인라인 편집 */
+    .group-name-input {
+      font-size: 14px;
+      min-width: 120px;
+    }
+    .group-name-input:focus {
+      box-shadow: 0 0 0 3px rgba(32, 36, 84, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  
+  <!-- 프로세스 현황 페이지 -->
+  <div id="processView" class="fade-in">
+    <!-- 헤더 -->
+    <div class="bg-white border-b border-slate-200 px-6 py-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-navy-500 to-navy-600 rounded-xl flex items-center justify-center shadow-lg">
+          <span class="text-white text-lg">📋</span>
+        </div>
+        <div class="flex-1">
+          <h1 class="text-lg font-bold text-slate-800">프로세스 진행 현황</h1>
+          <p class="text-sm text-slate-500">알리바바닷컴 입점을 위한 프로세스 관리</p>
+        </div>
+        <div class="flex items-center gap-3 text-xs">
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span><span class="text-slate-500">완료</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-blue-500 rounded-full"></span><span class="text-slate-500">진행</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-yellow-500 rounded-full"></span><span class="text-slate-500">요청</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-slate-300 rounded-full"></span><span class="text-slate-500">대기</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-orange-500 rounded-full"></span><span class="text-slate-500">보류</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 필터 영역 -->
+    <div class="bg-white px-6 py-3 flex items-center justify-between border-b border-slate-100">
+      <div class="flex items-center gap-2">
+        <!-- 프로젝트 선택 드롭다운 -->
+        <select id="projectSelect" onchange="selectProject(this.value)" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700 bg-white min-w-[160px]">
+          <option value="all">전체 업무</option>
+          <option value="alibaba" selected>알리바바 입점</option>
+          <option value="extra1">추가업무 1</option>
+          <option value="extra2">추가업무 2</option>
+          <option value="extra3">추가업무 3</option>
+        </select>
+        
+        <!-- 필터 버튼 + 드롭다운 -->
+        <div class="relative">
+          <button id="filterBtn" onclick="toggleFilterDropdown()" class="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            <span>필터</span>
+            <span id="filterBadge" class="hidden px-1.5 py-0.5 bg-blue-500 text-white text-xs rounded-full min-w-[18px] text-center">1</span>
+          </button>
+          
+          <!-- 필터 드롭다운 -->
+          <div id="filterDropdown" class="filter-dropdown">
+            <div class="px-4 py-3 bg-slate-50 border-b border-slate-100">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">상태별 필터</span>
+            </div>
+            
+            <div class="filter-item active" data-filter="all" onclick="selectFilter('all')">
+              <span class="check-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+              </span>
+              <span class="filter-label">전체 업무</span>
+              <span class="filter-count" id="count-all">0</span>
+            </div>
+            
+            <div class="filter-item" data-filter="mine" onclick="selectFilter('mine')">
+              <span class="check-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+              </span>
+              <span class="filter-label">내 업무</span>
+              <span class="filter-count" id="count-mine">0</span>
+            </div>
+            
+            <div class="filter-item" data-filter="completed" onclick="selectFilter('completed')">
+              <span class="check-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+              </span>
+              <span class="filter-label">완료된 업무</span>
+              <span class="filter-count" id="count-completed">0</span>
+            </div>
+            
+            <div class="filter-item" data-filter="progress" onclick="selectFilter('progress')">
+              <span class="check-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+              </span>
+              <span class="filter-label">진행 중 업무</span>
+              <span class="filter-count" id="count-progress">0</span>
+            </div>
+            
+            <div class="filter-item" data-filter="scheduled" onclick="selectFilter('scheduled')">
+              <span class="check-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+              </span>
+              <span class="filter-label">예정 업무</span>
+              <span class="filter-count" id="count-scheduled">0</span>
+            </div>
+            
+            <div class="filter-item" data-filter="hold" onclick="selectFilter('hold')">
+              <span class="check-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+              </span>
+              <span class="filter-label">보류 업무</span>
+              <span class="filter-count" id="count-hold">0</span>
+            </div>
+            
+            <div class="px-4 py-3 bg-slate-50 border-t border-slate-100">
+              <button onclick="clearFilters()" class="w-full text-sm text-slate-500 hover:text-slate-700 transition-colors">필터 초기화</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 현재 필터 태그 -->
+        <div id="activeFilterTag" class="hidden flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-sm border border-blue-200">
+          <span id="activeFilterText">전체</span>
+          <button onclick="clearFilters()" class="hover:bg-blue-100 rounded p-0.5 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-slate-500">총 <strong id="total-count" class="text-slate-700">0</strong>건</span>
+        <button class="flex items-center gap-1.5 px-4 py-1.5 bg-navy-500 text-white rounded-lg text-sm font-medium hover:bg-navy-600 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          업무 추가
+        </button>
+      </div>
+    </div>
+
+    <!-- 테이블 -->
+    <div class="bg-white overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr class="text-xs text-slate-500 font-medium">
+            <th class="text-left py-3 px-4 w-[380px]">업무명</th>
+            <th class="text-left py-3 px-3 w-[80px]">상태</th>
+            <th class="text-left py-3 px-3 w-[90px]">담당자</th>
+            <th class="text-left py-3 px-3 w-[90px]">시작일</th>
+            <th class="text-left py-3 px-3 w-[90px]">마감일</th>
+            <th class="text-left py-3 px-3 w-[70px]">진척도</th>
+            <th class="text-left py-3 px-3 w-[60px]">번호</th>
+          </tr>
+        </thead>
+        <tbody id="task-body"></tbody>
+      </table>
+    </div>
+
+    <!-- 그룹 추가 버튼 -->
+    <div class="bg-white px-4 py-3 border-t border-slate-100">
+      <button onclick="addGroup()" class="text-sm text-slate-500 hover:text-slate-700 border border-dashed border-slate-300 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors">+ 그룹 추가</button>
+    </div>
+  </div>
+
+  <!-- 오른쪽 상세 패널 -->
+  <div id="side-panel" class="side-panel fixed top-0 right-0 w-[460px] h-full bg-white border-l border-slate-200 shadow-2xl z-50 flex flex-col">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
+      <div class="flex items-center gap-2">
+        <span class="text-navy-500">📋</span>
+        <span class="text-sm font-medium text-slate-700">업무 상세</span>
+      </div>
+      <button onclick="closePanel()" class="p-1.5 hover:bg-slate-200 rounded-lg transition-colors">
+        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-gradient-to-br from-navy-400 to-navy-600 rounded-full flex items-center justify-center text-white text-xs font-bold">PM</div>
+          <div>
+            <span class="text-sm font-medium text-slate-800" id="panel-author">운영매니저</span>
+            <span class="text-xs text-slate-400 ml-2" id="panel-date">2025-03-01</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="px-5 py-4 border-b border-slate-100">
+        <h2 class="text-lg font-bold text-slate-800" id="panel-title">업무 제목</h2>
+        <span class="text-xs text-slate-400" id="panel-num">업무번호 1</span>
+      </div>
+      
+      <div class="px-5 py-4 space-y-4 border-b border-slate-100">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">상태</label>
+            <select id="panel-status" onchange="updateTaskStatus(this.value)" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white cursor-pointer hover:border-slate-300 transition-colors">
+              <option value="completed">✅ 완료</option>
+              <option value="progress">🔵 진행</option>
+              <option value="request">🟡 요청</option>
+              <option value="scheduled">⬜ 대기</option>
+              <option value="hold">🟠 보류</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">담당자</label>
+            <select id="panel-who" onchange="updateTaskWho(this.value)" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white cursor-pointer hover:border-slate-300 transition-colors">
+              <option value="운영매니저">운영매니저</option>
+              <option value="담당매니저">담당매니저</option>
+              <option value="대행사">대행사</option>
+              <option value="고객사">고객사</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">시작일</label>
+            <input type="date" id="panel-start" onchange="updateTaskDate('start', this.value)" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white cursor-pointer hover:border-slate-300 transition-colors">
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">마감일</label>
+            <input type="date" id="panel-end" onchange="updateTaskDate('end', this.value)" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white cursor-pointer hover:border-slate-300 transition-colors">
+          </div>
+        </div>
+      </div>
+      
+      <div class="px-5 py-4 border-b border-slate-100">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-slate-700">하위업무 <span class="text-slate-400 font-normal" id="panel-subtask-count">0</span></h3>
+          <button class="text-xs text-navy-500 hover:underline">+ 추가</button>
+        </div>
+        <div id="panel-subtasks" class="space-y-2">
+          <p class="text-sm text-slate-400 text-center py-4">하위업무가 없습니다</p>
+        </div>
+      </div>
+      
+      <!-- 메모 섹션 -->
+      <div class="px-5 py-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            메모
+          </h3>
+          <button onclick="toggleMemoEdit()" id="memo-edit-btn" class="text-xs text-navy-500 hover:underline">편집</button>
+        </div>
+        <div id="memo-display" class="bg-slate-50 rounded-lg p-3 min-h-[80px]">
+          <p id="memo-text" class="text-sm text-slate-600 whitespace-pre-wrap">메모가 없습니다.</p>
+        </div>
+        <div id="memo-editor" class="hidden">
+          <textarea id="memo-input" class="w-full text-sm border border-slate-200 rounded-lg p-3 min-h-[100px] resize-none focus:outline-none focus:ring-2 focus:ring-navy-500/20 focus:border-navy-400" placeholder="메모를 입력하세요..."></textarea>
+          <div class="flex justify-end gap-2 mt-2">
+            <button onclick="cancelMemoEdit()" class="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">취소</button>
+            <button onclick="saveMemo()" class="px-3 py-1.5 text-sm text-white bg-navy-500 rounded-lg hover:bg-navy-600">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-overlay" class="hidden fixed inset-0 bg-black/20 z-40" onclick="closePanel()"></div>
+
+  <script>
+    // 상태 설정
+    const statusConfig = {
+      completed: { label: '완료', bg: 'bg-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+      progress: { label: '진행', bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
+      request: { label: '요청', bg: 'bg-yellow-100', text: 'text-yellow-700', dot: 'bg-yellow-500' },
+      scheduled: { label: '대기', bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-300' },
+      hold: { label: '보류', bg: 'bg-orange-100', text: 'text-orange-700', dot: 'bg-orange-500' }
+    };
+
+    // 프로젝트별 데이터
+    const projectsData = {
+      // 알리바바 입점 프로젝트
+      alibaba: [
+        {
+          id: 'g1', name: '1. 자료 취합', expanded: false,
+          tasks: [
+            { id: 1, name: '📁 기본 셋팅 진행하기', status: 'progress', who: '운영매니저', start: '2025-03-01', end: '2025-03-15', progress: 50, num: 1, memo: '3월 10일까지 HS코드 확정 필요\n담당자 확인 요청함',
+              children: [
+                { id: 101, name: '관세/통관 HS코드 확인', status: 'completed', who: '운영매니저', start: '2025-03-01', end: '2025-03-05', progress: 100, num: 2 },
+                { id: 102, name: '단가셋팅 - 배송리드타임', status: 'progress', who: '운영매니저', start: '2025-03-05', end: '2025-03-15', progress: 30, num: 3, memo: '해외배송 리드타임 확인 중\n- 항공: 5-7일\n- 해상: 20-25일' },
+                { id: 103, name: '단가셋팅 - 용기', status: 'progress', who: '운영매니저', start: '2025-03-05', end: '2025-03-15', progress: 20, num: 4 },
+                { id: 104, name: '단가셋팅 - 충진', status: 'scheduled', who: '운영매니저', start: '-', end: '-', progress: 0, num: 5 }
+              ]
+            },
+            { id: 2, name: '📂 자료수집 완료하기', status: 'progress', who: '운영매니저', start: '2025-03-01', end: '2025-03-12', progress: 70, num: 6,
+              children: [
+                { id: 201, name: '[필수] 1_ 로고이미지', status: 'completed', who: '운영매니저', start: '2025-03-01', end: '2025-03-05', progress: 100, num: 7 },
+                { id: 202, name: '[필수] 2_ 디자인템플릿', status: 'completed', who: '운영매니저', start: '2025-03-01', end: '2025-03-05', progress: 100, num: 8 },
+                { id: 203, name: '[필수] 9_ 제품 이미지', status: 'progress', who: '운영매니저', start: '2025-03-05', end: '2025-03-15', progress: 50, num: 9 },
+                { id: 204, name: '★ 제품 인증서 (미리준비)', status: 'request', who: '고객사', start: '-', end: '-', progress: 0, num: 10 }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'g2', name: '2. 자료 검토', expanded: false,
+          tasks: [
+            { id: 3, name: '📋 제출물 검토', status: 'completed', who: '담당매니저', start: '2025-03-08', end: '2025-03-10', progress: 100, num: 11 },
+            { id: 4, name: '📝 보완 요청', status: 'completed', who: '담당매니저', start: '2025-03-08', end: '2025-03-10', progress: 100, num: 12 }
+          ]
+        },
+        {
+          id: 'g3', name: '3. 단톡방 초대', expanded: false,
+          tasks: [
+            { id: 5, name: '💬 KSP 수행사 단톡방 초대', status: 'completed', who: '담당매니저', start: '2025-03-10', end: '2025-03-10', progress: 100, num: 13 }
+          ]
+        },
+        {
+          id: 'g4', name: '4. BV 인증', expanded: false,
+          tasks: [
+            { id: 6, name: '✅ BV 인증 신청', status: 'completed', who: '담당매니저', start: '2025-03-11', end: '2025-03-11', progress: 100, num: 14 },
+            { id: 7, name: '✅ BV 인증 승인 확인', status: 'completed', who: '담당매니저', start: '2025-03-11', end: '2025-03-14', progress: 100, num: 15 }
+          ]
+        },
+        {
+          id: 'g5', name: '5. 접근권한 신청', expanded: false,
+          tasks: [
+            { id: 8, name: '🔗 APPLY 링크 전달', status: 'completed', who: '대행사', start: '2025-03-15', end: '2025-03-15', progress: 100, num: 16 },
+            { id: 9, name: '🔑 APPLY 신청 (고객사 계정)', status: 'progress', who: '고객사', start: '2025-03-15', end: '2025-03-20', progress: 50, num: 17 }
+          ]
+        },
+        {
+          id: 'g6', name: '6. 시안 제작', expanded: false,
+          tasks: [
+            { id: 10, name: '🎨 시안 제작', status: 'progress', who: '대행사', start: '2025-03-20', end: '2025-03-25', progress: 30, num: 18 },
+            { id: 11, name: '📝 샘플 포스팅 5개', status: 'scheduled', who: '대행사', start: '-', end: '-', progress: 0, num: 19 }
+          ]
+        },
+        {
+          id: 'g7', name: '7. 시안 검수', expanded: false,
+          tasks: [
+            { id: 12, name: '🔍 시안 검수', status: 'scheduled', who: '운영매니저', start: '-', end: '-', progress: 0, num: 20 },
+            { id: 13, name: '🔍 샘플 포스팅 검수', status: 'scheduled', who: '운영매니저', start: '-', end: '-', progress: 0, num: 21 }
+          ]
+        },
+        {
+          id: 'g8', name: '8. 샵 세팅', expanded: false,
+          tasks: [
+            { id: 14, name: '🏪 미니사이트 세팅', status: 'scheduled', who: '대행사', start: '-', end: '-', progress: 0, num: 22 },
+            { id: 15, name: '🖼️ 로고/회사프로필 설정', status: 'scheduled', who: '대행사', start: '-', end: '-', progress: 0, num: 23 }
+          ]
+        },
+        {
+          id: 'g9', name: '9. 제품 업로드', expanded: false,
+          tasks: [
+            { id: 16, name: '📤 상세페이지 폼 제작', status: 'progress', who: '운영매니저', start: '2025-03-20', end: '2025-04-05', progress: 20, num: 24 },
+            { id: 17, name: '🖼️ 썸네일 폼 제작', status: 'scheduled', who: '운영매니저', start: '-', end: '-', progress: 0, num: 25 }
+          ]
+        },
+        {
+          id: 'g10', name: '10. 샵 운영', expanded: false,
+          tasks: [
+            { id: 18, name: '🔔 RFQ 알림 설정', status: 'scheduled', who: '대행사', start: '-', end: '-', progress: 0, num: 26 },
+            { id: 19, name: '🔥 Warm leads 제공', status: 'scheduled', who: '대행사', start: '-', end: '-', progress: 0, num: 27 }
+          ]
+        },
+        {
+          id: 'g11', name: '추가 업무', expanded: false,
+          tasks: [
+            { id: 20, name: '📌 추가업무 1', status: 'progress', who: '운영매니저', start: '2025-03-25', end: '2025-04-01', progress: 40, num: 28 },
+            { id: 21, name: '📌 추가업무 2', status: 'scheduled', who: '담당매니저', start: '-', end: '-', progress: 0, num: 29 },
+            { id: 22, name: '📌 추가업무 3', status: 'hold', who: '고객사', start: '2025-03-20', end: '2025-04-10', progress: 10, num: 30 }
+          ]
+        }
+      ],
+      
+      // 추가업무 1 프로젝트
+      extra1: [
+        {
+          id: 'e1g1', name: '1. 기획 단계', expanded: false,
+          tasks: [
+            { id: 1001, name: '📋 요구사항 분석', status: 'completed', who: '운영매니저', start: '2025-04-01', end: '2025-04-05', progress: 100, num: 1 },
+            { id: 1002, name: '📝 기획서 작성', status: 'progress', who: '운영매니저', start: '2025-04-05', end: '2025-04-15', progress: 60, num: 2 }
+          ]
+        },
+        {
+          id: 'e1g2', name: '2. 실행 단계', expanded: false,
+          tasks: [
+            { id: 1003, name: '🔧 개발 진행', status: 'scheduled', who: '대행사', start: '-', end: '-', progress: 0, num: 3 },
+            { id: 1004, name: '✅ 테스트', status: 'scheduled', who: '담당매니저', start: '-', end: '-', progress: 0, num: 4 }
+          ]
+        }
+      ],
+      
+      // 추가업무 2 프로젝트
+      extra2: [
+        {
+          id: 'e2g1', name: '1. 준비 단계', expanded: false,
+          tasks: [
+            { id: 2001, name: '📁 자료 수집', status: 'progress', who: '담당매니저', start: '2025-04-10', end: '2025-04-20', progress: 30, num: 1 },
+            { id: 2002, name: '📊 분석 작업', status: 'scheduled', who: '운영매니저', start: '-', end: '-', progress: 0, num: 2 }
+          ]
+        },
+        {
+          id: 'e2g2', name: '2. 진행 단계', expanded: false,
+          tasks: [
+            { id: 2003, name: '🎯 목표 설정', status: 'scheduled', who: '운영매니저', start: '-', end: '-', progress: 0, num: 3 },
+            { id: 2004, name: '📈 실행', status: 'scheduled', who: '대행사', start: '-', end: '-', progress: 0, num: 4 }
+          ]
+        }
+      ],
+      
+      // 추가업무 3 프로젝트
+      extra3: [
+        {
+          id: 'e3g1', name: '1. 검토 단계', expanded: false,
+          tasks: [
+            { id: 3001, name: '🔍 현황 파악', status: 'hold', who: '운영매니저', start: '2025-04-15', end: '2025-05-01', progress: 10, num: 1 },
+            { id: 3002, name: '📝 보고서 작성', status: 'scheduled', who: '담당매니저', start: '-', end: '-', progress: 0, num: 2 }
+          ]
+        }
+      ]
+    };
+
+    // 현재 선택된 프로젝트
+    let currentProject = 'alibaba';
+    let groups = [...projectsData.alibaba];
+
+    const expandedTasks = new Set();
+    let currentTask = null;
+    let currentFilter = 'all';
+
+    // 프로젝트 선택
+    function selectProject(projectId) {
+      currentProject = projectId;
+      
+      if (projectId === 'all') {
+        // 전체 프로젝트 병합
+        groups = [];
+        Object.keys(projectsData).forEach(key => {
+          projectsData[key].forEach(group => {
+            groups.push({...group, projectKey: key});
+          });
+        });
+      } else {
+        groups = projectsData[projectId] ? [...projectsData[projectId]] : [];
+      }
+      
+      // 헤더 업데이트
+      updateHeader(projectId);
+      
+      // 다시 렌더링
+      expandedTasks.clear();
+      renderTasks();
+      updateFilterCounts();
+    }
+
+    // 그룹의 종합 상태 계산
+    function getGroupStatus(group) {
+      const allTasks = [];
+      
+      // 그룹 내 모든 업무와 하위업무 수집
+      group.tasks.forEach(task => {
+        allTasks.push(task);
+        if (task.children) {
+          task.children.forEach(child => allTasks.push(child));
+        }
+      });
+      
+      if (allTasks.length === 0) return 'scheduled';
+      
+      // 상태별 카운트
+      const statuses = allTasks.map(t => t.status);
+      const hasProgress = statuses.some(s => s === 'progress');
+      const hasRequest = statuses.some(s => s === 'request');
+      const hasHold = statuses.some(s => s === 'hold');
+      const allCompleted = statuses.every(s => s === 'completed');
+      const allScheduled = statuses.every(s => s === 'scheduled');
+      
+      // 우선순위: 진행 > 요청 > 보류 > 완료 > 예정
+      if (allCompleted) return 'completed';
+      if (allScheduled) return 'scheduled';
+      if (hasProgress) return 'progress';
+      if (hasRequest) return 'request';
+      if (hasHold) return 'hold';
+      
+      // 일부 완료, 일부 예정인 경우 → 진행으로 표시
+      return 'progress';
+    }
+
+    // 헤더 업데이트
+    function updateHeader(projectId) {
+      const titles = {
+        all: { title: '전체 프로젝트', desc: '모든 프로젝트의 업무를 확인합니다' },
+        alibaba: { title: '프로세스 진행 현황', desc: '알리바바닷컴 입점을 위한 프로세스 관리' },
+        extra1: { title: '추가업무 1', desc: '추가업무 1 프로젝트 관리' },
+        extra2: { title: '추가업무 2', desc: '추가업무 2 프로젝트 관리' },
+        extra3: { title: '추가업무 3', desc: '추가업무 3 프로젝트 관리' }
+      };
+      
+      const info = titles[projectId] || titles.alibaba;
+      document.querySelector('#processView h1').textContent = info.title;
+      document.querySelector('#processView h1 + p').textContent = info.desc;
+    }
+
+    // 필터 드롭다운 토글
+    function toggleFilterDropdown() {
+      const dropdown = document.getElementById('filterDropdown');
+      dropdown.classList.toggle('show');
+      
+      if (dropdown.classList.contains('show')) {
+        updateFilterCounts();
+        setTimeout(() => {
+          document.addEventListener('click', closeFilterOnOutsideClick);
+        }, 10);
+      }
+    }
+
+    function closeFilterOnOutsideClick(e) {
+      const dropdown = document.getElementById('filterDropdown');
+      const filterBtn = document.getElementById('filterBtn');
+      if (!dropdown.contains(e.target) && !filterBtn.contains(e.target)) {
+        dropdown.classList.remove('show');
+        document.removeEventListener('click', closeFilterOnOutsideClick);
+      }
+    }
+
+    // 필터별 업무 수 계산
+    function updateFilterCounts() {
+      let counts = { all: 0, mine: 0, completed: 0, progress: 0, scheduled: 0, hold: 0 };
+      
+      groups.forEach(group => {
+        group.tasks.forEach(task => {
+          counts.all++;
+          if (task.who === '운영매니저') counts.mine++;
+          if (task.status === 'completed') counts.completed++;
+          if (task.status === 'progress') counts.progress++;
+          if (task.status === 'scheduled') counts.scheduled++;
+          if (task.status === 'hold') counts.hold++;
+          
+          if (task.children) {
+            task.children.forEach(child => {
+              counts.all++;
+              if (child.who === '운영매니저') counts.mine++;
+              if (child.status === 'completed') counts.completed++;
+              if (child.status === 'progress') counts.progress++;
+              if (child.status === 'scheduled') counts.scheduled++;
+              if (child.status === 'hold') counts.hold++;
+            });
+          }
+        });
+      });
+      
+      document.getElementById('count-all').textContent = counts.all;
+      document.getElementById('count-mine').textContent = counts.mine;
+      document.getElementById('count-completed').textContent = counts.completed;
+      document.getElementById('count-progress').textContent = counts.progress;
+      document.getElementById('count-scheduled').textContent = counts.scheduled;
+      document.getElementById('count-hold').textContent = counts.hold;
+    }
+
+    // 필터 선택
+    function selectFilter(filter) {
+      currentFilter = filter;
+      
+      // UI 업데이트
+      document.querySelectorAll('.filter-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.filter === filter) {
+          item.classList.add('active');
+        }
+      });
+      
+      // 필터 태그 업데이트
+      const filterTag = document.getElementById('activeFilterTag');
+      const filterText = document.getElementById('activeFilterText');
+      const filterBadge = document.getElementById('filterBadge');
+      
+      if (filter !== 'all') {
+        filterTag.classList.remove('hidden');
+        const filterNames = {
+          mine: '내 업무',
+          completed: '완료된 업무',
+          progress: '진행 중 업무',
+          scheduled: '예정 업무',
+          hold: '보류 업무'
+        };
+        filterText.textContent = filterNames[filter];
+        filterBadge.classList.remove('hidden');
+      } else {
+        filterTag.classList.add('hidden');
+        filterBadge.classList.add('hidden');
+      }
+      
+      // 드롭다운 닫기
+      document.getElementById('filterDropdown').classList.remove('show');
+      document.removeEventListener('click', closeFilterOnOutsideClick);
+      
+      // 테이블 다시 렌더링
+      renderTasks();
+    }
+
+    // 필터 초기화
+    function clearFilters() {
+      selectFilter('all');
+    }
+
+    // 업무 필터링
+    function filterTask(task) {
+      if (currentFilter === 'all') return true;
+      if (currentFilter === 'mine') return task.who === '운영매니저';
+      if (currentFilter === 'completed') return task.status === 'completed';
+      if (currentFilter === 'progress') return task.status === 'progress';
+      if (currentFilter === 'scheduled') return task.status === 'scheduled';
+      if (currentFilter === 'hold') return task.status === 'hold';
+      return true;
+    }
+
+    // 그룹에 필터링된 업무가 있는지 확인
+    function hasFilteredTasks(group) {
+      // 빈 그룹도 표시 (전체 필터일 때)
+      if (currentFilter === 'all') return true;
+      
+      // 업무가 없는 그룹은 전체 필터일 때만 표시
+      if (group.tasks.length === 0) return false;
+      
+      return group.tasks.some(task => {
+        if (filterTask(task)) return true;
+        if (task.children) {
+          return task.children.some(child => filterTask(child));
+        }
+        return false;
+      });
+    }
+
+    function countFilteredTasks() {
+      let count = 0;
+      groups.forEach(g => {
+        g.tasks.forEach(t => {
+          if (filterTask(t)) count++;
+          if (t.children) {
+            t.children.forEach(c => {
+              if (filterTask(c)) count++;
+            });
+          }
+        });
+      });
+      return count;
+    }
+
+    function findTaskById(id) {
+      // 현재 선택된 프로젝트의 groups에서 검색
+      for (const group of groups) {
+        for (const task of group.tasks) {
+          if (task.id === id) return task;
+          if (task.children) {
+            const child = task.children.find(c => c.id === id);
+            if (child) return child;
+          }
+        }
+      }
+      // 전체 프로젝트에서 검색 (전체 업무 선택 시)
+      if (currentProject === 'all') {
+        for (const projectKey of Object.keys(projectsData)) {
+          for (const group of projectsData[projectKey]) {
+            for (const task of group.tasks) {
+              if (task.id === id) return task;
+              if (task.children) {
+                const child = task.children.find(c => c.id === id);
+                if (child) return child;
+              }
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    function openPanel(taskId) {
+      const task = findTaskById(taskId);
+      if (!task) return;
+      
+      currentTask = task;
+      document.getElementById('panel-title').textContent = task.name;
+      document.getElementById('panel-num').textContent = `업무번호 ${task.num}`;
+      document.getElementById('panel-author').textContent = task.who || '운영매니저';
+      document.getElementById('panel-date').textContent = task.start || '-';
+      document.getElementById('panel-status').value = task.status;
+      document.getElementById('panel-who').value = task.who || '운영매니저';
+      document.getElementById('panel-start').value = task.start && task.start !== '-' ? task.start : '';
+      document.getElementById('panel-end').value = task.end && task.end !== '-' ? task.end : '';
+      
+      const subtasksContainer = document.getElementById('panel-subtasks');
+      const subtaskCount = document.getElementById('panel-subtask-count');
+      
+      if (task.children && task.children.length > 0) {
+        subtaskCount.textContent = task.children.length;
+        subtasksContainer.innerHTML = task.children.map(child => {
+          const sc = statusConfig[child.status] || statusConfig.scheduled;
+          return `
+            <div class="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 cursor-pointer hover:border-slate-200 hover:bg-slate-50 transition-colors" onclick="openPanel(${child.id})">
+              <div class="flex items-center gap-2">
+                <span class="status-tag ${sc.bg} ${sc.text}">● ${sc.label}</span>
+                <span class="text-sm text-slate-700">${child.name}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400">${child.end || '-'}</span>
+                <span class="px-2 py-0.5 bg-navy-500 text-white text-xs rounded">${(child.who || '담당').substring(0, 2)}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        subtaskCount.textContent = '0';
+        subtasksContainer.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">하위업무가 없습니다</p>';
+      }
+      
+      // 메모 표시 업데이트
+      updateMemoDisplay(task);
+      
+      document.getElementById('side-panel').classList.add('open');
+      document.getElementById('panel-overlay').classList.remove('hidden');
+    }
+
+    function closePanel() {
+      document.getElementById('side-panel').classList.remove('open');
+      document.getElementById('panel-overlay').classList.add('hidden');
+    }
+
+    // 업무 상태 업데이트
+    function updateTaskStatus(newStatus) {
+      if (!currentTask) return;
+      
+      // 현재 업무의 상태 업데이트
+      currentTask.status = newStatus;
+      
+      // 진척도도 함께 업데이트
+      if (newStatus === 'completed') {
+        currentTask.progress = 100;
+      } else if (newStatus === 'scheduled' && currentTask.progress === 100) {
+        currentTask.progress = 0;
+      }
+      
+      // 테이블 다시 렌더링
+      renderTasks();
+      updateFilterCounts();
+      
+      // 토스트 메시지 표시
+      showToast(`상태가 "${statusConfig[newStatus].label}"(으)로 변경되었습니다.`);
+    }
+
+    // 담당자 업데이트
+    function updateTaskWho(newWho) {
+      if (!currentTask) return;
+      
+      currentTask.who = newWho;
+      
+      // 헤더의 담당자 정보도 업데이트
+      const headerWho = document.querySelector('#side-panel .text-sm.text-slate-600');
+      if (headerWho) {
+        const date = currentTask.start && currentTask.start !== '-' ? currentTask.start : '';
+        headerWho.textContent = date ? `${newWho}  ${date}` : newWho;
+      }
+      
+      // 테이블 다시 렌더링
+      renderTasks();
+      updateFilterCounts();
+      
+      showToast(`담당자가 "${newWho}"(으)로 변경되었습니다.`);
+    }
+
+    // 날짜 업데이트
+    function updateTaskDate(type, newDate) {
+      if (!currentTask) return;
+      
+      if (type === 'start') {
+        currentTask.start = newDate || '-';
+        // 헤더의 날짜 정보도 업데이트
+        const headerWho = document.querySelector('#side-panel .text-sm.text-slate-600');
+        if (headerWho && newDate) {
+          headerWho.textContent = `${currentTask.who}  ${newDate}`;
+        }
+      } else if (type === 'end') {
+        currentTask.end = newDate || '-';
+      }
+      
+      // 테이블 다시 렌더링
+      renderTasks();
+      
+      const label = type === 'start' ? '시작일' : '마감일';
+      showToast(`${label}이 변경되었습니다.`);
+    }
+
+    // 새 그룹 추가
+    function addGroup() {
+      // 새 그룹 ID 생성
+      const newGroupId = 'g_new_' + Date.now();
+      const groupCount = groups.length + 1;
+      
+      // 새 그룹 생성
+      const newGroup = {
+        id: newGroupId,
+        name: `새 그룹`,
+        expanded: true,
+        tasks: []
+      };
+      
+      // 현재 프로젝트의 groups에 추가
+      groups.push(newGroup);
+      
+      // 원본 데이터에도 추가 (프로젝트별)
+      if (currentProject !== 'all' && projectsData[currentProject]) {
+        projectsData[currentProject].push(newGroup);
+      }
+      
+      // 다시 렌더링
+      renderTasks();
+      updateFilterCounts();
+      
+      // 그룹명 인라인 편집 모드 진입
+      setTimeout(() => {
+        startEditGroupName(newGroupId);
+      }, 100);
+      
+      showToast('새 그룹이 추가되었습니다. 이름을 입력하세요.');
+    }
+
+    // 그룹명 인라인 편집 시작
+    function startEditGroupName(groupId) {
+      const group = groups.find(g => g.id === groupId);
+      if (!group) return;
+      
+      const nameSpan = document.querySelector(`[data-group-id="${groupId}"]`);
+      if (!nameSpan) return;
+      
+      const currentName = group.name;
+      const rect = nameSpan.getBoundingClientRect();
+      
+      // input으로 교체
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentName;
+      input.className = 'group-name-input font-semibold text-slate-700 bg-white border border-navy-400 rounded px-2 py-0.5 outline-none';
+      input.style.width = Math.max(150, rect.width + 20) + 'px';
+      
+      // 이벤트 핸들러
+      input.onblur = () => saveGroupName(groupId, input.value);
+      input.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveGroupName(groupId, input.value);
+        } else if (e.key === 'Escape') {
+          renderTasks(); // 취소
+        }
+      };
+      
+      nameSpan.replaceWith(input);
+      input.focus();
+      input.select();
+    }
+
+    // 그룹명 저장
+    function saveGroupName(groupId, newName) {
+      const group = groups.find(g => g.id === groupId);
+      if (!group) return;
+      
+      const trimmedName = newName.trim();
+      if (trimmedName) {
+        group.name = trimmedName;
+        
+        // 원본 데이터에도 반영
+        if (currentProject !== 'all' && projectsData[currentProject]) {
+          const originalGroup = projectsData[currentProject].find(g => g.id === groupId);
+          if (originalGroup) {
+            originalGroup.name = trimmedName;
+          }
+        }
+        
+        showToast('그룹 이름이 변경되었습니다.');
+      }
+      
+      renderTasks();
+    }
+
+    // 그룹명 편집 (더블클릭용)
+    function editGroupName(groupId) {
+      startEditGroupName(groupId);
+    }
+
+    // 그룹에 업무 추가
+    function addTaskToGroup(groupId) {
+      const group = groups.find(g => g.id === groupId);
+      if (!group) return;
+      
+      const taskName = prompt('업무 이름을 입력하세요:', '📌 새 업무');
+      if (!taskName || !taskName.trim()) return;
+      
+      // 새 업무 ID 생성
+      const newTaskId = Date.now();
+      const taskNum = countAllTasks() + 1;
+      
+      const newTask = {
+        id: newTaskId,
+        name: taskName.trim(),
+        status: 'scheduled',
+        who: '운영매니저',
+        start: '-',
+        end: '-',
+        progress: 0,
+        num: taskNum
+      };
+      
+      group.tasks.push(newTask);
+      
+      // 그룹이 닫혀있으면 열기
+      group.expanded = true;
+      
+      renderTasks();
+      updateFilterCounts();
+      showToast('새 업무가 추가되었습니다.');
+      
+      // 새 업무 패널 열기
+      openPanel(newTaskId);
+    }
+
+    // 전체 업무 수 계산
+    function countAllTasks() {
+      let count = 0;
+      groups.forEach(group => {
+        group.tasks.forEach(task => {
+          count++;
+          if (task.children) count += task.children.length;
+        });
+      });
+      return count;
+    }
+
+    // 토스트 메시지
+    function showToast(message) {
+      // 기존 토스트 제거
+      const existingToast = document.querySelector('.toast-message');
+      if (existingToast) existingToast.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast-message fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2.5 bg-slate-800 text-white text-sm rounded-lg shadow-lg z-[100] animate-fade-in';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
+    }
+
+    // 메모 편집 토글
+    function toggleMemoEdit() {
+      const display = document.getElementById('memo-display');
+      const editor = document.getElementById('memo-editor');
+      const editBtn = document.getElementById('memo-edit-btn');
+      const input = document.getElementById('memo-input');
+      
+      display.classList.add('hidden');
+      editor.classList.remove('hidden');
+      editBtn.classList.add('hidden');
+      
+      // 현재 메모 내용을 textarea에 설정
+      const currentMemo = currentTask?.memo || '';
+      input.value = currentMemo;
+      input.focus();
+    }
+
+    // 메모 편집 취소
+    function cancelMemoEdit() {
+      const display = document.getElementById('memo-display');
+      const editor = document.getElementById('memo-editor');
+      const editBtn = document.getElementById('memo-edit-btn');
+      
+      display.classList.remove('hidden');
+      editor.classList.add('hidden');
+      editBtn.classList.remove('hidden');
+    }
+
+    // 메모 저장
+    function saveMemo() {
+      if (!currentTask) return;
+      
+      const input = document.getElementById('memo-input');
+      const memoText = input.value.trim();
+      
+      // 데이터에 메모 저장
+      currentTask.memo = memoText;
+      
+      // UI 업데이트
+      const memoDisplay = document.getElementById('memo-text');
+      memoDisplay.textContent = memoText || '메모가 없습니다.';
+      memoDisplay.classList.toggle('text-slate-400', !memoText);
+      memoDisplay.classList.toggle('text-slate-600', !!memoText);
+      
+      cancelMemoEdit();
+      showToast('메모가 저장되었습니다.');
+    }
+
+    // 메모 표시 업데이트
+    function updateMemoDisplay(task) {
+      const memoText = document.getElementById('memo-text');
+      const memoInput = document.getElementById('memo-input');
+      const display = document.getElementById('memo-display');
+      const editor = document.getElementById('memo-editor');
+      const editBtn = document.getElementById('memo-edit-btn');
+      
+      // 편집 모드 초기화
+      display.classList.remove('hidden');
+      editor.classList.add('hidden');
+      editBtn.classList.remove('hidden');
+      
+      // 메모 내용 표시
+      const memo = task?.memo || '';
+      memoText.textContent = memo || '메모가 없습니다.';
+      memoText.classList.toggle('text-slate-400', !memo);
+      memoText.classList.toggle('text-slate-600', !!memo);
+      memoInput.value = memo;
+    }
+
+    function toggleGroup(groupId) {
+      const group = groups.find(g => g.id === groupId);
+      if (group) {
+        group.expanded = !group.expanded;
+        renderTasks();
+      }
+    }
+
+    function toggleTaskExpand(taskId) {
+      if (expandedTasks.has(taskId)) {
+        expandedTasks.delete(taskId);
+      } else {
+        expandedTasks.add(taskId);
+      }
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const tbody = document.getElementById('task-body');
+      let html = '';
+
+      groups.forEach(group => {
+        if (!hasFilteredTasks(group)) return;
+        
+        const filteredCount = group.tasks.filter(t => filterTask(t) || (t.children && t.children.some(c => filterTask(c)))).length;
+        const groupStatus = getGroupStatus(group);
+        const gs = statusConfig[groupStatus] || statusConfig.scheduled;
+        
+        html += `
+          <tr class="group-header border-b border-slate-100" onclick="toggleGroup('${group.id}')">
+            <td class="py-2.5 px-4">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-400 expand-icon ${group.expanded ? '' : 'collapsed'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+                <span class="font-semibold text-slate-700 group-name-text" data-group-id="${group.id}" ondblclick="event.stopPropagation(); editGroupName('${group.id}')">${group.name}</span>
+                <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">${filteredCount}</span>
+                ${group.expanded ? `<button onclick="event.stopPropagation(); addTaskToGroup('${group.id}')" class="ml-2 text-xs text-navy-500 hover:text-navy-700 hover:underline">+ 업무</button>` : ''}
+              </div>
+            </td>
+            <td class="py-2.5 px-3">
+              ${!group.expanded ? `<span class="status-tag ${gs.bg} ${gs.text}">● ${gs.label}</span>` : ''}
+            </td>
+            <td class="py-2.5 px-3"></td>
+            <td class="py-2.5 px-3"></td>
+            <td class="py-2.5 px-3"></td>
+            <td class="py-2.5 px-3"></td>
+            <td class="py-2.5 px-3"></td>
+          </tr>
+        `;
+
+        if (group.expanded) {
+          // 빈 그룹일 때 메시지 표시
+          if (group.tasks.length === 0) {
+            html += `
+              <tr class="border-b border-slate-50">
+                <td colspan="7" class="py-4 px-4 text-center text-slate-400 text-sm">
+                  업무가 없습니다. 
+                  <button onclick="addTaskToGroup('${group.id}')" class="text-navy-500 hover:underline ml-1">+ 업무 추가</button>
+                </td>
+              </tr>
+            `;
+          }
+          
+          group.tasks.forEach(task => {
+            const showTask = filterTask(task) || (task.children && task.children.some(c => filterTask(c)));
+            if (!showTask) return;
+            
+            const sc = statusConfig[task.status] || statusConfig.scheduled;
+            const hasChildren = task.children && task.children.length > 0;
+            const isExpanded = expandedTasks.has(task.id);
+
+            html += `
+              <tr class="task-row border-b border-slate-50 cursor-pointer" onclick="openPanel(${task.id})">
+                <td class="py-2.5 px-4">
+                  <div class="flex items-center gap-2">
+                    ${hasChildren ? `
+                      <button onclick="event.stopPropagation(); toggleTaskExpand(${task.id})" class="p-0.5 hover:bg-slate-200 rounded transition-colors">
+                        <svg class="w-4 h-4 text-slate-400 expand-icon ${isExpanded ? '' : 'collapsed'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                      </button>
+                    ` : '<span class="w-5"></span>'}
+                    <span class="text-slate-800">${task.name}</span>
+                    ${hasChildren ? `<span class="text-xs text-slate-400">(${task.children.length})</span>` : ''}
+                  </div>
+                </td>
+                <td class="py-2.5 px-3"><span class="status-tag ${sc.bg} ${sc.text}">● ${sc.label}</span></td>
+                <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-navy-500 text-white text-xs rounded">${(task.who || '').substring(0, 4)}</span></td>
+                <td class="py-2.5 px-3 text-slate-500">${task.start || '-'}</td>
+                <td class="py-2.5 px-3 text-slate-500">${task.end || '-'}</td>
+                <td class="py-2.5 px-3">
+                  <div class="flex items-center gap-1">
+                    <div class="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                      <div class="h-full ${task.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'} rounded-full transition-all" style="width: ${task.progress}%"></div>
+                    </div>
+                    <span class="text-xs text-slate-500">${task.progress}%</span>
+                  </div>
+                </td>
+                <td class="py-2.5 px-3 text-slate-400 text-xs">${task.num}</td>
+              </tr>
+            `;
+
+            if (hasChildren && isExpanded) {
+              task.children.forEach(child => {
+                if (!filterTask(child)) return;
+                
+                const csc = statusConfig[child.status] || statusConfig.scheduled;
+                html += `
+                  <tr class="child-task border-b border-slate-50 cursor-pointer" onclick="openPanel(${child.id})">
+                    <td class="py-2 px-4 pl-12">
+                      <div class="flex items-center gap-2">
+                        <span class="text-slate-400 text-xs">└</span>
+                        <span class="text-slate-700">${child.name}</span>
+                      </div>
+                    </td>
+                    <td class="py-2 px-3"><span class="status-tag ${csc.bg} ${csc.text}">● ${csc.label}</span></td>
+                    <td class="py-2 px-3"><span class="px-2 py-0.5 bg-slate-500 text-white text-xs rounded">${(child.who || '').substring(0, 4)}</span></td>
+                    <td class="py-2 px-3 text-slate-500 text-xs">${child.start || '-'}</td>
+                    <td class="py-2 px-3 text-slate-500 text-xs">${child.end || '-'}</td>
+                    <td class="py-2 px-3">
+                      <div class="flex items-center gap-1">
+                        <div class="w-12 h-1 bg-slate-200 rounded-full overflow-hidden">
+                          <div class="h-full ${child.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'} rounded-full" style="width: ${child.progress}%"></div>
+                        </div>
+                        <span class="text-xs text-slate-400">${child.progress}%</span>
+                      </div>
+                    </td>
+                    <td class="py-2 px-3 text-slate-400 text-xs">${child.num}</td>
+                  </tr>
+                `;
+              });
+            }
+          });
+        }
+      });
+
+      tbody.innerHTML = html;
+      document.getElementById('total-count').textContent = countFilteredTasks();
+    }
+
+    function addGroup() {
+      const newId = 'g' + (groups.length + 1);
+      groups.push({
+        id: newId,
+        name: '새 그룹',
+        expanded: true,
+        tasks: []
+      });
+      renderTasks();
+    }
+
+    // 초기 렌더링
+    renderTasks();
+    updateFilterCounts();
+  </script>
+</body>
+</html>

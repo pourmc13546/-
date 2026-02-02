@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>알리바바닷컴 셀러 실무 매뉴얼</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', '맑은 고딕', sans-serif; }
+
+    :root { --primary: #202454; }
+    body { background: #e8ecf3; }
+
+    .sidebar {
+      width: 200px;
+      background: linear-gradient(180deg, #1e2a4a 0%, #152238 100%);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+    }
+    .sidebar-header { padding: 16px 16px 8px; }
+    .sidebar-title { color: white; font-weight: 700; font-size: 14px; }
+    .sidebar-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+    .sidebar-nav { margin-top: 8px; }
+    .sidebar-footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; font-size: 12px; color: #64748b; border-top: 1px solid #334155; }
+
+    .main-content {
+      margin-left: 200px;
+      min-height: 100vh;
+      padding: 20px 24px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      color: #8b9dc3;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin: 1px 0;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .nav-item.active { background: var(--primary); color: white; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    .card { background: white; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .card-title { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 12px; }
+
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { text-align: left; padding: 8px 12px; font-weight: 500; color: #64748b; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+    .data-table td { padding: 8px 12px; color: #334155; border-bottom: 1px solid #f1f5f9; }
+    .data-table tr:hover td { background: #f8fafc; }
+
+    .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-block; background: #f1f5f9; color: #475569; }
+    .badge-primary { background: var(--primary); color: white; }
+    .badge-outline { background: white; border: 1px solid #e2e8f0; color: #475569; }
+
+    .tip-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #475569; margin-bottom: 12px; }
+
+    .stat-box { text-align: center; padding: 12px; background: #f8fafc; border-radius: 6px; }
+    .stat-value { font-size: 20px; font-weight: 700; color: var(--primary); }
+    .stat-value-sm { font-size: 16px; font-weight: 700; color: var(--primary); }
+    .stat-label { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+    .check-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; color: #475569; border-bottom: 1px solid #f1f5f9; }
+    .check-item:last-child { border-bottom: none; }
+    .check-item input { width: 16px; height: 16px; accent-color: var(--primary); }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .mini-card { background: #f8fafc; border-radius: 6px; padding: 10px 12px; font-size: 12px; }
+    .mini-card-title { font-weight: 600; color: #1e293b; margin-bottom: 4px; }
+
+    .flow-step { display: inline-flex; align-items: center; padding: 6px 10px; background: #f1f5f9; border-radius: 4px; font-size: 12px; color: #475569; }
+    .flow-arrow { margin: 0 6px; color: #94a3b8; }
+
+    .num-badge { width: 24px; height: 24px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; background: #f1f5f9; color: #475569; }
+
+    .highlight { color: var(--primary); font-weight: 600; }
+
+    .page-header { margin-bottom: 16px; }
+    .page-title { font-size: 18px; font-weight: 700; color: #1e293b; }
+    .page-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+    .flex { display: flex; }
+    .flex-center { display: flex; align-items: center; }
+    .flex-between { display: flex; align-items: center; justify-content: space-between; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+
+    .mb-2 { margin-bottom: 8px; }
+    .mb-3 { margin-bottom: 12px; }
+    .mb-4 { margin-bottom: 16px; }
+    .mt-2 { margin-top: 8px; }
+
+    .text-center { text-align: center; }
+    .text-xs { font-size: 12px; }
+    .text-sm { font-size: 14px; }
+    .text-xl { font-size: 20px; }
+    .text-slate { color: #64748b; }
+    .text-slate-dark { color: #475569; }
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+
+    .bg-light { background: #f8fafc; }
+    .rounded { border-radius: 6px; }
+    .border { border: 1px solid #e2e8f0; }
+    .p-2 { padding: 8px; }
+    .p-4 { padding: 16px; }
+
+    .level-box { flex: 1; text-align: center; padding: 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; }
+
+    ul { list-style: none; }
+    ul li { margin-bottom: 4px; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">알리바바 실무매뉴얼</div>
+      <div class="sidebar-sub">영업/CS팀</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showSection('overview')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        개요
+      </div>
+      <div class="nav-item" onclick="showSection('grade')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        바이어 등급화
+      </div>
+      <div class="nav-item" onclick="showSection('crm')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        CRM 관리
+      </div>
+      <div class="nav-item" onclick="showSection('response')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        응대 전략
+      </div>
+      <div class="nav-item" onclick="showSection('ai')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        AI & TA 활용
+      </div>
+      <div class="nav-item" onclick="showSection('growth')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        성장 전략
+      </div>
+      <div class="nav-item" onclick="showSection('kpi')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        KPI & 체크리스트
+      </div>
+      <div class="nav-item" onclick="showSection('cases')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        성공 사례
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">2026.01 세미나 기반</div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- 개요 -->
+    <section id="overview" class="section active">
+      <div class="flex-between mb-4">
+        <div>
+          <h1 class="page-title">알리바바닷컴 셀러 실무 매뉴얼</h1>
+          <p class="page-sub">바이어 관리 및 응대 가이드</p>
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <div class="stat-box"><div class="stat-value">4시간</div><div class="stat-label">응답 목표</div></div>
+        <div class="stat-box"><div class="stat-value">$150~200만</div><div class="stat-label">리스닝 매출</div></div>
+        <div class="stat-box"><div class="stat-value">18만+</div><div class="stat-label">AI 활용 셀러</div></div>
+        <div class="stat-box"><div class="stat-value">120%</div><div class="stat-label">멀티모달 성장</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">핵심 운영 원칙</div>
+        <div class="grid-3">
+          <div class="mini-card">
+            <div class="mini-card-title">⚡ 빠른 응답</div>
+            <div class="text-slate-dark">완벽한 답변보다 빠른 연결. 4시간 이내 응답</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-title">✅ 일단 YES</div>
+            <div class="text-slate-dark">"가능하게 만들겠다" 마인드. 조건+선택지 제시</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-title">📊 과정 공유</div>
+            <div class="text-slate-dark">진행 상황 실시간 공유. 바이어 불안 해소</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">B2B vs B2C 차이점</div>
+        <div class="tip-box mb-3">💡 <strong>B2B는 첫 거래 만들기가 어렵고, 그 다음부터는 매우 쉽다.</strong> 관계 형성 시 지속 재구매.</div>
+        <table class="data-table">
+          <thead><tr><th>구분</th><th>B2C</th><th>B2B</th></tr></thead>
+          <tbody>
+            <tr><td>예시</td><td>의류, 립스틱</td><td>자동차, 원자재</td></tr>
+            <tr><td>결정 요소</td><td>적음 (사진, 가격)</td><td>많음 (스펙, 인증, 조건)</td></tr>
+            <tr><td>AI 역할</td><td>단순 매칭</td><td><span class="highlight">복잡한 니즈 매칭</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 바이어 등급화 -->
+    <section id="grade" class="section">
+      <div class="page-header">
+        <h1 class="page-title">바이어 등급화</h1>
+        <p class="page-sub">리소스의 선택과 집중을 위한 분류 체계</p>
+      </div>
+
+      <div class="tip-box mb-4">💡 <strong>핵심: 모든 바이어를 동일하게 대하지 않는다.</strong> 중소기업은 리소스가 제한적.</div>
+
+      <div class="card">
+        <div class="card-title">3단계 등급 체계</div>
+        <table class="data-table">
+          <thead><tr><th>등급</th><th>특징</th><th>담당</th><th>샘플 비용</th><th>리소스</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-primary">A등급</span></td>
+              <td>최고 품질, 높은 오더 포텐셜</td>
+              <td>시니어 전담</td>
+              <td class="highlight">100% 무료</td>
+              <td>최고</td>
+            </tr>
+            <tr>
+              <td><span class="badge">B등급</span></td>
+              <td>중간 수준, 성장 가능성</td>
+              <td>시니어 (여유시)</td>
+              <td>50% 지원</td>
+              <td>보통</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-outline">C등급</span></td>
+              <td>일반 바이어, 소규모</td>
+              <td>주니어/AI</td>
+              <td>전액 부담</td>
+              <td>최소</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">알리바바 바이어 레벨 활용</div>
+        <div class="flex gap-2 mb-3">
+          <div class="level-box">
+            <span class="badge badge-primary">L4</span>
+            <div class="text-xs text-slate mt-2">집중 응대</div>
+          </div>
+          <div class="level-box">
+            <span class="badge">L3</span>
+            <div class="text-xs text-slate mt-2">적극 응대</div>
+          </div>
+          <div class="level-box">
+            <span class="badge badge-outline">L2</span>
+            <div class="text-xs text-slate mt-2">기본 응대</div>
+          </div>
+          <div class="level-box">
+            <span class="badge badge-outline">L1/L0</span>
+            <div class="text-xs text-slate mt-2">AI 1차</div>
+          </div>
+        </div>
+        <div class="tip-box">💡 L4 배지 바이어에게는 더 신중하게 답변. 구매 전환 가능성 높음.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">분류 기준</div>
+        <div class="grid-4">
+          <div class="mini-card text-center">🏢<br><span class="text-xs">기업 규모</span></div>
+          <div class="mini-card text-center">📦<br><span class="text-xs">오더 규모</span></div>
+          <div class="mini-card text-center">🌟<br><span class="text-xs">바이어 영향력</span></div>
+          <div class="mini-card text-center">📈<br><span class="text-xs">성장 잠재력</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRM 관리 -->
+    <section id="crm" class="section">
+      <div class="page-header">
+        <h1 class="page-title">CRM 관리</h1>
+        <p class="page-sub">체계적인 바이어 등록 및 관리</p>
+      </div>
+
+      <div class="tip-box mb-4">🎯 <strong>리스닝만으로 연간 $150만~$200만 달성 가능.</strong> 신규보다 기존 고객 관리가 핵심.</div>
+
+      <div class="card">
+        <div class="card-title">CRM 등록 체계</div>
+        <table class="data-table">
+          <thead><tr><th>단계</th><th>내용</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><span class="num-badge">1</span></td><td>전원 등록</td><td>문의 오면 무조건 CRM 등록</td></tr>
+            <tr><td><span class="num-badge">2</span></td><td>거래 발생 태그</td><td>실제 구매 바이어 별도 관리</td></tr>
+            <tr><td><span class="num-badge">3</span></td><td>리스닝 태그</td><td>재구매 바이어 = 가장 중요</td></tr>
+            <tr><td><span class="num-badge">4</span></td><td>레벨 표시</td><td>알리바바 L0~L4 함께 기록</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">관계 관리 방법</div>
+        <div class="grid-2">
+          <div class="mini-card">
+            <div class="mini-card-title">✗ 하지 말 것</div>
+            <ul class="text-xs text-slate-dark mt-2">
+              <li>• "물건 얼마나 팔렸어요?" (직접적)</li>
+              <li>• 매칭 후 다음 주문까지 연락 안 함</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-title">✓ 해야 할 것</div>
+            <ul class="text-xs text-slate-dark mt-2">
+              <li>• "요즘 어떻게 지내세요?" (자연스럽게)</li>
+              <li>• 제품 도착 후 판매 현황 체크</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">2026년 알리바바 성공 공식</div>
+        <div class="text-center p-4 rounded bg-light">
+          <div class="text-xs text-slate mb-2">월 매출 목표 달성 공식</div>
+          <div class="text-xl font-bold highlight">월 매출 4,100만원 = 계약 4건 × 객단가 1,000만원</div>
+          <div class="text-xs mt-2 text-slate">이걸 달성하려면 아래 <span class="highlight">5가지 지표</span>가 <span class="highlight">목표치</span>를 충족해야 함</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 응대 전략 -->
+    <section id="response" class="section">
+      <div class="page-header">
+        <h1 class="page-title">응대 전략</h1>
+        <p class="page-sub">빠른 응답, YES 전략, 과정 공유</p>
+      </div>
+
+      <div class="grid-3 mb-4">
+        <div class="card">
+          <div class="card-title">⚡ 빠른 응답</div>
+          <div class="stat-box mb-2"><div class="stat-value">4시간</div><div class="stat-label">5스타 기준</div></div>
+          <ul class="text-xs text-slate-dark">
+            <li>• 바이어는 여러 셀러에 동시 문의</li>
+            <li>• 먼저 응답하는 셀러가 기회 잡음</li>
+            <li>• 빠른 응답 = 신뢰 파트너</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">✅ YES 전략</div>
+          <div class="tip-box mb-2">일단 YES → 방법을 찾자</div>
+          <div class="text-xs text-slate-dark">
+            <strong>YES 의미:</strong> 최선의 선택지를 찾겠다<br>
+            YES + 진행 과정/일정/선택지 함께 제시
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 과정 공유</div>
+          <div class="tip-box mb-2">진행 근거로 신뢰 구축</div>
+          <div class="text-xs text-slate-dark">
+            • 샘플 진행, 테스트 일정<br>
+            • 생산 현황 (사진/영상)<br>
+            • 배송 트래킹
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">효과적인 첫 응답</div>
+        <div class="grid-2">
+          <div class="mini-card">
+            <div class="mini-card-title">✗ 피할 것</div>
+            <div class="text-xs text-slate-dark">"가능/불가능"으로만 끝내기, 바이어 상황 파악 없이 답변</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-title">✓ 해야 할 것</div>
+            <div class="text-xs text-slate-dark">질문 추가: 목표 시장? 현재 고객? 판매 방법? 가격 경쟁력?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">이슈 대응 선택지</div>
+        <table class="data-table">
+          <thead><tr><th>상황</th><th>A안</th><th>B안</th><th>C안</th></tr></thead>
+          <tbody>
+            <tr><td>일정 이슈</td><td>일정 유지 + 옵션 변경</td><td>옵션 유지 + 납기 연장</td><td>패키지 일부 조정</td></tr>
+            <tr><td>가격 이슈</td><td>수량 조정</td><td>스펙 조정</td><td>단계별 분할</td></tr>
+            <tr><td>품질 이슈</td><td>즉시 재생산</td><td>부분 환불 + 할인</td><td>대체 제품</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- AI & TA 활용 -->
+    <section id="ai" class="section">
+      <div class="page-header">
+        <h1 class="page-title">AI & TA 활용</h1>
+        <p class="page-sub">효율적인 도구 활용법</p>
+      </div>
+
+      <div class="grid-2 mb-4">
+        <div class="card">
+          <div class="card-title">🤖 AI 어시스턴스</div>
+          <div class="grid-3 mb-3">
+            <div class="stat-box"><div class="stat-value-sm">18만+</div><div class="stat-label">활용 셀러</div></div>
+            <div class="stat-box"><div class="stat-value-sm">상위25%</div><div class="stat-label">성과</div></div>
+            <div class="stat-box"><div class="stat-value-sm">120%</div><div class="stat-label">검색 성장</div></div>
+          </div>
+          <div class="tip-box mb-3">💡 바이어 대부분은 AI와 대화하는 줄 모름. 1차 필터링 활용.</div>
+          <div class="grid-2">
+            <div class="mini-card">
+              <div class="mini-card-title">AI 처리</div>
+              <div class="text-xs text-slate-dark">기본 정보, 배송비, MOQ, 재고</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-card-title">사람 처리</div>
+              <div class="text-xs text-slate-dark">L3/L4 상담, 커스텀, 대량, 클레임</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🛡️ TA (Trade Assurance)</div>
+          <div class="grid-2 mb-3">
+            <div class="mini-card">
+              <div class="mini-card-title">Before</div>
+              <div class="text-xs text-slate-dark">견적 → 확인 → 송금 → 발송</div>
+              <div class="text-xs text-slate">전환 이탈 발생</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-card-title">After</div>
+              <div class="text-xs text-slate-dark">장바구니 → 체크아웃 → 끝!</div>
+              <div class="text-xs highlight">B2C도 판매 가능</div>
+            </div>
+          </div>
+          <div class="tip-box">⚠️ 무게 설정 주의! 200g→1kg 등록 시 배송비 과다 → 전환율 급락</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">AI 설정 방법</div>
+        <div class="flex gap-2">
+          <span class="flow-step">1. 셀러센터 → 채팅 설정 → AI ON</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">2. "지식 기반" 버튼 → AI 학습</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">3. FAQ 등록</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 성장 전략 -->
+    <section id="growth" class="section">
+      <div class="page-header">
+        <h1 class="page-title">성장 전략</h1>
+        <p class="page-sub">바이어 성장 지원 & 레이팅 관리</p>
+      </div>
+
+      <div class="grid-2 mb-4">
+        <div class="card">
+          <div class="card-title">📈 바이어 성장 지원</div>
+          <div class="tip-box mb-2">💡 바이어를 키우면 우리도 성장</div>
+          <table class="data-table">
+            <thead><tr><th>지표</th><th>Before</th><th>After</th></tr></thead>
+            <tbody>
+              <tr><td>주문 주기</td><td>1~2개월</td><td class="highlight">2~3주</td></tr>
+              <tr><td>객단가</td><td>$200~400</td><td class="highlight">$800~1,200</td></tr>
+            </tbody>
+          </table>
+          <div class="mt-2 text-xs text-slate-dark">
+            <strong>방법:</strong> SNS 모니터링, 마케팅 노하우 공유, 무료 샘플 제공
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">⭐ 레이팅 & 후기</div>
+          <div class="tip-box mb-2">💡 L2~L4는 이미 한국 공급처 있음. 레이팅이 준비되어야 전환.</div>
+          <div class="mini-card mb-2">
+            <div class="mini-card-title">후기 확보 전략</div>
+            <ul class="text-xs text-slate-dark mt-2">
+              <li>• B2C 1개 구매도 후기 획득 가능</li>
+              <li>• 오더 계속 만들어 후기 축적</li>
+              <li>• 배송 완료 후 자연스럽게 요청</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-title">신제품 전략</div>
+            <div class="text-xs text-slate-dark">바이어는 신제품에 민감. 기존+신상품 동시 매칭 → 반응↑</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI & 체크리스트 -->
+    <section id="kpi" class="section">
+      <div class="page-header">
+        <h1 class="page-title">KPI & 체크리스트</h1>
+        <p class="page-sub">성과 측정 및 일일/주간 관리</p>
+      </div>
+
+      <div class="grid-4 mb-4">
+        <div class="stat-box"><div class="stat-value">4시간</div><div class="stat-label">응답 시간</div></div>
+        <div class="stat-box"><div class="stat-value">지속</div><div class="stat-label">리스닝율</div></div>
+        <div class="stat-box"><div class="stat-value">집중</div><div class="stat-label">A등급 전환</div></div>
+        <div class="stat-box"><div class="stat-value">축적</div><div class="stat-label">후기/레이팅</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📋 일일 체크리스트</div>
+          <div class="check-item"><input type="checkbox" id="d1"><label for="d1">신규 문의 확인 및 4시간 내 응답</label></div>
+          <div class="check-item"><input type="checkbox" id="d2"><label for="d2">바이어 등급 확인 (L3/L4 우선)</label></div>
+          <div class="check-item"><input type="checkbox" id="d3"><label for="d3">진행 중인 주문 과정 공유</label></div>
+          <div class="check-item"><input type="checkbox" id="d4"><label for="d4">AI 응답 품질 확인</label></div>
+          <div class="check-item"><input type="checkbox" id="d5"><label for="d5">CRM 신규 바이어 등록</label></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📋 주간 체크리스트</div>
+          <div class="check-item"><input type="checkbox" id="w1"><label for="w1">기존 바이어 관계 관리</label></div>
+          <div class="check-item"><input type="checkbox" id="w2"><label for="w2">바이어 SNS 모니터링</label></div>
+          <div class="check-item"><input type="checkbox" id="w3"><label for="w3">신상품 등록/업데이트</label></div>
+          <div class="check-item"><input type="checkbox" id="w4"><label for="w4">후기 요청 (배송 완료 건)</label></div>
+          <div class="check-item"><input type="checkbox" id="w5"><label for="w5">AI 지식 기반 업데이트</label></div>
+          <div class="check-item"><input type="checkbox" id="w6"><label for="w6">30일 평균 응답 시간 확인</label></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 성공 사례 -->
+    <section id="cases" class="section">
+      <div class="page-header">
+        <h1 class="page-title">성공 사례</h1>
+        <p class="page-sub">2026 알리바바 세미나 발표 셀러</p>
+      </div>
+
+      <div class="card mb-3">
+        <div class="flex-center gap-2 mb-2">
+          <span class="num-badge">1</span>
+          <span class="font-semibold text-sm">놈마 셀러</span>
+          <span class="text-xs text-slate">바이어 등급화 & CRM</span>
+        </div>
+        <div class="grid-2">
+          <div class="text-xs text-slate-dark">
+            <strong>전략:</strong> A/B/C 등급화, 등급별 리소스 차등, 모든 바이어 CRM 등록, A등급 시니어 전담
+          </div>
+          <div class="stat-box"><div class="stat-value">$150~200만</div><div class="stat-label">리스닝 연매출</div></div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="flex-center gap-2 mb-2">
+          <span class="num-badge">2</span>
+          <span class="font-semibold text-sm">오브젝 코리아 (김인포 대표)</span>
+          <span class="text-xs text-slate">화장품 OEM / YES 전략</span>
+        </div>
+        <div class="grid-2">
+          <div class="text-xs text-slate-dark">
+            <strong>전략:</strong> 일단 YES + 선택지, 빠른 응답 + 질문, 카톡처럼 과정 공유<br>
+            <strong>피드백:</strong> "진행 투명, 의사결정 빠름, 단가 합리적"
+          </div>
+          <div class="stat-box"><div class="stat-value">50개국+</div><div class="stat-label">바이어 연결, 6년 파트너십</div></div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="flex-center gap-2 mb-2">
+          <span class="num-badge">3</span>
+          <span class="font-semibold text-sm">문지훈 대표</span>
+          <span class="text-xs text-slate">K-뷰티/K-굿즈</span>
+        </div>
+        <div class="grid-2">
+          <div class="text-xs text-slate-dark">
+            <strong>전략:</strong> AI 1차 필터링, L3/L4 집중, 바이어 성장 지원, 신제품 지속 등록<br>
+            <strong>헝가리 사례:</strong> 일방 취소 당한 바이어 → 친근 대응 → $1,367+$280
+          </div>
+          <div class="stat-box"><div class="stat-value">3~4배</div><div class="stat-label">객단가 성장</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">글로벌 성공 셀러 공통점</div>
+        <table class="data-table">
+          <thead><tr><th>특징</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td>포지셔닝 명확</td><td>"우리는 무엇을 잘하는가" 한 문장 → 응대 일관성</td></tr>
+            <tr><td>빠른 의사결정</td><td>가격, MOQ, 리드타임, 인증 등 자료 즉시 제공</td></tr>
+            <tr><td>샘플 전략 명확</td><td>샘플로 무엇을 검증할지 사전 제시</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.checked = localStorage.getItem(cb.id) === 'true';
+      cb.addEventListener('change', function() { localStorage.setItem(this.id, this.checked); });
+    });
+  </script>
+
+</body>
+</html>
