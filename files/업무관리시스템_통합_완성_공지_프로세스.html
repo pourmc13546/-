@@ -2569,12 +2569,11 @@
             </select>
           </div>
           <div>
-            <label class="text-xs text-slate-400 block mb-1">담당자</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs text-slate-400">담당자</label>
+              <button onclick="openAssigneeManager()" class="text-xs text-navy-500 hover:underline">관리</button>
+            </div>
             <select id="panel-who" onchange="updateTaskWho(this.value)" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white cursor-pointer hover:border-slate-300 transition-colors">
-              <option value="운영매니저">운영매니저</option>
-              <option value="담당매니저">담당매니저</option>
-              <option value="대행사">대행사</option>
-              <option value="고객사">고객사</option>
             </select>
           </div>
         </div>
@@ -2624,6 +2623,25 @@
   </div>
 
   <div id="panel-overlay" class="fixed inset-0 bg-black/20 z-40 hidden" onclick="closePanel()"></div>
+
+  <!-- 담당자 관리 모달 -->
+  <div id="assigneeModal" class="modal-overlay" onclick="if(event.target===this)closeAssigneeManager()">
+    <div class="modal-container" style="max-width:400px">
+      <div class="modal-header">
+        <h2>담당자 관리</h2>
+        <div class="modal-close" onclick="closeAssigneeManager()">
+          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+      </div>
+      <div class="modal-body" style="max-height:50vh">
+        <div id="assigneeList" class="space-y-2"></div>
+        <div class="mt-4 flex gap-2">
+          <input type="text" id="newAssigneeName" placeholder="새 담당자 이름" class="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-navy-400" onkeydown="if(event.key==='Enter')addAssignee()">
+          <button onclick="addAssignee()" class="px-4 py-2 bg-navy-500 text-white text-sm rounded-lg hover:bg-navy-600">추가</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
       <!-- ==================== 성과관리 뷰 (KPI 대시보드) ==================== -->
       <div id="performanceView" class="hidden fade-in p-8">
@@ -11433,6 +11451,7 @@ Best regards,
           });
           groups = [...(projectsData[currentProject] || [])];
           await loadProjectNamesFromSupabase();
+          await loadAssigneeListFromSupabase();
           renderProjectDropdown();
           renderTasks();
           updateFilterCounts();
@@ -11884,7 +11903,7 @@ Best regards,
       document.getElementById('panel-author').textContent = task.who || '운영매니저';
       document.getElementById('panel-date').textContent = task.start || '-';
       document.getElementById('panel-status').value = task.status;
-      document.getElementById('panel-who').value = task.who || '운영매니저';
+      renderAssigneeSelect(task.who || '운영매니저');
       document.getElementById('panel-start').value = task.start && task.start !== '-' ? task.start : '';
       document.getElementById('panel-end').value = task.end && task.end !== '-' ? task.end : '';
       
@@ -12133,6 +12152,101 @@ Best regards,
       
       const label = type === 'start' ? '시작일' : '마감일';
       showToast(`${label}이 변경되었습니다.`);
+    }
+
+    // ===== 담당자 목록 관리 =====
+    let assigneeList = ['운영매니저', '담당매니저', '대행사', '고객사'];
+
+    async function loadAssigneeListFromSupabase() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('app_settings').select('value').eq('key', 'assigneeList').single();
+        if (!error && data && data.value) {
+          assigneeList = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+        }
+      } catch (e) { console.error('assigneeList 로드 에러:', e); }
+    }
+
+    async function saveAssigneeListToSupabase() {
+      try {
+        await supabaseClient.from('app_settings').upsert({
+          key: 'assigneeList',
+          value: assigneeList,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+      } catch (e) { console.error('assigneeList 저장 에러:', e); }
+    }
+
+    function renderAssigneeSelect(selectedValue) {
+      const select = document.getElementById('panel-who');
+      if (!select) return;
+      select.innerHTML = assigneeList.map(name =>
+        `<option value="${name}" ${name === selectedValue ? 'selected' : ''}>${name}</option>`
+      ).join('');
+    }
+
+    function openAssigneeManager() {
+      renderAssigneeManagerList();
+      document.getElementById('assigneeModal').classList.add('show');
+    }
+
+    function closeAssigneeManager() {
+      document.getElementById('assigneeModal').classList.remove('show');
+      // 드롭다운 갱신
+      if (currentTask) renderAssigneeSelect(currentTask.who);
+    }
+
+    function renderAssigneeManagerList() {
+      const container = document.getElementById('assigneeList');
+      container.innerHTML = assigneeList.map((name, idx) => `
+        <div class="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-colors group">
+          <span class="text-sm text-slate-700">${name}</span>
+          <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onclick="renameAssignee(${idx})" class="p-1 hover:bg-slate-200 rounded" title="수정">
+              <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            </button>
+            <button onclick="removeAssignee(${idx})" class="p-1 hover:bg-red-100 rounded" title="삭제">
+              <svg class="w-3.5 h-3.5 text-slate-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function addAssignee() {
+      const input = document.getElementById('newAssigneeName');
+      const name = input.value.trim();
+      if (!name) return;
+      if (assigneeList.includes(name)) { alert('이미 존재하는 담당자입니다.'); return; }
+
+      assigneeList.push(name);
+      input.value = '';
+      await saveAssigneeListToSupabase();
+      renderAssigneeManagerList();
+      showToast(`"${name}" 담당자가 추가되었습니다.`);
+    }
+
+    async function renameAssignee(idx) {
+      const oldName = assigneeList[idx];
+      const newName = prompt('담당자 이름을 수정하세요:', oldName);
+      if (!newName || !newName.trim() || newName.trim() === oldName) return;
+      if (assigneeList.includes(newName.trim())) { alert('이미 존재하는 담당자입니다.'); return; }
+
+      assigneeList[idx] = newName.trim();
+      await saveAssigneeListToSupabase();
+      renderAssigneeManagerList();
+      showToast(`담당자 이름이 "${newName.trim()}"(으)로 변경되었습니다.`);
+    }
+
+    async function removeAssignee(idx) {
+      const name = assigneeList[idx];
+      if (assigneeList.length <= 1) { alert('최소 1명의 담당자가 필요합니다.'); return; }
+      if (!confirm(`"${name}" 담당자를 삭제하시겠습니까?`)) return;
+
+      assigneeList.splice(idx, 1);
+      await saveAssigneeListToSupabase();
+      renderAssigneeManagerList();
+      showToast(`"${name}" 담당자가 삭제되었습니다.`);
     }
 
     // ===== 그룹 액션 메뉴 =====
