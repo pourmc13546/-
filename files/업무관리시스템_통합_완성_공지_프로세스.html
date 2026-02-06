@@ -4419,17 +4419,17 @@ Best regards,
           </div>
           <!-- 탭 네비게이션 -->
           <div class="flex gap-2 mt-4 border-b border-slate-200">
-            <button onclick="switchEducationTab('downloads')" id="eduTab-downloads" class="edu-tab px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600">
-              자료 다운로드
-            </button>
-            <button onclick="switchEducationTab('content')" id="eduTab-content" class="edu-tab px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+            <button onclick="switchEducationTab('content')" id="eduTab-content" class="edu-tab px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600">
               실무교육 내용 보기
+            </button>
+            <button onclick="switchEducationTab('downloads')" id="eduTab-downloads" class="edu-tab px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+              자료 다운로드
             </button>
           </div>
         </div>
 
         <!-- 자료 다운로드 탭 -->
-        <div id="eduContent-downloads" class="edu-tab-content">
+        <div id="eduContent-downloads" class="edu-tab-content hidden">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- 교육자료 1: DOCX 파일 -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
@@ -4509,7 +4509,7 @@ Best regards,
         </div>
 
         <!-- 실무교육 내용 보기 탭 -->
-        <div id="eduContent-content" class="edu-tab-content hidden">
+        <div id="eduContent-content" class="edu-tab-content">
           <div class="flex gap-6">
             <!-- 목차 사이드바 -->
             <div class="w-64 flex-shrink-0 hidden lg:block">
