@@ -4417,82 +4417,694 @@ Best regards,
               <p class="text-slate-500 mt-1">해외입점사업 관련 교육 및 참고 자료</p>
             </div>
           </div>
+          <!-- 탭 네비게이션 -->
+          <div class="flex gap-2 mt-4 border-b border-slate-200">
+            <button onclick="switchEducationTab('downloads')" id="eduTab-downloads" class="edu-tab px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600">
+              자료 다운로드
+            </button>
+            <button onclick="switchEducationTab('content')" id="eduTab-content" class="edu-tab px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+              실무교육 내용 보기
+            </button>
+          </div>
         </div>
 
-        <!-- 교육자료 목록 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- 교육자료 1: DOCX 파일 -->
-          <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
-            <div class="flex items-start gap-4">
-              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <h3 class="font-semibold text-slate-800 mb-1">해외입점사업 교육자료</h3>
-                <p class="text-sm text-slate-500 mb-3">알리바바 입점 및 운영 가이드</p>
-                <div class="flex items-center gap-2 text-xs text-slate-400 mb-4">
-                  <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded">DOCX</span>
-                  <span>64KB</span>
-                </div>
-                <a href="files/교육자료_DOCX.docx" download class="inline-flex items-center gap-2 px-4 py-2 bg-navy-500 text-white text-sm rounded-lg hover:bg-navy-600 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        <!-- 자료 다운로드 탭 -->
+        <div id="eduContent-downloads" class="edu-tab-content">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 교육자료 1: DOCX 파일 -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                   </svg>
-                  다운로드
-                </a>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-slate-800 mb-1">해외입점사업 교육자료</h3>
+                  <p class="text-sm text-slate-500 mb-3">알리바바 입점 및 운영 가이드</p>
+                  <div class="flex items-center gap-2 text-xs text-slate-400 mb-4">
+                    <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded">DOCX</span>
+                    <span>64KB</span>
+                  </div>
+                  <a href="files/교육자료_DOCX.docx" download class="inline-flex items-center gap-2 px-4 py-2 bg-navy-500 text-white text-sm rounded-lg hover:bg-navy-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    다운로드
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- 교육자료 2: 알리바바 세미나 요약 -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-slate-800 mb-1">2026 알리바바 세미나 요약</h3>
+                  <p class="text-sm text-slate-500 mb-3">알리바바 세미나 핵심 내용 정리</p>
+                  <div class="flex items-center gap-2 text-xs text-slate-400 mb-4">
+                    <span class="bg-green-50 text-green-600 px-2 py-1 rounded">MD</span>
+                    <span>17KB</span>
+                  </div>
+                  <a href="files/2026_알리바바_세미나_요약.md" download class="inline-flex items-center gap-2 px-4 py-2 bg-navy-500 text-white text-sm rounded-lg hover:bg-navy-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    다운로드
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- 교육자료 3: 알리바바닷컴 실무매뉴얼 -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-slate-800 mb-1">알리바바닷컴 실무매뉴얼</h3>
+                  <p class="text-sm text-slate-500 mb-3">입점부터 운영까지 실무 가이드</p>
+                  <div class="flex items-center gap-2 text-xs text-slate-400 mb-4">
+                    <span class="bg-orange-50 text-orange-600 px-2 py-1 rounded">HTML</span>
+                    <span>30KB</span>
+                  </div>
+                  <a href="files/알리바바닷컴_실무매뉴얼.html" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-navy-500 text-white text-sm rounded-lg hover:bg-navy-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    열기
+                  </a>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- 교육자료 2: 알리바바 세미나 요약 -->
-          <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
-            <div class="flex items-start gap-4">
-              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <h3 class="font-semibold text-slate-800 mb-1">2026 알리바바 세미나 요약</h3>
-                <p class="text-sm text-slate-500 mb-3">알리바바 세미나 핵심 내용 정리</p>
-                <div class="flex items-center gap-2 text-xs text-slate-400 mb-4">
-                  <span class="bg-green-50 text-green-600 px-2 py-1 rounded">MD</span>
-                  <span>17KB</span>
-                </div>
-                <a href="files/2026_알리바바_세미나_요약.md" download class="inline-flex items-center gap-2 px-4 py-2 bg-navy-500 text-white text-sm rounded-lg hover:bg-navy-600 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                  </svg>
-                  다운로드
-                </a>
+        <!-- 실무교육 내용 보기 탭 -->
+        <div id="eduContent-content" class="edu-tab-content hidden">
+          <div class="flex gap-6">
+            <!-- 목차 사이드바 -->
+            <div class="w-64 flex-shrink-0 hidden lg:block">
+              <div class="bg-white rounded-xl shadow-sm p-4 sticky top-4 max-h-[calc(100vh-120px)] overflow-y-auto">
+                <h3 class="font-semibold text-slate-800 mb-3 text-sm">목차</h3>
+                <nav class="space-y-1 text-sm">
+                  <a href="#edu-intro" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">교육 목적</a>
+                  <a href="#edu-ch1" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH1. 우리는 누구인가</a>
+                  <a href="#edu-ch2" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH2. 바이어 질문 TOP 10</a>
+                  <a href="#edu-ch3" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH3. 지역별 기후 전략</a>
+                  <a href="#edu-ch4" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH4. 시험 성적서 활용</a>
+                  <a href="#edu-ch5" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH5. 바이어 응답 전략</a>
+                  <a href="#edu-ch6" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH6. 소량 구매 전략</a>
+                  <a href="#edu-ch7" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH7. 바이어 관계 관리</a>
+                  <a href="#edu-ch8" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH8. 일일 체크리스트</a>
+                  <a href="#edu-ch9" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH9. 성공/실패 사례</a>
+                  <a href="#edu-ch10" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">CH10. 마무리</a>
+                  <a href="#edu-appendix" class="block px-3 py-2 text-slate-600 hover:bg-slate-50 rounded-lg">부록: 빠른 참조</a>
+                </nav>
               </div>
             </div>
-          </div>
 
-          <!-- 교육자료 3: 알리바바닷컴 실무매뉴얼 -->
-          <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
-            <div class="flex items-start gap-4">
-              <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                </svg>
+            <!-- 본문 내용 -->
+            <div class="flex-1 bg-white rounded-xl shadow-sm p-8 education-content">
+              <style>
+                .education-content h1 { font-size: 1.75rem; font-weight: 700; color: #1e293b; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+                .education-content h2 { font-size: 1.375rem; font-weight: 600; color: #334155; margin: 1.5rem 0 0.75rem; }
+                .education-content h3 { font-size: 1.125rem; font-weight: 600; color: #475569; margin: 1.25rem 0 0.5rem; }
+                .education-content p { color: #64748b; line-height: 1.75; margin: 0.75rem 0; }
+                .education-content ul, .education-content ol { margin: 0.75rem 0; padding-left: 1.5rem; }
+                .education-content li { color: #64748b; line-height: 1.75; margin: 0.25rem 0; }
+                .education-content strong { color: #1e293b; }
+                .education-content .highlight-box { background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; }
+                .education-content .warning-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; }
+                .education-content .success-box { background: #ecfdf5; border-left: 4px solid #10b981; padding: 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; }
+                .education-content .template-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem; font-family: monospace; font-size: 0.875rem; white-space: pre-wrap; }
+                .education-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+                .education-content th, .education-content td { border: 1px solid #e2e8f0; padding: 0.75rem; text-align: left; }
+                .education-content th { background: #f8fafc; font-weight: 600; color: #334155; }
+                .education-content td { color: #64748b; }
+              </style>
+
+              <!-- 헤더 -->
+              <div class="text-center mb-8 pb-6 border-b-2 border-slate-200">
+                <h1 class="text-3xl font-bold text-slate-800 mb-2" style="border:none; margin:0; padding:0;">알리바바닷컴 직원 실무교육 자료</h1>
+                <p class="text-lg text-slate-600">방수재 & 페인트 수출 영업 완벽 가이드</p>
               </div>
-              <div class="flex-1">
-                <h3 class="font-semibold text-slate-800 mb-1">알리바바닷컴 실무매뉴얼</h3>
-                <p class="text-sm text-slate-500 mb-3">입점부터 운영까지 실무 가이드</p>
-                <div class="flex items-center gap-2 text-xs text-slate-400 mb-4">
-                  <span class="bg-orange-50 text-orange-600 px-2 py-1 rounded">HTML</span>
-                  <span>30KB</span>
+
+              <!-- 교육 목적 -->
+              <section id="edu-intro">
+                <h2>교육 목적</h2>
+                <p>이 자료는 알리바바닷컴에서 방수재와 페인트 제품을 해외 바이어에게 판매하는 실무 직원을 위한 종합 교육 자료입니다. 본 교육을 통해 다음을 습득하게 됩니다:</p>
+                <ol>
+                  <li>우리 회사의 핵심 경쟁력과 차별화 포인트</li>
+                  <li>바이어가 가장 많이 하는 질문과 완벽한 답변 방법</li>
+                  <li>지역별 기후에 맞춘 맞춤형 제안 전략</li>
+                  <li>시험 성적서를 활용한 기술 상담 스킬</li>
+                  <li>바이어 응답 및 관계 관리 실전 노하우</li>
+                </ol>
+              </section>
+
+              <!-- CHAPTER 1 -->
+              <section id="edu-ch1">
+                <h1>CHAPTER 1. 우리는 누구인가</h1>
+
+                <h2>1.1 핵심 정체성: 제조사가 아닌 브랜드 파트너</h2>
+                <div class="highlight-box">
+                  <strong>중요: 첫 대화부터 이 마인드셋을 가지세요</strong>
                 </div>
-                <a href="files/알리바바닷컴_실무매뉴얼.html" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-navy-500 text-white text-sm rounded-lg hover:bg-navy-600 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                  열기
-                </a>
-              </div>
+                <p>바이어에게 우리를 소개할 때 절대 "우리는 방수재 제조사입니다"라고 말하지 마세요. 대신 이렇게 말하세요:</p>
+                <div class="template-box">"우리는 당신의 브랜드 파트너입니다. 제조를 넘어, 기획부터 생산, 패키징, 브랜딩까지 원스톱으로 지원합니다."</div>
+                <p>왜 이게 중요할까요? 바이어는 단순히 제품을 사는 것이 아닙니다. 그들은 자신의 시장에서 성공할 수 있는 <strong>브랜드 런칭 파트너</strong>를 찾고 있습니다.</p>
+
+                <h2>1.2 우리의 압도적 실적</h2>
+                <div class="warning-box">
+                  <strong>직원 여러분, 이 숫자들을 외우세요. 바이어와의 모든 대화에 활용됩니다.</strong>
+                </div>
+
+                <h3>260만 세대 무하자 실적</h3>
+                <ul>
+                  <li><strong>의미:</strong> "이것은 단순한 숫자가 아닙니다. 우리 제품은 프리미엄급이며 하자가 없습니다."</li>
+                  <li><strong>활용:</strong> "우리 제품은 이미 260만 세대에 시공되었으며, 무수히 많은 시공자와 고객이 신뢰하는 품질입니다."</li>
+                </ul>
+
+                <h3>특허 70개</h3>
+                <ul>
+                  <li><strong>의미:</strong> "우리는 매년 신제품을 개발합니다. 제품력이 공신력 있고, 시공 후 완벽함을 보장합니다."</li>
+                  <li><strong>활용:</strong> "70개의 특허 기술로 매년 새로운 제품을 출시합니다. 당신의 시장에 가장 최신 기술을 제공할 수 있습니다."</li>
+                </ul>
+
+                <h3>제품 600종</h3>
+                <ul>
+                  <li><strong>의미:</strong> "모든 기후, 모든 상황에 대응 가능합니다."</li>
+                  <li><strong>활용:</strong> "600종 이상의 제품 라인업으로 당신의 지역 기후에 완벽히 최적화된 제품을 제공합니다."</li>
+                </ul>
+
+                <h3>글로벌 파트너사 250곳</h3>
+                <ul>
+                  <li><strong>의미:</strong> "우리의 시공 품질이 세계적으로 검증되었습니다."</li>
+                  <li><strong>활용:</strong> "전 세계 250곳의 파트너사가 우리 제품을 선택했고, 그들의 우수한 시공 품질이 우리의 신뢰를 증명합니다."</li>
+                </ul>
+
+                <h2>1.3 올인원 토탈 솔루션 - 우리만의 무기</h2>
+                <div class="highlight-box">
+                  <strong>이것이 우리가 다른 중국 공장들과 완전히 다른 이유입니다.</strong>
+                </div>
+
+                <h3>5단계 통합 시스템</h3>
+                <table>
+                  <tr><th>단계</th><th>내용</th><th>왜 중요한가</th><th>실전 활용</th></tr>
+                  <tr><td><strong>1단계: 설계</strong></td><td>지역별 기후 분석 기반 최적 설계</td><td>동남아와 중동에 같은 제품을 팔 수 없습니다</td><td>"당신의 지역 기후를 분석하여 최적의 방수 솔루션을 설계합니다"</td></tr>
+                  <tr><td><strong>2단계: 시공</strong></td><td>10만평 자체 및 협력 공장</td><td>정확한 납기 보장</td><td>"10만평 규모의 공장으로 2-4주 정확한 납기를 보장합니다"</td></tr>
+                  <tr><td><strong>3단계: 감리</strong></td><td>전 과정 품질 관리 및 시험 인증</td><td>260만 세대 무하자의 비밀</td><td>"모든 제품이 10가지 기본 성능 시험을 통과합니다"</td></tr>
+                  <tr><td><strong>4단계: 제조</strong></td><td>600종 제품, 소량 샘플 가능</td><td>바이어가 테스트할 수 있음</td><td>"1-3개 샘플부터 시작 가능합니다"</td></tr>
+                  <tr><td><strong>5단계: 브랜딩</strong></td><td>시장조사, 타깃 설정, 가격책정, 디자인 일괄 지원</td><td>이게 진짜 차별화 포인트</td><td>"당신의 브랜드 런칭을 위한 모든 것을 지원합니다"</td></tr>
+                </table>
+              </section>
+
+              <!-- CHAPTER 2 -->
+              <section id="edu-ch2">
+                <h1>CHAPTER 2. 바이어가 가장 많이 하는 질문 TOP 10</h1>
+
+                <h2>2.1 왜 이 질문들을 외워야 하나요?</h2>
+                <div class="highlight-box">
+                  <strong>핵심: 반복되는 질문에서 수요를 읽습니다</strong><br>
+                  국가가 달라도 반복되는 질문은 시장의 공통 니즈입니다. 이 10가지 질문에 대한 완벽한 답변을 준비하면 90%의 바이어를 커버할 수 있습니다.
+                </div>
+
+                <h2>2.2 TOP 10 질문과 완벽한 답변</h2>
+
+                <h3>질문 1: "우리 지역 기후(고온/저온/다습)에 맞나요?"</h3>
+                <div class="template-box">"네, 맞습니다! 우리는 600종의 제품 중에서 당신의 지역 기후에 최적화된 제품을 추천해드립니다. [구체적 지역명]의 경우 [기후 특성]이므로, [추천 제품]이 가장 적합합니다. 지금 바로 성능 데이터와 함께 제품 리스트를 보내드릴까요?"</div>
+                <p><strong>실전 예시:</strong></p>
+                <ul>
+                  <li>태국 바이어: "태국은 연중 고온다습하고 스콜성 폭우가 잦습니다. 통기형 방수재와 곰팡이 방지 성능이 필수입니다. 우리의 TH-2000 시리즈를 추천드립니다."</li>
+                  <li>사우디 바이어: "사우디는 초고온·건조 환경이며 자외선이 강합니다. UV 저항 방수재가 필수이며, 밝은 색상으로 열 반사 효과를 높인 SA-3000 시리즈를 추천드립니다."</li>
+                </ul>
+
+                <h3>질문 2: "품질 인증서와 시험 성적서가 있나요?"</h3>
+                <div class="template-box">"물론입니다! 우리는 모든 제품에 대해 한국 정부 인증 시험 성적서를 보유하고 있습니다. 더 중요한 것은, 단순히 서류를 드리는 것이 아니라:
+1) 당신의 언어로 전문 번역하여 제공
+2) 각 수치가 무슨 의미인지 상세 해석
+3) 시공 시 하자를 얼마나 감소시키는지 구체적 데이터 제공
+이 세 가지를 모두 해드립니다. 48시간 내에 준비해드릴 수 있습니다."</div>
+
+                <h3>질문 3: "방수 효과는 얼마나 지속되나요?"</h3>
+                <div class="template-box">"우리 제품은 내후성 2000시간 시험을 통과했습니다. 이것이 의미하는 바는:
+- 자외선, 비, 눈, 온도 변화에도 성능이 유지됩니다
+- 색이 바래지 않고 오래 지속됩니다
+- 실제로 제품 수명이 일반 제품 대비 2배 연장됩니다
+- 중동이나 북미 같은 극한 환경에서도 문제없습니다
+
+실제 프로젝트 사례를 보여드릴까요? [지역명] 프로젝트는 10년이 지난 지금도 하자가 전혀 없습니다."</div>
+
+                <h3>질문 4: "시공이 어렵지 않나요? 가이드가 있나요?"</h3>
+                <div class="template-box">"전혀 어렵지 않습니다! 우리가 제공하는 것:
+1) 10-30초 시공 과정 영상 (실제 시공 장면)
+2) 단계별 상세 가이드 (당신의 언어로 번역)
+3) 필요시 화상 상담 (우리 기술팀과 직접 연결)
+4) 시공 중 문제 발생 시 24시간 내 응답
+
+실제로 우리 제품을 처음 사용하는 시공자도 가이드만 보면 완벽하게 시공할 수 있습니다."</div>
+
+                <h3>질문 5: "소량 테스트 주문이 가능한가요?"</h3>
+                <div class="template-box">"네! 이것이 우리의 핵심 전략입니다.
+- 1-3개 샘플부터 시작 가능
+- 프로모션 가격 제공
+- 납기: 2-4주
+- 품질은 대량 주문과 100% 동일
+
+우리의 철학: 신뢰를 먼저 구축하고, 그 다음 비즈니스입니다.
+단계별 성장: 1-10개 테스트 → 50개 → 300개 → 대량 주문
+우리 바이어의 85%가 이 경로로 성장했습니다."</div>
+
+                <h3>질문 6: "일반 페인트와 뭐가 다른가요?"</h3>
+                <table>
+                  <tr><th>구분</th><th>일반 페인트</th><th>우리 제품</th></tr>
+                  <tr><td>기능</td><td>색상 표현만 가능</td><td>방수 + 단열 + 차열 + 색상 모두 가능</td></tr>
+                  <tr><td>방수 효과</td><td>없음</td><td>투수성 0.001로 완벽 방수</td></tr>
+                  <tr><td>에너지 효율</td><td>없음</td><td>에너지 비용 30% 절감</td></tr>
+                  <tr><td>수명</td><td>3-5년</td><td>10-20년</td></tr>
+                </table>
+                <p><strong>결론:</strong> 가격은 20% 높지만, 총 소유 비용은 50% 저렴합니다.</p>
+
+                <h3>질문 7: "납기는 얼마나 걸리나요?"</h3>
+                <div class="success-box">
+                  <strong>정확히 2-4주입니다. '약' 2-4주가 아니라 '정확히'입니다.</strong>
+                  <ul>
+                    <li>10만평 자체 공장 보유</li>
+                    <li>주요 원료 상시 재고 확보</li>
+                    <li>지금까지 납기 지연율: 0.3% (천재지변 제외)</li>
+                    <li>만약 우리 실수로 납기가 늦어지면: 10% 할인 자동 적용</li>
+                  </ul>
+                </div>
+
+                <h3>질문 8: "색상/패키징 커스터마이징 가능한가요?"</h3>
+                <div class="template-box">"100% 가능합니다! 이것이 우리의 브랜딩 서비스입니다.
+
+우리가 제공하는 것:
+1) 시장조사: 당신의 타깃 시장 분석
+2) 타깃 설정: 누구에게 팔 것인가?
+3) 가격 책정: 최적 가격대 추천
+4) 디자인: 패키징, 로고, 컬러 일괄 디자인
+
+비용: 50개 이상 주문 시 디자인 비용 무료"</div>
+
+                <h3>질문 9: "가격 경쟁력이 있나요?"</h3>
+                <table>
+                  <tr><th>구분</th><th>가격</th><th>총 비용</th></tr>
+                  <tr><td>중국 저가 공장</td><td>-30%</td><td>재시공 비용 포함 시 +50%</td></tr>
+                  <tr><td>우리 제품</td><td>기준</td><td>한 번에 완벽 → 기준</td></tr>
+                  <tr><td>유럽 브랜드</td><td>+150%</td><td>브랜드 비용만 비쌈</td></tr>
+                </table>
+                <p><strong>결론:</strong> 우리가 실질적으로 가장 경제적입니다.</p>
+
+                <h3>질문 10: "AS나 하자 발생 시 어떻게 하나요?"</h3>
+                <div class="success-box">
+                  <strong>260만 세대 무하자 실적이 우리의 답변입니다.</strong>
+                  <p>하지만 만약 문제가 발생한다면:</p>
+                  <ul>
+                    <li><strong>Option A:</strong> 즉시 재생산 (무료) - 24시간 내 원인 분석, 72시간 내 재생산 시작</li>
+                    <li><strong>Option B:</strong> 부분 환불 + 할인 - 30-50% 환불, 다음 주문 20% 할인</li>
+                    <li><strong>Option C:</strong> 대체품 무상 제공 - 동급 또는 상위 제품으로 교체</li>
+                  </ul>
+                  <p>실제 통계: 하자 발생률 0.1%, 하자 처리 만족도 98%, 재구매율 94%</p>
+                </div>
+              </section>
+
+              <!-- CHAPTER 3 -->
+              <section id="edu-ch3">
+                <h1>CHAPTER 3. 지역별 기후 & 방수 전략 마스터</h1>
+
+                <h2>3.1 왜 지역별 전략이 필요한가?</h2>
+                <div class="warning-box">
+                  <strong>핵심 원칙: 모든 지역에 같은 제품을 팔 수 없다</strong><br>
+                  방수재는 기후에 극도로 민감한 제품입니다. 동남아시아의 고온다습한 환경과 중동의 초고온 건조 환경에 같은 제품을 쓰면 100% 실패합니다.
+                </div>
+
+                <h2>3.2 지역별 추천 제품</h2>
+                <table>
+                  <tr><th>국가/지역</th><th>기후 유형</th><th>추천 제품</th><th>핵심 메시지</th></tr>
+                  <tr><td>한국/일본/중국</td><td>사계절</td><td>EA-2000</td><td>유연성, 한파 대응</td></tr>
+                  <tr><td>태국/베트남/인도네시아</td><td>고온다습</td><td>SEA-3000</td><td>통기형, 곰팡이 방지</td></tr>
+                  <tr><td>인도/파키스탄</td><td>우기/건기</td><td>SA-4000</td><td>내열·내수 복합</td></tr>
+                  <tr><td>사우디/UAE/카타르</td><td>초고온</td><td>ME-5000</td><td>UV 저항, 탄성</td></tr>
+                  <tr><td>카자흐스탄/우즈베키스탄</td><td>일교차 큼</td><td>CA-6000</td><td>내한·내열</td></tr>
+                  <tr><td>유럽 서·북부</td><td>온대~한랭</td><td>EU-7000</td><td>10년 장기 보증</td></tr>
+                  <tr><td>유럽 남부</td><td>고온·건조/겨울 비</td><td>ES-8000</td><td>타일 하부 특화</td></tr>
+                  <tr><td>아프리카 북부</td><td>고온·건조</td><td>ME-5000</td><td>UV·내열 중심</td></tr>
+                  <tr><td>북미</td><td>지역차 큼, 한파</td><td>NA-1000</td><td>극한 기후 대응</td></tr>
+                  <tr><td>남미</td><td>열대~온대</td><td>LA-2000</td><td>열대 우기 특화</td></tr>
+                  <tr><td>오세아니아</td><td>온화, 자외선 강함</td><td>OC-3000</td><td>해양성 기후 특화</td></tr>
+                </table>
+
+                <h3>동남아시아 바이어 대응 예시</h3>
+                <div class="template-box">"동남아는 습기가 최대 적입니다. 일반 방수재는 물은 막지만 습기는 못 막아서 내부에 습기가 차면서 곰팡이가 생기고 방수층이 들뜨게 됩니다.
+
+우리 SEA-3000은:
+1) 통기형 방수재로 습기는 배출하면서 물은 차단
+2) 특수 곰팡이 방지 성분 함유 → 5년간 곰팡이 0%
+3) 방수층 위에 미끄럼 방지 처리 가능 → 안전사고 예방
+
+실제 태국 프로젝트에서 3년간 곰팡이 발생 0건 기록"</div>
+
+                <h3>중동 바이어 대응 예시</h3>
+                <div class="template-box">"중동은 세계에서 가장 가혹한 환경입니다. 일반 방수재는 6개월이면 망가집니다.
+
+우리 ME-5000의 특별한 점:
+1) UV 저항 방수재 필수 → 자외선 차단 특수 코팅
+2) 밝은 색상 권장 (백색, 아이보리) → 열 반사 효과로 표면 온도 20도 낮춤
+3) 탄성 유지가 핵심 → 80도에서도 탄성 100% 유지
+
+사우디 프로젝트: 여름 표면 온도 75도 환경에서 5년간 하자 0건"</div>
+              </section>
+
+              <!-- CHAPTER 4 -->
+              <section id="edu-ch4">
+                <h1>CHAPTER 4. 시험 성적서 활용 - 이것이 진짜 전문가의 영역</h1>
+
+                <h2>4.1 절대 원칙: 단순 번역은 NO!</h2>
+                <div class="warning-box">
+                  <strong>잘못된 접근:</strong><br>
+                  바이어: "시험 성적서 있나요?"<br>
+                  직원: "네, 여기 PDF 파일입니다." (이메일 첨부)<br><br>
+                  <strong>이건 최악입니다. 바이어는 숫자의 의미를 모릅니다.</strong>
+                </div>
+
+                <div class="success-box">
+                  <strong>올바른 접근:</strong><br>
+                  "네, 있습니다! 하지만 단순히 PDF만 보내드리는 것이 아니라:
+                  <ol>
+                    <li>당신의 언어로 전문 번역</li>
+                    <li>각 수치가 무슨 의미인지 상세 설명</li>
+                    <li>시공 시 하자를 얼마나 감소시키는지 구체적 데이터</li>
+                  </ol>
+                  이 세 가지를 모두 제공해드립니다. 48시간만 주시면 완벽하게 준비하겠습니다."
+                </div>
+
+                <h2>4.2 주요 시험항목 요약표 (직원 필수 암기)</h2>
+                <table>
+                  <tr><th>시험항목</th><th>측정 대상</th><th>실제 효과</th><th>하자 감소율</th><th>적용 지역</th></tr>
+                  <tr><td>인장강도</td><td>찢어짐 저항력</td><td>균열 방지</td><td>누수 75%↓</td><td>모든 지역</td></tr>
+                  <tr><td>신장율</td><td>늘어남 정도</td><td>온도 변화 대응</td><td>열팽창균열 90%↓</td><td>일교차 큰 지역</td></tr>
+                  <tr><td>부착강도</td><td>표면 부착력</td><td>박리 방지</td><td>들뜸 85%↓</td><td>강풍/해안 지역</td></tr>
+                  <tr><td>투수성</td><td>물 차단력</td><td>침투 방지</td><td>누수재발 95%↓</td><td>우기 긴 지역</td></tr>
+                  <tr><td>내후성</td><td>기후 저항성</td><td>장기 내구성</td><td>수명 2배↑</td><td>극한 기후 지역</td></tr>
+                </table>
+
+                <h3>활용 팁</h3>
+                <p>바이어가 특정 지역을 언급하면, 즉시 이 표를 보고 해당 지역에 가장 중요한 시험 항목을 강조하세요.</p>
+                <ul>
+                  <li>태국 바이어 → 투수성 + 내후성 강조</li>
+                  <li>사우디 바이어 → 내후성 + 신장율 강조</li>
+                  <li>카자흐스탄 바이어 → 신장율 + 인장강도 강조</li>
+                </ul>
+              </section>
+
+              <!-- CHAPTER 5 -->
+              <section id="edu-ch5">
+                <h1>CHAPTER 5. 바이어 응답 실전 전략</h1>
+
+                <h2>5.1 황금률: 빠른 응답 3단계</h2>
+                <div class="warning-box">
+                  <strong>절대 원칙: 완벽함보다 속도!</strong>
+                </div>
+
+                <table>
+                  <tr><th>단계</th><th>시간</th><th>내용</th></tr>
+                  <tr><td><strong>1단계</strong></td><td>30분 내</td><td>1차 응답 - "메시지 잘 받았습니다. [구체적 시간]까지 상세 답변 드리겠습니다."</td></tr>
+                  <tr><td><strong>2단계</strong></td><td>24시간 내</td><td>상세 제안 - 옵션표 + 가격 + 타임라인 (3가지 제품 옵션)</td></tr>
+                  <tr><td><strong>3단계</strong></td><td>48시간 내</td><td>인증서 번역 + 기술 상담 제안</td></tr>
+                </table>
+
+                <h2>5.2 비주얼 커뮤니케이션 전략</h2>
+                <div class="highlight-box">
+                  <strong>핵심: 텍스트보다 사진 1장, 사진보다 영상 1개가 신뢰도를 10배 높입니다!</strong>
+                </div>
+
+                <h3>필수 비주얼 자료 체크리스트</h3>
+                <ul>
+                  <li><strong>공장 생산 시설 사진</strong> - 청결한 생산 라인, 첨단 설비</li>
+                  <li><strong>시공 과정 영상 (10-30초)</strong> - 제품 개봉 → 표면 처리 → 도포 → 완성</li>
+                  <li><strong>제품별 실물 사진</strong> - 정면, 측면, 용기 열었을 때</li>
+                  <li><strong>이전 프로젝트 비포/애프터</strong> - 하자 상태 → 시공 완료</li>
+                  <li><strong>방수 테스트 영상</strong> - 물 뿌리기, 압력 테스트</li>
+                  <li><strong>인증서 원본 + 번역본</strong> - 스캔 고화질 PDF</li>
+                </ul>
+
+                <h2>5.3 과정 공유로 신뢰 구축</h2>
+                <div class="highlight-box">
+                  <strong>바이어의 가장 큰 불안:</strong> "돈 보냈는데 제품이 안 오면 어떡하지?"<br>
+                  <strong>해결책:</strong> 모든 과정을 투명하게 공유
+                </div>
+
+                <h3>실시간 공유 체크리스트</h3>
+                <ul>
+                  <li>□ 주문 확인 즉시 (5분 이내) - 주문번호, 다음 단계, 담당자 연락처</li>
+                  <li>□ 생산 시작 (주문 후 1-2일) - 원료 준비 사진</li>
+                  <li>□ 중간 점검 (생산 중) - 생산 라인 사진 2-3장</li>
+                  <li>□ 품질 테스트 (생산 완료 후) - 테스트 결과 리포트</li>
+                  <li>□ 패키징 완료 - 최종 제품 여러 각도</li>
+                  <li>□ 출고 전 - 트래킹 번호, Invoice, Packing List</li>
+                  <li>□ 배송 중 (2-3일마다) - 현재 위치 업데이트</li>
+                  <li>□ 도착 후 3일 - 품질 확인 및 피드백 요청</li>
+                </ul>
+
+                <h2>5.4 이슈를 A/B/C 선택지로 관리</h2>
+                <div class="warning-box">
+                  <strong>절대 원칙: "안 됩니다"는 금지어!</strong><br>
+                  문제가 발생했을 때, 항상 해결 시나리오 3가지를 제시하세요.
+                </div>
+              </section>
+
+              <!-- CHAPTER 6 -->
+              <section id="edu-ch6">
+                <h1>CHAPTER 6. 소량 구매 전략 - 신뢰가 먼저, 비즈니스는 나중</h1>
+
+                <h2>6.1 왜 소량 구매를 권장하는가?</h2>
+                <table>
+                  <tr><th>방식</th><th>최소 주문</th><th>바이어 심리</th><th>거래 성사율</th></tr>
+                  <tr><td>전통적 B2B</td><td>500개</td><td>"500개나 사야 해? 위험해…"</td><td>10%</td></tr>
+                  <tr><td>우리의 방식</td><td>1-3개 (샘플)</td><td>"3개만 사면 돼? 한 번 해볼까?"</td><td>75%</td></tr>
+                </table>
+
+                <h2>6.2 성장 단계 전략</h2>
+                <table>
+                  <tr><th>단계</th><th>수량</th><th>목표</th><th>전략</th></tr>
+                  <tr><td>1단계</td><td>1-10개</td><td>신뢰 구축</td><td>프로모션 가격 (정가의 85%), 무료 배송, 시공 가이드 상세 제공</td></tr>
+                  <tr><td>2단계</td><td>50-300개</td><td>안정적 파트너십</td><td>정상 가격, 충성 고객 할인 5%, 정기 주문 시 추가 할인 3%</td></tr>
+                  <tr><td>3단계</td><td>1000개+</td><td>장기 파트너</td><td>VIP 가격 (15-20% 할인), 맞춤 브랜딩 무료, 전담 매니저 배정</td></tr>
+                </table>
+
+                <h2>6.3 샘플 최소화 정책</h2>
+                <div class="highlight-box">
+                  <strong>원칙: 샘플은 1-3개만</strong><br>
+                  왜? 샘플은 비즈니스가 아니기 때문입니다.
+                </div>
+              </section>
+
+              <!-- CHAPTER 7 -->
+              <section id="edu-ch7">
+                <h1>CHAPTER 7. 바이어 관계 관리 - 평생 고객으로 만들기</h1>
+
+                <h2>7.1 3단계 성장 관리</h2>
+                <table>
+                  <tr><th>단계</th><th>대상</th><th>목표</th><th>핵심 활동</th></tr>
+                  <tr><td>1단계</td><td>신규 바이어 (첫 주문)</td><td>강렬한 첫인상</td><td>5분 내 확인, 실시간 업데이트, 도착 예정일 리마인더</td></tr>
+                  <tr><td>2단계</td><td>재주문 바이어 (2-5회)</td><td>안정적 파트너십</td><td>충성 고객 할인, 신제품 우선 공유, 생일 축하 (+10% 쿠폰)</td></tr>
+                  <tr><td>3단계</td><td>VIP 바이어 (6회+)</td><td>장기 전략적 파트너</td><td>전담 매니저, 24시간 핫라인, VIP 가격, 한국 공장 초청</td></tr>
+                </table>
+
+                <h2>7.2 추천 보상 프로그램</h2>
+                <div class="success-box">
+                  <strong>원리: 만족한 고객이 최고의 영업사원</strong>
+                  <ul>
+                    <li><strong>레벨 1:</strong> 추천인이 첫 주문 → 추천한 사람 5% 할인, 신규 고객 5% 환영 할인</li>
+                    <li><strong>레벨 2:</strong> 추천인이 재주문 → 추천한 사람 10% 할인</li>
+                    <li><strong>레벨 3:</strong> 추천인이 VIP 승격 → 추천한 사람 $500 크레딧</li>
+                  </ul>
+                </div>
+              </section>
+
+              <!-- CHAPTER 8 -->
+              <section id="edu-ch8">
+                <h1>CHAPTER 8. 일일 체크리스트 - 실전 루틴</h1>
+
+                <h2>8.1 아침 루틴 (9:00-10:00)</h2>
+                <ul>
+                  <li>□ 신규 메시지 확인 (30분 내 응답) - 알리바바, 이메일, WhatsApp/WeChat</li>
+                  <li>□ 주문 현황 확인 - 신규 주문, 생산 중, 출고 예정</li>
+                  <li>□ 오늘의 우선순위 설정 - Top 3 긴급 업무 선정</li>
+                </ul>
+
+                <h2>8.2 오전 업무 (10:00-12:00)</h2>
+                <ul>
+                  <li>□ 견적서 발송 - 3가지 옵션 제시, 48시간 내 응답률 100% 목표</li>
+                  <li>□ 생산 현황 사진 공유 - 바이어에게 업데이트</li>
+                  <li>□ 신규 바이어 리서치 - 국가/지역 확인, 기후 특성 파악</li>
+                </ul>
+
+                <h2>8.3 오후 업무 (13:00-18:00)</h2>
+                <ul>
+                  <li>□ 바이어 팔로업 - 48시간 전 견적 보낸 바이어</li>
+                  <li>□ 기술 상담 - 인증서 번역, 수치 해석, 화상 상담</li>
+                  <li>□ 문제 해결 - 클레임 처리, A/B/C 옵션 제시</li>
+                </ul>
+
+                <h2>8.4 저녁 루틴 (18:00-19:00)</h2>
+                <ul>
+                  <li>□ 배송 트래킹 업데이트</li>
+                  <li>□ 미응답 리마인더</li>
+                  <li>□ 내일 준비</li>
+                </ul>
+              </section>
+
+              <!-- CHAPTER 9 -->
+              <section id="edu-ch9">
+                <h1>CHAPTER 9. 성공 사례 & 실패 사례</h1>
+
+                <h2>9.1 성공 사례</h2>
+
+                <h3>사례 1: 태국 바이어 Mr. Som</h3>
+                <div class="success-box">
+                  <p><strong>배경:</strong> 샘플 3개 요청, 방콕, 소규모 건설 프로젝트 테스트</p>
+                  <p><strong>우리의 대응:</strong></p>
+                  <ol>
+                    <li>30분 내 1차 응답</li>
+                    <li>태국 기후 분석 자료 제공</li>
+                    <li>SEA-3000 (통기형 방수재) 추천</li>
+                    <li>시공 영상 태국어 자막 제공</li>
+                  </ol>
+                  <p><strong>결과:</strong> 1개월 후 50개 → 3개월 후 200개 → 6개월 후 VIP 승격, 월 500개 정기 주문 → 현재 태국 총판</p>
+                  <p><strong>성공 요인:</strong> 빠른 응답, 지역 특화 솔루션, 언어 현지화, 단계적 신뢰 구축</p>
+                </div>
+
+                <h2>9.2 실패 사례 (교훈)</h2>
+
+                <h3>실패 사례 1: 인도 바이어 Mr. Patel</h3>
+                <div class="warning-box">
+                  <p><strong>배경:</strong> 샘플 20개 요청, 뭄바이, 목적 불명확</p>
+                  <p><strong>우리의 실수:</strong></p>
+                  <ol>
+                    <li>샘플 정책 무시하고 20개 발송</li>
+                    <li>목적 확인 안 함</li>
+                    <li>팔로업 안 함</li>
+                  </ol>
+                  <p><strong>결과:</strong> 샘플 받은 후 연락 두절, 샘플만 모으는 브로커였음, 손실: $300 + 시간</p>
+                  <p><strong>교훈:</strong> 샘플 정책 엄격히 지키기, 바이어 진정성 확인 필수, 목적 명확히 묻기</p>
+                </div>
+
+                <h3>실패 사례 2: 브라질 바이어 Mr. Silva</h3>
+                <div class="warning-box">
+                  <p><strong>배경:</strong> 첫 주문 100개 (좋은 시작), 상파울루, 소매 판매</p>
+                  <p><strong>우리의 실수:</strong></p>
+                  <ol>
+                    <li>납기 지연 (4주 → 6주)</li>
+                    <li>사전 공지 안 함</li>
+                    <li>보상 제안 안 함</li>
+                  </ol>
+                  <p><strong>결과:</strong> 부정적 리뷰, 재주문 없음, 브라질 시장에서 평판 악화</p>
+                  <p><strong>교훈:</strong> 납기 절대 지키기, 문제 발생 시 즉시 공유, 선제적 보상 제안, 한 명의 불만족 고객이 10명의 잠재 고객 잃게 함</p>
+                </div>
+              </section>
+
+              <!-- CHAPTER 10 -->
+              <section id="edu-ch10">
+                <h1>CHAPTER 10. 마무리 - 성공을 위한 마인드셋</h1>
+
+                <h2>10.1 핵심 원칙 8가지</h2>
+                <ol>
+                  <li><strong>제조를 넘어 브랜드 파트너로</strong> - "우리는 단순히 물건을 파는 것이 아니라, 바이어의 성공을 돕는 파트너입니다."</li>
+                  <li><strong>지역별 기후 맞춤 솔루션</strong> - "모든 지역에 같은 제품을 팔 수 없습니다. 기후 분석이 첫걸음입니다."</li>
+                  <li><strong>인증서 번역 + 수치 해석 + 기술 상담</strong> - "숫자만 보내지 마세요. 의미를 설명하세요."</li>
+                  <li><strong>30분 내 1차 응답</strong> - "완벽함보다 속도가 중요합니다."</li>
+                  <li><strong>사진과 영상 최대 활용</strong> - "텍스트 1,000자보다 사진 1장, 사진보다 영상 1개가 강력합니다."</li>
+                  <li><strong>과정 투명 공유</strong> - "바이어의 불안을 없애는 가장 좋은 방법은 투명함입니다."</li>
+                  <li><strong>A/B/C 선택지</strong> - "절대 '안 됩니다'라고 하지 마세요. 항상 3가지 해결책을 제시하세요."</li>
+                  <li><strong>소량으로 시작, 신뢰로 확장</strong> - "1-10개로 시작해서 1,000개로 성장하는 것이 우리의 전략입니다."</li>
+                </ol>
+
+                <h2>10.2 우리의 자부심</h2>
+                <div class="success-box">
+                  <ul>
+                    <li><strong>260만 세대 무하자</strong> → 우리 제품은 완벽합니다</li>
+                    <li><strong>특허 70개</strong> → 우리는 혁신합니다</li>
+                    <li><strong>제품 600종</strong> → 우리는 준비되어 있습니다</li>
+                    <li><strong>글로벌 파트너 250곳</strong> → 우리는 신뢰받습니다</li>
+                  </ul>
+                  <p><strong>여러분은 단순한 영업사원이 아닙니다.</strong><br>
+                  <strong>여러분은 한국 제조업의 자부심을 세계에 알리는 대사입니다.</strong></p>
+                </div>
+              </section>
+
+              <!-- 부록 -->
+              <section id="edu-appendix">
+                <h1>부록: 빠른 참조 자료</h1>
+
+                <h2>A. 국가별 추천 제품 매칭표</h2>
+                <table>
+                  <tr><th>국가/지역</th><th>기후 유형</th><th>추천 제품</th><th>핵심 메시지</th></tr>
+                  <tr><td>한국/일본/중국</td><td>사계절</td><td>EA-2000</td><td>유연성, 한파 대응</td></tr>
+                  <tr><td>태국/베트남</td><td>고온다습</td><td>SEA-3000</td><td>통기형, 곰팡이 방지</td></tr>
+                  <tr><td>인도/파키스탄</td><td>우기/건기</td><td>SA-4000</td><td>내열·내수 복합</td></tr>
+                  <tr><td>사우디/UAE</td><td>초고온</td><td>ME-5000</td><td>UV 저항, 탄성</td></tr>
+                  <tr><td>카자흐스탄</td><td>일교차 큼</td><td>CA-6000</td><td>내한·내열</td></tr>
+                </table>
+
+                <h2>B. 응답 템플릿 모음</h2>
+
+                <h3>신규 문의 응답</h3>
+                <div class="template-box">안녕하세요 [이름]님!
+
+메시지 감사합니다.
+[국가]에서 연락주셨네요!
+
+귀하의 지역은 [기후 특성]이므로
+[추천 제품]을 추천드립니다.
+
+24시간 내 상세 제안서 보내드리겠습니다.
+
+Best regards,
+[당신 이름]</div>
+
+                <h3>견적서 발송</h3>
+                <div class="template-box">[이름]님,
+
+요청하신 견적입니다:
+
+Option A: [제품A] - $[가격]
+Option B: [제품B] - $[가격]
+Option C: [제품C] - $[가격]
+
+각 옵션의 차이점:
+[간단 설명]
+
+질문 있으시면 언제든 연락주세요!</div>
+
+                <h3>주문 확인</h3>
+                <div class="template-box">[이름]님,
+
+주문 감사합니다!
+
+주문번호: [번호]
+수량: [수량]
+예상 완료: [날짜]
+
+실시간으로 업데이트 드리겠습니다!</div>
+
+                <div class="text-center mt-12 pt-8 border-t-2 border-slate-200">
+                  <p class="text-lg font-semibold text-slate-700">이 매뉴얼을 끝까지 읽어주셔서 감사합니다.</p>
+                  <p class="text-lg font-semibold text-slate-700">이제 실천할 시간입니다!</p>
+                  <p class="text-2xl mt-4">화이팅!</p>
+                </div>
+              </section>
+
             </div>
           </div>
         </div>
@@ -11742,6 +12354,30 @@ Best regards,
         }
       }
       return null;
+    }
+
+    // 교육자료 탭 전환
+    function switchEducationTab(tabName) {
+      // 모든 탭 버튼 비활성화
+      document.querySelectorAll('.edu-tab').forEach(tab => {
+        tab.classList.remove('border-blue-500', 'text-blue-600');
+        tab.classList.add('border-transparent', 'text-slate-500');
+      });
+      // 모든 탭 콘텐츠 숨기기
+      document.querySelectorAll('.edu-tab-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+      // 선택된 탭 활성화
+      const activeTab = document.getElementById(`eduTab-${tabName}`);
+      if (activeTab) {
+        activeTab.classList.remove('border-transparent', 'text-slate-500');
+        activeTab.classList.add('border-blue-500', 'text-blue-600');
+      }
+      // 선택된 콘텐츠 표시
+      const activeContent = document.getElementById(`eduContent-${tabName}`);
+      if (activeContent) {
+        activeContent.classList.remove('hidden');
+      }
     }
 
     function openPanel(taskId) {
