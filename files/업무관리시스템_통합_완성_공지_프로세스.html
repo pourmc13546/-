@@ -4012,36 +4012,42 @@
         <div id="ref-tds" class="ref-section hidden">
           <div class="bg-white rounded-xl shadow-sm p-6">
             <div class="flex justify-between items-center mb-4">
-              <h3 class="font-semibold text-slate-700">TDS (Technical Data Sheet)</h3>
+              <div>
+                <h3 class="font-semibold text-slate-700">TDS (Technical Data Sheet)</h3>
+                <p class="text-xs text-slate-500 mt-1">제품별 기술 데이터 시트</p>
+              </div>
               <div class="flex items-center gap-3">
-                <button onclick="loadGoogleDriveFiles('tds')" class="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                <button onclick="loadGoogleDriveFiles('tds')" class="text-sm text-slate-600 hover:text-slate-800 flex items-center gap-1">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                   새로고침
                 </button>
-                <a href="https://drive.google.com/drive/folders/1Ihxbpn80g7qqpmY8QnAqGxpQvLxX0XZL?usp=sharing" target="_blank" class="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                <a href="https://drive.google.com/drive/folders/1Ihxbpn80g7qqpmY8QnAqGxpQvLxX0XZL?usp=sharing" target="_blank" class="text-sm text-slate-600 hover:text-slate-800 flex items-center gap-1">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                  Google Drive 열기
+                  Google Drive
                 </a>
               </div>
             </div>
-            <!-- 폴더 목록 -->
+            <!-- 폴더 필터 -->
             <div id="tds-folders" class="mb-4">
-              <div class="flex flex-wrap gap-2 mb-4">
-                <button onclick="loadGoogleDriveFolder('tds', '')" class="tds-folder-btn px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors active">전체</button>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="loadGoogleDriveFolder('tds', '')" class="tds-folder-btn px-3 py-1 text-xs bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">전체</button>
               </div>
             </div>
-            <!-- 파일 목록 -->
-            <div id="tds-files" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div class="col-span-full text-center py-8 text-slate-500">
-                <svg class="w-12 h-12 mx-auto mb-3 text-slate-300 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                파일을 불러오는 중...
-              </div>
-            </div>
-            <div class="mt-4 p-4 bg-indigo-50 rounded-lg">
-              <p class="text-sm text-indigo-700 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                TDS는 제품의 물리적/화학적 특성, 사용법, 보관 조건 등을 포함합니다. Google Drive에서 자동으로 불러옵니다.
-              </p>
+            <!-- 파일 테이블 -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600">
+                  <tr>
+                    <th class="py-2 px-4 text-left font-medium">번호</th>
+                    <th class="py-2 px-4 text-left font-medium">파일명</th>
+                    <th class="py-2 px-4 text-left font-medium">폴더</th>
+                    <th class="py-2 px-4 text-center font-medium">다운로드</th>
+                  </tr>
+                </thead>
+                <tbody id="tds-files">
+                  <tr><td colspan="4" class="py-8 text-center text-slate-400">파일을 불러오는 중...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -4050,36 +4056,42 @@
         <div id="ref-msds" class="ref-section hidden">
           <div class="bg-white rounded-xl shadow-sm p-6">
             <div class="flex justify-between items-center mb-4">
-              <h3 class="font-semibold text-slate-700">MSDS (Material Safety Data Sheet)</h3>
+              <div>
+                <h3 class="font-semibold text-slate-700">MSDS (Material Safety Data Sheet)</h3>
+                <p class="text-xs text-slate-500 mt-1">제품별 물질안전보건자료</p>
+              </div>
               <div class="flex items-center gap-3">
-                <button onclick="loadGoogleDriveFiles('msds')" class="text-sm text-rose-600 hover:text-rose-800 flex items-center gap-1">
+                <button onclick="loadGoogleDriveFiles('msds')" class="text-sm text-slate-600 hover:text-slate-800 flex items-center gap-1">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                   새로고침
                 </button>
-                <a href="https://drive.google.com/drive/folders/1vHKa6TKQ4vSvYprWHBWLaLo-I_MI9fdD?usp=sharing" target="_blank" class="text-sm text-rose-600 hover:text-rose-800 flex items-center gap-1">
+                <a href="https://drive.google.com/drive/folders/1vHKa6TKQ4vSvYprWHBWLaLo-I_MI9fdD?usp=sharing" target="_blank" class="text-sm text-slate-600 hover:text-slate-800 flex items-center gap-1">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                  Google Drive 열기
+                  Google Drive
                 </a>
               </div>
             </div>
-            <!-- 폴더 목록 -->
+            <!-- 폴더 필터 -->
             <div id="msds-folders" class="mb-4">
-              <div class="flex flex-wrap gap-2 mb-4">
-                <button onclick="loadGoogleDriveFolder('msds', '')" class="msds-folder-btn px-3 py-1.5 text-sm bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition-colors active">전체</button>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="loadGoogleDriveFolder('msds', '')" class="msds-folder-btn px-3 py-1 text-xs bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">전체</button>
               </div>
             </div>
-            <!-- 파일 목록 -->
-            <div id="msds-files" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div class="col-span-full text-center py-8 text-slate-500">
-                <svg class="w-12 h-12 mx-auto mb-3 text-slate-300 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                파일을 불러오는 중...
-              </div>
-            </div>
-            <div class="mt-4 p-4 bg-rose-50 rounded-lg">
-              <p class="text-sm text-rose-700 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                MSDS는 화학물질의 안전한 취급, 보관, 운송에 필요한 정보를 포함합니다. Google Drive에서 자동으로 불러옵니다.
-              </p>
+            <!-- 파일 테이블 -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600">
+                  <tr>
+                    <th class="py-2 px-4 text-left font-medium">번호</th>
+                    <th class="py-2 px-4 text-left font-medium">파일명</th>
+                    <th class="py-2 px-4 text-left font-medium">폴더</th>
+                    <th class="py-2 px-4 text-center font-medium">다운로드</th>
+                  </tr>
+                </thead>
+                <tbody id="msds-files">
+                  <tr><td colspan="4" class="py-8 text-center text-slate-400">파일을 불러오는 중...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -11512,13 +11524,8 @@ Option C: [제품C] - $[가격]
       const filesContainer = document.getElementById(`${type}-files`);
       const foldersContainer = document.getElementById(`${type}-folders`);
 
-      // 로딩 표시
-      filesContainer.innerHTML = `
-        <div class="col-span-full text-center py-8 text-slate-500">
-          <svg class="w-12 h-12 mx-auto mb-3 text-slate-300 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          파일을 불러오는 중...
-        </div>
-      `;
+      // 로딩 표시 (테이블 형식)
+      filesContainer.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400">파일을 불러오는 중...</td></tr>`;
 
       // 메인 폴더에서 하위 폴더 목록 가져오기
       const items = await fetchDriveContents(folderId);
@@ -11527,15 +11534,12 @@ Option C: [제품C] - $[가격]
       data.folders = items.filter(item => item.mimeType === 'application/vnd.google-apps.folder');
       const rootFiles = items.filter(item => item.mimeType !== 'application/vnd.google-apps.folder');
 
-      // 폴더 버튼 렌더링
-      const btnClass = type === 'tds' ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200';
-      const activeBtnClass = type === 'tds' ? 'bg-indigo-500 text-white' : 'bg-rose-500 text-white';
-
-      let folderBtns = `<button onclick="loadGoogleDriveFolder('${type}', '')" class="${type}-folder-btn px-3 py-1.5 text-sm rounded-lg transition-colors ${activeBtnClass}">전체</button>`;
+      // 폴더 버튼 렌더링 (심플한 스타일)
+      let folderBtns = `<button onclick="loadGoogleDriveFolder('${type}', '')" class="${type}-folder-btn px-3 py-1 text-xs bg-slate-700 text-white rounded hover:bg-slate-800 transition-colors">전체</button>`;
       data.folders.forEach(folder => {
-        folderBtns += `<button onclick="loadGoogleDriveFolder('${type}', '${folder.id}')" class="${type}-folder-btn px-3 py-1.5 text-sm rounded-lg transition-colors ${btnClass}">${folder.name}</button>`;
+        folderBtns += `<button onclick="loadGoogleDriveFolder('${type}', '${folder.id}')" class="${type}-folder-btn px-3 py-1 text-xs bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">${folder.name}</button>`;
       });
-      foldersContainer.innerHTML = `<div class="flex flex-wrap gap-2 mb-4">${folderBtns}</div>`;
+      foldersContainer.innerHTML = `<div class="flex flex-wrap gap-2">${folderBtns}</div>`;
 
       // 모든 하위 폴더의 파일도 가져오기
       data.files = [...rootFiles];
@@ -11558,19 +11562,16 @@ Option C: [제품C] - $[가격]
       const data = type === 'tds' ? tdsData : msdsData;
       data.currentFolder = folderId;
 
-      // 버튼 활성화 상태 변경
-      const btnClass = type === 'tds' ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200';
-      const activeBtnClass = type === 'tds' ? 'bg-indigo-500 text-white' : 'bg-rose-500 text-white';
-
+      // 버튼 활성화 상태 변경 (심플한 스타일)
       document.querySelectorAll(`.${type}-folder-btn`).forEach(btn => {
-        btn.className = `${type}-folder-btn px-3 py-1.5 text-sm rounded-lg transition-colors ${btnClass}`;
+        btn.className = `${type}-folder-btn px-3 py-1 text-xs bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors`;
       });
-      event.target.className = `${type}-folder-btn px-3 py-1.5 text-sm rounded-lg transition-colors ${activeBtnClass}`;
+      event.target.className = `${type}-folder-btn px-3 py-1 text-xs bg-slate-700 text-white rounded hover:bg-slate-800 transition-colors`;
 
       renderDriveFiles(type);
     }
 
-    // 파일 목록 렌더링
+    // 파일 목록 렌더링 (테이블 형식)
     function renderDriveFiles(type) {
       const data = type === 'tds' ? tdsData : msdsData;
       const container = document.getElementById(`${type}-files`);
@@ -11582,41 +11583,30 @@ Option C: [제품C] - $[가격]
       }
 
       if (files.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full text-center py-8 text-slate-500">
-            <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            파일이 없습니다.
-          </div>
-        `;
+        container.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400">파일이 없습니다.</td></tr>`;
         return;
       }
 
-      const colorClass = type === 'tds' ? 'indigo' : 'rose';
-      container.innerHTML = files.map(file => {
-        const ext = file.name.split('.').pop().toUpperCase();
+      container.innerHTML = files.map((file, index) => {
         const downloadUrl = `https://drive.google.com/uc?export=download&id=${file.id}`;
-        const viewUrl = `https://drive.google.com/file/d/${file.id}/view`;
-        const folderTag = file.folderName ? `<span class="text-xs bg-${colorClass}-100 text-${colorClass}-600 px-2 py-0.5 rounded">${file.folderName}</span>` : '';
+        const folderName = file.folderName || '-';
 
         return `
-          <div class="border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow bg-white">
-            <div class="flex items-start gap-3">
-              <div class="w-10 h-10 bg-${colorClass}-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-${colorClass}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <tr class="border-b hover:bg-slate-50 group">
+            <td class="py-3 px-4 text-slate-500">${index + 1}</td>
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">📄</span>
+                <span class="font-medium text-slate-700">${file.name}</span>
               </div>
-              <div class="flex-1 min-w-0">
-                <h4 class="font-medium text-slate-800 text-sm truncate" title="${file.name}">${file.name}</h4>
-                <div class="flex items-center gap-2 mt-1">
-                  <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${ext}</span>
-                  ${folderTag}
-                </div>
-              </div>
-            </div>
-            <div class="flex gap-2 mt-3">
-              <a href="${downloadUrl}" class="flex-1 text-center text-xs px-3 py-1.5 bg-${colorClass}-500 text-white rounded-lg hover:bg-${colorClass}-600 transition-colors">다운로드</a>
-              <a href="${viewUrl}" target="_blank" class="text-xs px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">보기</a>
-            </div>
-          </div>
+            </td>
+            <td class="py-3 px-4 text-slate-600">${folderName}</td>
+            <td class="py-3 px-4 text-center">
+              <a href="${downloadUrl}" class="p-1.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 inline-flex" title="다운로드">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              </a>
+            </td>
+          </tr>
         `;
       }).join('');
     }
