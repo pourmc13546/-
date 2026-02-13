@@ -12098,16 +12098,36 @@ Option C: [제품C] - $[가격]
     // Supabase에 프로세스 데이터 저장
     async function saveProjectsDataToSupabase() {
       try {
-        const { data, error } = await supabaseClient
+        // 먼저 기존 데이터 확인
+        const { data: existing } = await supabaseClient
           .from('app_settings')
-          .upsert({
-            key: 'projectsData',
-            value: projectsData,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'key' });
+          .select('id')
+          .eq('key', 'projectsData')
+          .single();
 
-        if (error) {
-          console.error('❌ Supabase 저장 에러:', error);
+        let result;
+        if (existing) {
+          // 기존 데이터 업데이트
+          result = await supabaseClient
+            .from('app_settings')
+            .update({
+              value: JSON.stringify(projectsData),
+              updated_at: new Date().toISOString()
+            })
+            .eq('key', 'projectsData');
+        } else {
+          // 새로 삽입
+          result = await supabaseClient
+            .from('app_settings')
+            .insert({
+              key: 'projectsData',
+              value: JSON.stringify(projectsData),
+              updated_at: new Date().toISOString()
+            });
+        }
+
+        if (result.error) {
+          console.error('❌ Supabase 저장 에러:', result.error);
           return false;
         }
         console.log('✅ Supabase에 데이터 저장 완료');
@@ -13103,11 +13123,11 @@ Option C: [제품C] - $[가격]
     }
 
     // 새 그룹 추가
-    function addGroup() {
+    async function addGroup() {
       // 새 그룹 ID 생성
       const newGroupId = 'g_new_' + Date.now();
       const groupCount = groups.length + 1;
-      
+
       // 새 그룹 생성
       const newGroup = {
         id: newGroupId,
@@ -13115,24 +13135,27 @@ Option C: [제품C] - $[가격]
         expanded: true,
         tasks: []
       };
-      
+
       // 현재 프로젝트의 groups에 추가
       groups.push(newGroup);
-      
+
       // 원본 데이터에도 추가 (프로젝트별)
       if (currentProject !== 'all' && projectsData[currentProject]) {
         projectsData[currentProject].push(newGroup);
       }
-      
+
+      // Supabase에 저장
+      await saveProjectsDataToSupabase();
+
       // 다시 렌더링
       renderTasks();
       updateFilterCounts();
-      
+
       // 그룹명 인라인 편집 모드 진입
       setTimeout(() => {
         startEditGroupName(newGroupId);
       }, 100);
-      
+
       showToast('새 그룹이 추가되었습니다. 이름을 입력하세요.');
     }
 
@@ -13171,14 +13194,14 @@ Option C: [제품C] - $[가격]
     }
 
     // 그룹명 저장
-    function saveGroupName(groupId, newName) {
+    async function saveGroupName(groupId, newName) {
       const group = groups.find(g => g.id === groupId);
       if (!group) return;
-      
+
       const trimmedName = newName.trim();
       if (trimmedName) {
         group.name = trimmedName;
-        
+
         // 원본 데이터에도 반영
         if (currentProject !== 'all' && projectsData[currentProject]) {
           const originalGroup = projectsData[currentProject].find(g => g.id === groupId);
@@ -13186,10 +13209,12 @@ Option C: [제품C] - $[가격]
             originalGroup.name = trimmedName;
           }
         }
-        
+
+        // Supabase에 저장
+        await saveProjectsDataToSupabase();
         showToast('그룹 이름이 변경되었습니다.');
       }
-      
+
       renderTasks();
     }
 
@@ -13199,17 +13224,17 @@ Option C: [제품C] - $[가격]
     }
 
     // 그룹에 업무 추가
-    function addTaskToGroup(groupId) {
+    async function addTaskToGroup(groupId) {
       const group = groups.find(g => g.id === groupId);
       if (!group) return;
-      
+
       const taskName = prompt('업무 이름을 입력하세요:', '📌 새 업무');
       if (!taskName || !taskName.trim()) return;
-      
+
       // 새 업무 ID 생성
       const newTaskId = Date.now();
       const taskNum = countAllTasks() + 1;
-      
+
       const newTask = {
         id: newTaskId,
         name: taskName.trim(),
@@ -13220,16 +13245,19 @@ Option C: [제품C] - $[가격]
         progress: 0,
         num: taskNum
       };
-      
+
       group.tasks.push(newTask);
-      
+
       // 그룹이 닫혀있으면 열기
       group.expanded = true;
-      
+
+      // Supabase에 저장
+      await saveProjectsDataToSupabase();
+
       renderTasks();
       updateFilterCounts();
       showToast('새 업무가 추가되었습니다.');
-      
+
       // 새 업무 패널 열기
       openPanel(newTaskId);
     }
@@ -13507,14 +13535,19 @@ Option C: [제품C] - $[가격]
       document.getElementById('total-count').textContent = countFilteredTasks();
     }
 
-    function addGroup() {
-      const newId = 'g' + (groups.length + 1);
-      groups.push({
+    async function addGroup() {
+      const newId = 'g_new_' + Date.now();
+      const newGroup = {
         id: newId,
         name: '새 그룹',
         expanded: true,
         tasks: []
-      });
+      };
+      groups.push(newGroup);
+      if (currentProject !== 'all' && projectsData[currentProject]) {
+        projectsData[currentProject].push(newGroup);
+      }
+      await saveProjectsDataToSupabase();
       renderTasks();
     }
 
