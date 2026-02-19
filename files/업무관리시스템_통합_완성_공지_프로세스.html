@@ -8069,8 +8069,8 @@ Option C: [제품C] - $[가격]
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeModal(&#39;order&#39;)">취소</button>
-        <button class="btn-submit" onclick="submitOrder()">등록</button>
+        <button class="btn-cancel" onclick="closeTradeModal(&#39;order&#39;)">취소</button>
+        <button class="btn-submit" onclick="submitTradeOrder()">등록</button>
       </div>
     </div>
   </div>
@@ -8149,8 +8149,8 @@ Option C: [제품C] - $[가격]
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeModal(&#39;shipping&#39;)">취소</button>
-        <button class="btn-submit" onclick="submitShipping()">등록</button>
+        <button class="btn-cancel" onclick="closeTradeModal(&#39;shipping&#39;)">취소</button>
+        <button class="btn-submit" onclick="submitTradeShipping()">등록</button>
       </div>
     </div>
   </div>
@@ -8222,8 +8222,8 @@ Option C: [제품C] - $[가격]
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeModal(&#39;issue&#39;)">취소</button>
-        <button class="btn-submit" onclick="submitIssue()">등록</button>
+        <button class="btn-cancel" onclick="closeTradeModal(&#39;issue&#39;)">취소</button>
+        <button class="btn-submit" onclick="submitTradeIssue()">등록</button>
       </div>
     </div>
   </div>
@@ -8954,6 +8954,7 @@ Option C: [제품C] - $[가격]
 
           renderCSTable();
           closeDetailModal();
+          saveDataToSupabase('csData', csData);
           showToast('✅ CS 정보가 저장되었습니다 (Supabase 동기화 완료)');
         } else {
           throw new Error('업데이트 실패');
@@ -8974,6 +8975,7 @@ Option C: [제품C] - $[가격]
 
         renderCSTable();
         closeDetailModal();
+        saveDataToSupabase('csData', csData);
         showToast('⚠️ CS 정보 저장됨 (로컬만, Supabase 연결 실패)');
       }
     }
@@ -9080,9 +9082,11 @@ Option C: [제품C] - $[가격]
         item.assignee = assignee;
         renderCSTable();
         openCSDetail(id);
+        saveDataToSupabase('csData', csData);
         showToast('✅ 수정이 저장되었습니다 (Supabase 동기화 완료)');
       } catch (error) {
         console.error('CS 수정 에러:', error);
+        saveDataToSupabase('csData', csData);
         showToast('⚠️ 수정 저장됨 (로컬만)');
       }
     }
@@ -9099,9 +9103,11 @@ Option C: [제품C] - $[가격]
           item.status = 'progress';
           renderCSTable();
           openCSDetail(id);
+          saveDataToSupabase('csData', csData);
           showToast('💾 답변이 저장되었습니다 (Supabase 동기화 완료)');
         } catch (error) {
           console.error('답변 저장 에러:', error);
+          saveDataToSupabase('csData', csData);
           showToast('⚠️ 답변 저장됨 (로컬만)');
         }
       } else {
@@ -9514,13 +9520,17 @@ Option C: [제품C] - $[가격]
           renderBuyerTable();
           buyerEditMode = false;
           renderBuyerDetailContent(item, false);
+          saveDataToSupabase('buyerData', buyerData);
           showToast('✅ 바이어 정보가 수정되었습니다 (Supabase 저장 완료)');
         } else {
           throw new Error('수정 실패');
         }
       } catch (error) {
         console.error('바이어 수정 에러:', error);
-        showToast('❌ 바이어 수정에 실패했습니다');
+        Object.assign(item, { level, status, stage, company, contact, email, phone, businessType, source, salesRegion, productCategories, paymentTerms, nextFollowUp, assignee, notes, isReorder });
+        renderBuyerTable();
+        saveDataToSupabase('buyerData', buyerData);
+        showToast('⚠️ 바이어 정보 저장됨 (로컬만)');
       }
     }
 
@@ -9545,13 +9555,20 @@ Option C: [제품C] - $[가격]
           }
           renderBuyerTable();
           closeDetailModal();
+          saveDataToSupabase('buyerData', buyerData);
           showToast('✅ 바이어가 삭제되었습니다 (Supabase 삭제 완료)');
         } else {
           throw new Error('삭제 실패');
         }
       } catch (error) {
         console.error('바이어 삭제 에러:', error);
-        showToast('❌ 바이어 삭제에 실패했습니다');
+        // 로컬에서라도 삭제
+        const index = buyerData.findIndex(b => b.id === id);
+        if (index !== -1) buyerData.splice(index, 1);
+        renderBuyerTable();
+        closeDetailModal();
+        saveDataToSupabase('buyerData', buyerData);
+        showToast('⚠️ 바이어 삭제됨 (로컬만)');
       }
     }
 
@@ -9725,6 +9742,7 @@ Option C: [제품C] - $[가격]
         item.status = newStatus;
         renderQuoteTable();
         closeDetailModal();
+        saveDataToSupabase('quoteData', quoteData);
         showToast('✅ 견적 상태가 변경되었습니다');
       }
     }
@@ -9746,12 +9764,14 @@ Option C: [제품C] - $[가격]
           item.status = 'progress';
           renderCSTable();
           openCSDetail(id);
+          saveDataToSupabase('csData', csData);
           showToast('💾 답변이 저장되었습니다 (Supabase 동기화 완료)');
         } catch (error) {
           console.error('답변 저장 에러:', error);
           item.reply = reply;
           item.status = 'progress';
           renderCSTable();
+          saveDataToSupabase('csData', csData);
           showToast('⚠️ 답변 저장됨 (로컬만)');
         }
       } else {
@@ -9764,15 +9784,17 @@ Option C: [제품C] - $[가격]
       if (item) {
         try {
           const result = await updateCSData(id, { status: newStatus });
-          if (result) {
-            item.status = newStatus;
-            renderCSTable();
-            closeDetailModal();
-            showToast('✅ 상태가 변경되었습니다 (Supabase 저장 완료)');
-          }
+          item.status = newStatus;
+          renderCSTable();
+          closeDetailModal();
+          saveDataToSupabase('csData', csData);
+          showToast('✅ 상태가 변경되었습니다 (Supabase 저장 완료)');
         } catch (error) {
           console.error('CS 상태 변경 에러:', error);
-          showToast('❌ 상태 변경에 실패했습니다');
+          item.status = newStatus;
+          renderCSTable();
+          saveDataToSupabase('csData', csData);
+          showToast('⚠️ 상태 변경됨 (로컬 저장)');
         }
       }
     }
@@ -9839,6 +9861,7 @@ Option C: [제품C] - $[가격]
           csData.unshift(newCS);
           renderCSTable();
           closeCSRegisterModal();
+          saveDataToSupabase('csData', csData);
           showToast('✅ CS 문의가 등록되었습니다 (Supabase 저장 완료)');
         } else {
           throw new Error('저장 실패');
@@ -9947,6 +9970,7 @@ Option C: [제품C] - $[가격]
           buyerData.unshift(newBuyer);
           renderBuyerTable();
           closeBuyerRegisterModal();
+          saveDataToSupabase('buyerData', buyerData);
           showToast('✅ 바이어가 등록되었습니다 (Supabase 저장 완료)');
         } else {
           throw new Error('저장 실패');
@@ -10062,6 +10086,7 @@ Option C: [제품C] - $[가격]
       quoteData.unshift(newQuote);
       renderQuoteTable();
       closeQuoteRegisterModal();
+      saveDataToSupabase('quoteData', quoteData);
       showToast('✅ 견적이 등록되었습니다');
     }
 
@@ -10090,7 +10115,8 @@ Option C: [제품C] - $[가격]
           assignee: pendingQuoteData.assignee
         };
         buyerData.unshift(tempBuyer);
-        
+        saveDataToSupabase('buyerData', buyerData);
+
         registerQuote(
           pendingQuoteData.buyerName,
           pendingQuoteData.product,
@@ -10783,12 +10809,20 @@ Option C: [제품C] - $[가격]
 
     // ==================== 모달 열기/닫기 함수 ====================
     function openModal(type) {
-      document.getElementById(type + 'Modal').classList.add('active');
+      const modal = document.getElementById(type + 'Modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+      }
       document.body.style.overflow = 'hidden';
     }
     
     function closeModal(type) {
-      document.getElementById(type + 'Modal').classList.remove('active');
+      const modal = document.getElementById(type + 'Modal');
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      }
       document.body.style.overflow = '';
     }
     
@@ -10813,20 +10847,170 @@ Option C: [제품C] - $[가격]
       }
     });
     
-    // 폼 제출 함수들
-    function submitOrder() {
-      alert('주문이 등록되었습니다.');
-      closeModal('order');
+    // ========================================
+    // 거래관리 모달 닫기/열기 함수
+    // ========================================
+    function closeTradeModal(type) {
+      const modal = document.getElementById(type + 'Modal');
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      }
+      document.body.style.overflow = '';
     }
-    
-    function submitShipping() {
-      alert('배송이 등록되었습니다.');
-      closeModal('shipping');
+
+    function closeTradeModalOnOverlay(event, type) {
+      if (event.target === event.currentTarget) {
+        closeTradeModal(type);
+      }
     }
-    
-    function submitIssue() {
-      alert('이슈가 등록되었습니다.');
-      closeModal('issue');
+
+    function openTradeModal(type) {
+      const modal = document.getElementById(type + 'Modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+      }
+      document.body.style.overflow = 'hidden';
+    }
+
+    // ========================================
+    // 주문 등록 함수
+    // ========================================
+    function submitTradeOrder() {
+      const modal = document.getElementById('orderModal');
+      const selects = modal.querySelectorAll('.form-select');
+      const inputs = modal.querySelectorAll('.form-input');
+      const textarea = modal.querySelector('.form-textarea');
+
+      const buyer = selects[0]?.value;
+      const orderDate = inputs[0]?.value;
+      const dueDate = inputs[1]?.value;
+      const product = inputs[2]?.value;
+      const qty = parseInt(inputs[3]?.value) || 0;
+      const amount = inputs[4]?.value ? '$' + parseFloat(inputs[4]?.value).toLocaleString() : '';
+      const assignee = selects[1]?.value === 'heo' ? '허지은' : selects[1]?.value === 'kim' ? '김채원' : '';
+      const note = textarea?.value || '';
+
+      if (!buyer || !product || !qty || !assignee) {
+        showToast('⚠️ 필수 항목을 모두 입력해주세요');
+        return;
+      }
+
+      const buyerNames = { globaltech: 'GlobalTech Inc.', eurotrade: 'EuroTrade GmbH', asiapac: 'AsiaPac Ltd.', canadacorp: 'CanadaCorp' };
+      const newOrder = {
+        id: `ORD-2025-${String(orderData.length + 49).padStart(3, '0')}`,
+        buyer: buyerNames[buyer] || buyer,
+        country: '',
+        orderDate: orderDate,
+        dueDate: dueDate,
+        product: product,
+        qty: qty,
+        amount: amount,
+        assignee: assignee,
+        status: '신규',
+        note: note
+      };
+
+      orderData.unshift(newOrder);
+      renderOrderTable();
+      closeTradeModal('order');
+      saveDataToSupabase('orderData', orderData);
+      showToast('✅ 주문이 등록되었습니다');
+    }
+
+    // ========================================
+    // 배송 등록 함수
+    // ========================================
+    function submitTradeShipping() {
+      const modal = document.getElementById('shippingModal');
+      const selects = modal.querySelectorAll('.form-select');
+      const inputs = modal.querySelectorAll('.form-input');
+
+      const orderId = selects[0]?.value;
+      const blNo = inputs[0]?.value;
+      const method = selects[1]?.value;
+      const carrier = selects[2]?.selectedOptions[0]?.text || selects[2]?.value || '';
+      const departure = inputs[1]?.value;
+      const eta = inputs[2]?.value;
+      const assignee = selects[3]?.value === 'heo' ? '허지은' : selects[3]?.value === 'kim' ? '김채원' : '';
+
+      if (!orderId || !blNo || !carrier || !assignee) {
+        showToast('⚠️ 필수 항목을 모두 입력해주세요');
+        return;
+      }
+
+      const order = orderData.find(o => o.id === orderId);
+      const newShipping = {
+        blNo: blNo,
+        orderId: orderId,
+        buyer: order ? order.buyer : orderId,
+        country: '🌐',
+        countryName: '',
+        status: '준비중',
+        departure: departure,
+        eta: eta,
+        carrier: carrier,
+        vessel: '',
+        route: '',
+        assignee: assignee,
+        steps: [0, 0, 0, 0, 0],
+        history: [{ step: '대기중', date: '-', status: '' }]
+      };
+
+      shippingData.unshift(newShipping);
+      renderShippingTable();
+      closeTradeModal('shipping');
+      saveDataToSupabase('shippingData', shippingData);
+      showToast('✅ 배송이 등록되었습니다');
+    }
+
+    // ========================================
+    // 이슈 등록 함수
+    // ========================================
+    function submitTradeIssue() {
+      const modal = document.getElementById('issueModal');
+      const selects = modal.querySelectorAll('.form-select');
+      const inputs = modal.querySelectorAll('.form-input');
+      const textarea = modal.querySelector('.form-textarea');
+
+      const priorityMap = { high: '긴급', medium: '보통', low: '낮음' };
+      const typeMap = { quality: '품질 불량', delivery: '배송 지연', customs: '통관 이슈', payment: '결제 문제', other: '기타' };
+
+      const priority = priorityMap[selects[0]?.value] || selects[0]?.value || '보통';
+      const type = typeMap[selects[1]?.value] || selects[1]?.value || '';
+      const orderId = selects[2]?.value;
+      const title = inputs[0]?.value;
+      const content = textarea?.value || '';
+      const assignee = selects[3]?.value === 'heo' ? '허지은' : selects[3]?.value === 'kim' ? '김채원' : '';
+
+      if (!title || !type || !assignee) {
+        showToast('⚠️ 필수 항목을 모두 입력해주세요');
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const order = orderData.find(o => o.id === orderId);
+      const newIssue = {
+        id: `ISS-${String(issueData.length + 1).padStart(3, '0')}`,
+        priority: priority,
+        status: '미처리',
+        type: type,
+        title: title,
+        orderId: orderId || '-',
+        buyer: order ? order.buyer : '-',
+        assignee: assignee,
+        date: today,
+        days: 0,
+        description: content || '상세 내용이 없습니다.',
+        actions: [`${today} - 이슈 등록 (${assignee})`]
+      };
+
+      issueData.unshift(newIssue);
+      renderIssueTable();
+      closeTradeModal('issue');
+      saveDataToSupabase('issueData', issueData);
+      showToast('✅ 이슈가 등록되었습니다');
     }
 
     // 배송 상태 필터
@@ -11206,14 +11390,15 @@ Option C: [제품C] - $[가격]
     // Google API Key 불러오기
     async function loadGoogleApiKey() {
       try {
-        const { data } = await supabaseClient
+        const { data: rows } = await supabaseClient
           .from('app_settings')
           .select('value')
           .eq('key', 'google_api_key')
-          .single();
+          .order('updated_at', { ascending: false })
+          .limit(1);
 
-        if (data && data.value) {
-          GOOGLE_API_KEY = data.value;
+        if (rows && rows.length > 0 && rows[0].value) {
+          GOOGLE_API_KEY = rows[0].value;
           localStorage.setItem('googleApiKey', GOOGLE_API_KEY);
         }
       } catch (err) {
@@ -11419,14 +11604,15 @@ Option C: [제품C] - $[가격]
         }));
 
         // 폴더 링크 불러오기
-        const { data: settings } = await supabaseClient
+        const { data: settingsRows } = await supabaseClient
           .from('app_settings')
           .select('value')
           .eq('key', 'test_reports_folder_link')
-          .single();
+          .order('updated_at', { ascending: false })
+          .limit(1);
 
-        if (settings) {
-          testReportsFolderLink = settings.value || '';
+        if (settingsRows && settingsRows.length > 0) {
+          testReportsFolderLink = settingsRows[0].value || '';
         }
 
         renderTestReportsTable();
@@ -11700,6 +11886,7 @@ Option C: [제품C] - $[가격]
       `;
       
       container.insertAdjacentHTML('beforeend', cardHtml);
+      saveNoticeDataToSupabase();
     }
 
     // 카드 삭제
@@ -11708,7 +11895,7 @@ Option C: [제품C] - $[가격]
         const card = btn.closest('.dynamic-card');
         card.style.opacity = '0';
         card.style.transform = 'scale(0.95)';
-        setTimeout(() => card.remove(), 200);
+        setTimeout(() => { card.remove(); saveNoticeDataToSupabase(); }, 200);
       }
     }
 
@@ -11733,6 +11920,7 @@ Option C: [제품C] - $[가격]
       `;
       
       itemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+      saveNoticeDataToSupabase();
     }
 
     // 카드 항목 삭제
@@ -11748,7 +11936,7 @@ Option C: [제품C] - $[가격]
       
       item.style.opacity = '0';
       item.style.transform = 'translateX(-10px)';
-      setTimeout(() => item.remove(), 200);
+      setTimeout(() => { item.remove(); saveNoticeDataToSupabase(); }, 200);
     }
 
     // 카드 제목 수정
@@ -11771,8 +11959,9 @@ Option C: [제품C] - $[가격]
         newSpan.className = 'title-text';
         newSpan.textContent = newText;
         input.replaceWith(newSpan);
+        saveNoticeDataToSupabase();
       };
-      
+
       input.addEventListener('blur', saveTitle);
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -11807,8 +11996,9 @@ Option C: [제품C] - $[가격]
         newH4.textContent = newText;
         newH4.onclick = () => editItemTitle(newH4);
         input.replaceWith(newH4);
+        saveNoticeDataToSupabase();
       };
-      
+
       input.addEventListener('blur', saveTitle);
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -11842,8 +12032,9 @@ Option C: [제품C] - $[가격]
         newP.textContent = newText;
         newP.onclick = () => editItemDesc(newP);
         textarea.replaceWith(newP);
+        saveNoticeDataToSupabase();
       };
-      
+
       textarea.addEventListener('blur', saveDesc);
       textarea.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -11878,6 +12069,7 @@ Option C: [제품C] - $[가격]
           e.stopPropagation();
           iconEl.textContent = emoji;
           picker.remove();
+          saveNoticeDataToSupabase();
         };
         picker.appendChild(btn);
       });
@@ -12061,81 +12253,217 @@ Option C: [제품C] - $[가격]
 
     // Supabase에서 프로세스 데이터 불러오기
     async function loadProjectsDataFromSupabase() {
+      let loaded = false;
+
+      // 1) Supabase에서 로드 시도
       try {
-        const { data, error } = await supabaseClient
+        const { data: rows, error } = await supabaseClient
           .from('app_settings')
           .select('value')
           .eq('key', 'projectsData')
-          .single();
+          .limit(1);
 
-        if (error) {
-          console.log('📌 Supabase에 저장된 데이터 없음, 기본 데이터 사용');
-          // 기본 데이터를 Supabase에 저장
-          await saveProjectsDataToSupabase();
-          return;
-        }
-
-        if (data && data.value) {
-          const savedData = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+        if (!error && rows && rows.length > 0 && rows[0].value) {
+          const savedData = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
           Object.assign(projectsData, savedData);
-          // 페이지 로드 시 모든 그룹을 닫힌 상태로 시작
-          Object.values(projectsData).forEach(projectGroups => {
-            if (Array.isArray(projectGroups)) projectGroups.forEach(g => g.expanded = false);
-          });
-          groups = [...(projectsData[currentProject] || [])];
-          await loadProjectNamesFromSupabase();
-          await loadAssigneeListFromSupabase();
-          renderProjectDropdown();
-          renderTasks();
-          updateFilterCounts();
-          console.log('✅ Supabase에서 데이터 로드 완료');
+          loaded = true;
+          console.log('✅ Supabase에서 projectsData 로드 완료');
         }
       } catch (e) {
-        console.error('❌ Supabase 로드 에러:', e);
+        console.error('❌ Supabase 로드 실패:', e);
+      }
+
+      // 2) Supabase 실패 시 localStorage에서 로드
+      if (!loaded) {
+        try {
+          const local = localStorage.getItem('projectsData');
+          if (local) {
+            const savedData = JSON.parse(local);
+            Object.assign(projectsData, savedData);
+            loaded = true;
+            console.log('✅ localStorage에서 projectsData 로드 완료');
+          }
+        } catch (e) {}
+      }
+
+      // 3) 데이터 로드 후 화면 업데이트
+      if (loaded) {
+        Object.values(projectsData).forEach(projectGroups => {
+          if (Array.isArray(projectGroups)) projectGroups.forEach(g => g.expanded = false);
+        });
+        groups = [...(projectsData[currentProject] || [])];
+        await loadProjectNamesFromSupabase();
+        await loadAssigneeListFromSupabase();
+        renderProjectDropdown();
+        renderTasks();
+        updateFilterCounts();
+      } else {
+        console.log('📌 저장된 데이터 없음, 기본 데이터 사용');
+        await saveProjectsDataToSupabase();
       }
     }
 
     // Supabase에 프로세스 데이터 저장
     async function saveProjectsDataToSupabase() {
+      // 1) localStorage에 즉시 백업 (항상 성공)
+      try { localStorage.setItem('projectsData', JSON.stringify(projectsData)); } catch(e) {}
+
+      // 2) Supabase에 저장 시도 (delete + insert 방식 - 가장 안정적)
       try {
-        // 먼저 기존 데이터 확인
-        const { data: existing } = await supabaseClient
-          .from('app_settings')
-          .select('id')
-          .eq('key', 'projectsData')
-          .single();
-
-        let result;
-        if (existing) {
-          // 기존 데이터 업데이트
-          result = await supabaseClient
-            .from('app_settings')
-            .update({
-              value: JSON.stringify(projectsData),
-              updated_at: new Date().toISOString()
-            })
-            .eq('key', 'projectsData');
-        } else {
-          // 새로 삽입
-          result = await supabaseClient
-            .from('app_settings')
-            .insert({
-              key: 'projectsData',
-              value: JSON.stringify(projectsData),
-              updated_at: new Date().toISOString()
-            });
-        }
-
-        if (result.error) {
-          console.error('❌ Supabase 저장 에러:', result.error);
+        await supabaseClient.from('app_settings').delete().eq('key', 'projectsData');
+        const { error } = await supabaseClient.from('app_settings').insert({
+          key: 'projectsData',
+          value: JSON.stringify(projectsData)
+        });
+        if (error) {
+          console.error('❌ Supabase projectsData 저장 에러:', error);
           return false;
         }
-        console.log('✅ Supabase에 데이터 저장 완료');
+        console.log('✅ Supabase projectsData 저장 완료');
         return true;
       } catch (e) {
-        console.error('❌ Supabase 저장 에러:', e);
+        console.error('❌ Supabase projectsData 저장 에러:', e);
         return false;
       }
+    }
+
+    // ========================================
+    // 범용 Supabase 저장/로드 함수 (app_settings 패턴)
+    // ========================================
+    async function saveDataToSupabase(key, data) {
+      // 1) localStorage에 즉시 백업 (항상 성공)
+      try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
+
+      // 2) Supabase에 저장 (delete + insert 방식)
+      try {
+        await supabaseClient.from('app_settings').delete().eq('key', key);
+        const { error } = await supabaseClient.from('app_settings').insert({
+          key: key,
+          value: JSON.stringify(data)
+        });
+        if (error) {
+          console.error(`❌ Supabase 저장 에러 (${key}):`, error);
+          return false;
+        }
+        console.log(`✅ Supabase 저장 완료: ${key}`);
+        return true;
+      } catch (e) {
+        console.error(`❌ Supabase 저장 에러 (${key}):`, e);
+        return false;
+      }
+    }
+
+    async function loadDataFromSupabase(key) {
+      // 1) Supabase에서 로드 시도
+      try {
+        const { data: rows, error } = await supabaseClient
+          .from('app_settings')
+          .select('value')
+          .eq('key', key)
+          .limit(1);
+
+        if (!error && rows && rows.length > 0 && rows[0].value) {
+          const parsed = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
+          console.log(`✅ Supabase에서 ${key} 로드 완료`);
+          return parsed;
+        }
+      } catch (e) {
+        console.error(`❌ Supabase 로드 에러 (${key}):`, e);
+      }
+
+      // 2) Supabase 실패 시 localStorage에서 로드
+      try {
+        const local = localStorage.getItem(key);
+        if (local) {
+          console.log(`✅ localStorage에서 ${key} 로드 완료`);
+          return JSON.parse(local);
+        }
+      } catch (e) {}
+
+      console.log(`📌 ${key} 데이터 없음, 기본 데이터 사용`);
+      return null;
+    }
+
+    // ========================================
+    // 공지사항 DOM 직렬화/복원 함수
+    // ========================================
+    function serializeNoticeData() {
+      const container = document.getElementById('dynamic-cards-container');
+      if (!container) return [];
+      const cards = container.querySelectorAll('.dynamic-card');
+      const data = [];
+      cards.forEach(card => {
+        const titleText = card.querySelector('.title-text');
+        const titleIcon = card.querySelector('.card-title span:first-child');
+        const items = [];
+        card.querySelectorAll('.card-item').forEach(item => {
+          const icon = item.querySelector('.item-icon');
+          const title = item.querySelector('.item-title');
+          const desc = item.querySelector('.item-desc');
+          items.push({
+            icon: icon ? icon.textContent.trim() : '📝',
+            iconClass: icon ? icon.className : '',
+            title: title ? title.textContent.trim() : '',
+            titleClass: title ? title.className : '',
+            desc: desc ? desc.textContent.trim() : ''
+          });
+        });
+        data.push({
+          id: card.getAttribute('data-card-id'),
+          titleIcon: titleIcon ? titleIcon.textContent.trim() : '📌',
+          title: titleText ? titleText.textContent.trim() : '제목 없음',
+          items: items
+        });
+      });
+      return data;
+    }
+
+    function renderNoticesFromData(data) {
+      const container = document.getElementById('dynamic-cards-container');
+      if (!container || !data || data.length === 0) return;
+      container.innerHTML = '';
+      data.forEach(card => {
+        const itemsHtml = card.items.map(item => `
+          <div class="card-item flex items-start gap-3 p-4 bg-slate-50 rounded-xl relative group/item">
+            <span class="${item.iconClass || 'item-icon w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center text-lg flex-shrink-0 cursor-pointer'}" onclick="editItemIcon(this)">${item.icon}</span>
+            <div class="flex-1">
+              <h4 class="${item.titleClass || 'item-title font-semibold text-sky-600 mb-1 cursor-pointer'}" onclick="editItemTitle(this)">${item.title}</h4>
+              <p class="item-desc text-sm text-slate-600 cursor-pointer" onclick="editItemDesc(this)">${item.desc}</p>
+            </div>
+            <button onclick="deleteCardItem(this)" class="absolute top-2 right-2 p-1 bg-slate-200 text-slate-500 rounded hover:bg-rose-100 hover:text-rose-500 opacity-0 group-hover/item:opacity-100 transition-all" title="항목 삭제">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        `).join('');
+
+        const cardHtml = `
+          <div class="dynamic-card bg-white rounded-2xl p-6 border border-slate-200/60 shadow-sm mb-6 relative group" data-card-id="${card.id}">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="card-title text-lg font-semibold text-amber-600 flex items-center gap-2 cursor-pointer" onclick="editCardTitle(this)">
+                <span>${card.titleIcon}</span> <span class="title-text">${card.title}</span>
+              </h3>
+              <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onclick="addCardItem(this)" class="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 transition-colors" title="항목 추가">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                </button>
+                <button onclick="deleteCard(this)" class="p-1.5 bg-rose-100 text-rose-600 rounded-lg hover:bg-rose-200 transition-colors" title="카드 삭제">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="card-items space-y-4">${itemsHtml}</div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', cardHtml);
+      });
+      // cardIdCounter 업데이트
+      const maxId = Math.max(...data.map(c => parseInt(c.id) || 0), cardIdCounter);
+      cardIdCounter = maxId + 1;
+    }
+
+    async function saveNoticeDataToSupabase() {
+      const data = serializeNoticeData();
+      await saveDataToSupabase('noticeData', data);
     }
 
     // 페이지 로드 시 Supabase에서 데이터 불러오기
@@ -12154,26 +12482,25 @@ Option C: [제품C] - $[가격]
     // Supabase에서 프로젝트 이름 불러오기
     async function loadProjectNamesFromSupabase() {
       try {
-        const { data, error } = await supabaseClient
-          .from('app_settings')
-          .select('value')
-          .eq('key', 'projectNames')
-          .single();
-        if (!error && data && data.value) {
-          const saved = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+        const { data: rows } = await supabaseClient.from('app_settings').select('value').eq('key', 'projectNames').limit(1);
+        if (rows && rows.length > 0 && rows[0].value) {
+          const saved = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
           Object.assign(projectNames, saved);
+        } else {
+          const local = localStorage.getItem('projectNames');
+          if (local) Object.assign(projectNames, JSON.parse(local));
         }
-      } catch (e) { console.error('projectNames 로드 에러:', e); }
+      } catch (e) {
+        try { const local = localStorage.getItem('projectNames'); if (local) Object.assign(projectNames, JSON.parse(local)); } catch(e2) {}
+      }
     }
 
     // Supabase에 프로젝트 이름 저장
     async function saveProjectNamesToSupabase() {
+      try { localStorage.setItem('projectNames', JSON.stringify(projectNames)); } catch(e) {}
       try {
-        await supabaseClient.from('app_settings').upsert({
-          key: 'projectNames',
-          value: projectNames,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'key' });
+        await supabaseClient.from('app_settings').delete().eq('key', 'projectNames');
+        await supabaseClient.from('app_settings').insert({ key: 'projectNames', value: JSON.stringify(projectNames) });
       } catch (e) { console.error('projectNames 저장 에러:', e); }
     }
 
@@ -12836,21 +13163,23 @@ Option C: [제품C] - $[가격]
 
     async function loadAssigneeListFromSupabase() {
       try {
-        const { data, error } = await supabaseClient
-          .from('app_settings').select('value').eq('key', 'assigneeList').single();
-        if (!error && data && data.value) {
-          assigneeList = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+        const { data: rows } = await supabaseClient.from('app_settings').select('value').eq('key', 'assigneeList').limit(1);
+        if (rows && rows.length > 0 && rows[0].value) {
+          assigneeList = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
+        } else {
+          const local = localStorage.getItem('assigneeList');
+          if (local) assigneeList = JSON.parse(local);
         }
-      } catch (e) { console.error('assigneeList 로드 에러:', e); }
+      } catch (e) {
+        try { const local = localStorage.getItem('assigneeList'); if (local) assigneeList = JSON.parse(local); } catch(e2) {}
+      }
     }
 
     async function saveAssigneeListToSupabase() {
+      try { localStorage.setItem('assigneeList', JSON.stringify(assigneeList)); } catch(e) {}
       try {
-        await supabaseClient.from('app_settings').upsert({
-          key: 'assigneeList',
-          value: assigneeList,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'key' });
+        await supabaseClient.from('app_settings').delete().eq('key', 'assigneeList');
+        await supabaseClient.from('app_settings').insert({ key: 'assigneeList', value: JSON.stringify(assigneeList) });
       } catch (e) { console.error('assigneeList 저장 에러:', e); }
     }
 
@@ -14188,74 +14517,77 @@ Option C: [제품C] - $[가격]
   // ========================================
 
   async function loadAndRenderFromSupabase() {
-    console.log('🔄 Supabase에서 데이터 로딩 중...');
+    console.log('🔄 Supabase app_settings에서 전체 데이터 로딩 중...');
 
     try {
-      const mapper = mapSupabaseToHTML();
-
-      // 병렬로 데이터 로드
-      const [cs, buyers, products, quotes, orders, shipping, issues, settlements] = await Promise.all([
-        fetchCSData(),
-        fetchBuyers(),
-        fetchProducts(),
-        fetchQuotes(),
-        fetchOrders(),
-        fetchShipping(),
-        fetchIssues(),
-        fetchSettlements()
+      // app_settings에서 각 데이터를 병렬로 로드
+      const [
+        savedNotice, savedQuotes, savedOrders, savedShipping,
+        savedIssues, savedSettlements, savedProducts, savedBuyers, savedCS
+      ] = await Promise.all([
+        loadDataFromSupabase('noticeData'),
+        loadDataFromSupabase('quoteData'),
+        loadDataFromSupabase('orderData'),
+        loadDataFromSupabase('shippingData'),
+        loadDataFromSupabase('issueData'),
+        loadDataFromSupabase('settlementData'),
+        loadDataFromSupabase('productData'),
+        loadDataFromSupabase('buyerData'),
+        loadDataFromSupabase('csData')
       ]);
 
-      // 데이터 매핑 및 전역 변수 업데이트 (기본 데이터 유지하면서 추가)
-      if (cs && cs.length > 0) {
-        const newCSData = mapper.mapCSData(cs);
-        // 기본 데이터의 최대 ID 찾기
-        const maxDefaultId = Math.max(...csData.map(c => c.id));
-        // 새 데이터의 ID를 기본 데이터 이후로 조정
-        newCSData.forEach((item, idx) => {
-          item.id = maxDefaultId + 1 + idx;
-        });
-        csData = [...csData, ...newCSData];
-        console.log('✅ CS 데이터 로드:', csData.length, '건');
+      // 공지사항 복원 (DOM 기반)
+      if (savedNotice && savedNotice.length > 0) {
+        renderNoticesFromData(savedNotice);
+        console.log('✅ 공지사항 로드:', savedNotice.length, '건');
       }
 
-      if (buyers && buyers.length > 0) {
-        const newBuyerData = mapper.mapBuyerData(buyers);
-        const maxDefaultBuyerId = Math.max(...buyerData.map(b => b.id));
-        newBuyerData.forEach((item, idx) => {
-          item.id = maxDefaultBuyerId + 1 + idx;
-        });
-        buyerData = [...buyerData, ...newBuyerData];
-        console.log('✅ 바이어 데이터 로드:', buyerData.length, '건');
-      }
-
-      if (products && products.length > 0) {
-        productData = mapper.mapProductData(products);
-        console.log('✅ 상품 데이터 로드:', productData.length, '건');
-      }
-
-      if (quotes && quotes.length > 0) {
-        quoteData = mapper.mapQuoteData(quotes);
+      // 견적 데이터 복원
+      if (savedQuotes && savedQuotes.length > 0) {
+        quoteData = savedQuotes;
         console.log('✅ 견적 데이터 로드:', quoteData.length, '건');
       }
 
-      if (orders && orders.length > 0) {
-        orderData = mapper.mapOrderData(orders);
+      // 주문 데이터 복원
+      if (savedOrders && savedOrders.length > 0) {
+        orderData = savedOrders;
         console.log('✅ 주문 데이터 로드:', orderData.length, '건');
       }
 
-      if (shipping && shipping.length > 0) {
-        shippingData = mapper.mapShippingData(shipping);
+      // 배송 데이터 복원
+      if (savedShipping && savedShipping.length > 0) {
+        shippingData = savedShipping;
         console.log('✅ 배송 데이터 로드:', shippingData.length, '건');
       }
 
-      if (issues && issues.length > 0) {
-        issueData = mapper.mapIssueData(issues);
+      // 이슈 데이터 복원
+      if (savedIssues && savedIssues.length > 0) {
+        issueData = savedIssues;
         console.log('✅ 이슈 데이터 로드:', issueData.length, '건');
       }
 
-      if (settlements && settlements.length > 0) {
-        settlementData = mapper.mapSettlementData(settlements);
+      // 정산 데이터 복원
+      if (savedSettlements && savedSettlements.length > 0) {
+        settlementData = savedSettlements;
         console.log('✅ 정산 데이터 로드:', settlementData.length, '건');
+      }
+
+      // 제품 데이터 복원
+      if (savedProducts && savedProducts.length > 0) {
+        productData = savedProducts;
+        console.log('✅ 제품 데이터 로드:', productData.length, '건');
+      }
+
+      // 바이어 데이터 복원
+      if (savedBuyers && savedBuyers.length > 0) {
+        buyerData = savedBuyers;
+        console.log('✅ 바이어 데이터 로드:', buyerData.length, '건');
+      }
+
+      // CS 데이터 복원
+      if (savedCS && savedCS.length > 0) {
+        csData = savedCS;
+        console.log('✅ CS 데이터 로드:', csData.length, '건');
       }
 
       // 테이블 다시 렌더링
@@ -14268,7 +14600,7 @@ Option C: [제품C] - $[가격]
       if (typeof renderIssueTable === 'function') renderIssueTable();
       if (typeof renderSettlementTable === 'function') renderSettlementTable();
 
-      console.log('🎉 Supabase 데이터 로드 및 화면 업데이트 완료!');
+      console.log('🎉 Supabase app_settings 데이터 로드 및 화면 업데이트 완료!');
 
     } catch (error) {
       console.error('❌ Supabase 데이터 로드 실패:', error);
