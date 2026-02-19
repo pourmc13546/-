@@ -12251,39 +12251,52 @@ Option C: [제품C] - $[가격]
     let currentTask = null;
     let currentFilter = 'all';
 
-    // Supabase에서 프로세스 데이터 불러오기
+    // 프로세스 데이터 불러오기 (localStorage 우선)
     async function loadProjectsDataFromSupabase() {
       let loaded = false;
+      let loadSource = '';
 
-      // 1) Supabase에서 로드 시도
+      // 1) localStorage에서 먼저 로드 (동기적, 항상 빠르고 안정적)
       try {
-        const { data: rows, error } = await supabaseClient
-          .from('app_settings')
-          .select('value')
-          .eq('key', 'projectsData')
-          .limit(1);
-
-        if (!error && rows && rows.length > 0 && rows[0].value) {
-          const savedData = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
-          Object.assign(projectsData, savedData);
-          loaded = true;
-          console.log('✅ Supabase에서 projectsData 로드 완료');
-        }
-      } catch (e) {
-        console.error('❌ Supabase 로드 실패:', e);
-      }
-
-      // 2) Supabase 실패 시 localStorage에서 로드
-      if (!loaded) {
-        try {
-          const local = localStorage.getItem('projectsData');
-          if (local) {
-            const savedData = JSON.parse(local);
+        const local = localStorage.getItem('projectsData');
+        if (local) {
+          const savedData = JSON.parse(local);
+          if (savedData && typeof savedData === 'object' && Object.keys(savedData).length > 0) {
             Object.assign(projectsData, savedData);
             loaded = true;
+            loadSource = 'localStorage';
             console.log('✅ localStorage에서 projectsData 로드 완료');
           }
-        } catch (e) {}
+        }
+      } catch (e) {
+        console.error('❌ localStorage 로드 실패:', e);
+      }
+
+      // 2) Supabase에서 로드 시도 (localStorage 실패 시 또는 동기화용)
+      if (!loaded) {
+        try {
+          if (typeof supabaseClient !== 'undefined') {
+            const { data: rows, error } = await supabaseClient
+              .from('app_settings')
+              .select('value')
+              .eq('key', 'projectsData')
+              .limit(1);
+
+            if (!error && rows && rows.length > 0 && rows[0].value) {
+              const savedData = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
+              if (savedData && typeof savedData === 'object' && Object.keys(savedData).length > 0) {
+                Object.assign(projectsData, savedData);
+                loaded = true;
+                loadSource = 'Supabase';
+                console.log('✅ Supabase에서 projectsData 로드 완료');
+                // Supabase에서 로드한 경우 localStorage에도 백업
+                try { localStorage.setItem('projectsData', JSON.stringify(projectsData)); } catch(e) {}
+              }
+            }
+          }
+        } catch (e) {
+          console.error('❌ Supabase 로드 실패:', e);
+        }
       }
 
       // 3) 데이터 로드 후 화면 업데이트
@@ -12297,90 +12310,139 @@ Option C: [제품C] - $[가격]
         renderProjectDropdown();
         renderTasks();
         updateFilterCounts();
+        showDebugToast('데이터 로드 완료 (' + loadSource + ')', 'success');
       } else {
         console.log('📌 저장된 데이터 없음, 기본 데이터 사용');
+        showDebugToast('저장된 데이터 없음, 기본 데이터 사용', 'info');
         await saveProjectsDataToSupabase();
       }
     }
 
-    // Supabase에 프로세스 데이터 저장
-    async function saveProjectsDataToSupabase() {
-      // 1) localStorage에 즉시 백업 (항상 성공)
-      try { localStorage.setItem('projectsData', JSON.stringify(projectsData)); } catch(e) {}
+    // 디버그 토스트 표시 함수
+    function showDebugToast(message, type) {
+      const colors = { success: '#10b981', error: '#ef4444', info: '#3b82f6', warning: '#f59e0b' };
+      const toast = document.createElement('div');
+      toast.style.cssText = `position:fixed;top:10px;right:10px;z-index:99999;padding:10px 20px;border-radius:8px;color:white;font-size:13px;font-weight:600;background:${colors[type]||colors.info};box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:opacity 0.5s;pointer-events:none;`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+    }
 
-      // 2) Supabase에 저장 시도 (delete + insert 방식 - 가장 안정적)
+    // 프로세스 데이터 저장 (localStorage 우선 + Supabase 동기화)
+    async function saveProjectsDataToSupabase() {
+      // 현재 groups 데이터를 projectsData에 반영 (all이 아닌 경우만)
+      if (currentProject && currentProject !== 'all' && groups) {
+        projectsData[currentProject] = JSON.parse(JSON.stringify(groups));
+      }
+
+      // 1) localStorage에 즉시 저장 (동기적, 항상 성공)
+      let localSaved = false;
       try {
-        await supabaseClient.from('app_settings').delete().eq('key', 'projectsData');
-        const { error } = await supabaseClient.from('app_settings').insert({
-          key: 'projectsData',
-          value: JSON.stringify(projectsData)
-        });
-        if (error) {
-          console.error('❌ Supabase projectsData 저장 에러:', error);
-          return false;
+        const jsonStr = JSON.stringify(projectsData);
+        localStorage.setItem('projectsData', jsonStr);
+        localStorage.setItem('projectsData_timestamp', Date.now().toString());
+        localSaved = true;
+        console.log('✅ localStorage 저장 완료 (' + (jsonStr.length / 1024).toFixed(1) + 'KB)');
+      } catch(e) {
+        console.error('❌ localStorage 저장 실패:', e);
+        showDebugToast('localStorage 저장 실패: ' + e.message, 'error');
+      }
+
+      // 2) Supabase에 비동기 저장 (동기화용)
+      try {
+        if (typeof supabaseClient !== 'undefined') {
+          await supabaseClient.from('app_settings').delete().eq('key', 'projectsData');
+          const { error } = await supabaseClient.from('app_settings').insert({
+            key: 'projectsData',
+            value: JSON.stringify(projectsData)
+          });
+          if (error) {
+            console.error('❌ Supabase projectsData 저장 에러:', error);
+          } else {
+            console.log('✅ Supabase projectsData 저장 완료');
+          }
         }
-        console.log('✅ Supabase projectsData 저장 완료');
-        return true;
       } catch (e) {
         console.error('❌ Supabase projectsData 저장 에러:', e);
-        return false;
       }
+
+      if (localSaved) {
+        showDebugToast('데이터 저장 완료', 'success');
+      }
+      return localSaved;
     }
 
     // ========================================
     // 범용 Supabase 저장/로드 함수 (app_settings 패턴)
     // ========================================
     async function saveDataToSupabase(key, data) {
-      // 1) localStorage에 즉시 백업 (항상 성공)
-      try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
-
-      // 2) Supabase에 저장 (delete + insert 방식)
+      // 1) localStorage에 즉시 저장 (동기적, 항상 성공)
+      let localSaved = false;
       try {
-        await supabaseClient.from('app_settings').delete().eq('key', key);
-        const { error } = await supabaseClient.from('app_settings').insert({
-          key: key,
-          value: JSON.stringify(data)
-        });
-        if (error) {
-          console.error(`❌ Supabase 저장 에러 (${key}):`, error);
-          return false;
+        localStorage.setItem(key, JSON.stringify(data));
+        localSaved = true;
+        console.log(`✅ localStorage 저장 완료: ${key}`);
+      } catch(e) {
+        console.error(`❌ localStorage 저장 실패 (${key}):`, e);
+      }
+
+      // 2) Supabase에 비동기 저장 (동기화용)
+      try {
+        if (typeof supabaseClient !== 'undefined') {
+          await supabaseClient.from('app_settings').delete().eq('key', key);
+          const { error } = await supabaseClient.from('app_settings').insert({
+            key: key,
+            value: JSON.stringify(data)
+          });
+          if (error) {
+            console.error(`❌ Supabase 저장 에러 (${key}):`, error);
+          } else {
+            console.log(`✅ Supabase 저장 완료: ${key}`);
+          }
         }
-        console.log(`✅ Supabase 저장 완료: ${key}`);
-        return true;
       } catch (e) {
         console.error(`❌ Supabase 저장 에러 (${key}):`, e);
-        return false;
       }
+      return localSaved;
     }
 
     async function loadDataFromSupabase(key) {
-      // 1) Supabase에서 로드 시도
+      // 1) localStorage에서 먼저 로드 (동기적, 빠르고 안정적)
       try {
-        const { data: rows, error } = await supabaseClient
-          .from('app_settings')
-          .select('value')
-          .eq('key', key)
-          .limit(1);
+        const local = localStorage.getItem(key);
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (parsed !== null && parsed !== undefined) {
+            console.log(`✅ localStorage에서 ${key} 로드 완료`);
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.error(`❌ localStorage 로드 에러 (${key}):`, e);
+      }
 
-        if (!error && rows && rows.length > 0 && rows[0].value) {
-          const parsed = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
-          console.log(`✅ Supabase에서 ${key} 로드 완료`);
-          return parsed;
+      // 2) localStorage에 없으면 Supabase에서 로드
+      try {
+        if (typeof supabaseClient !== 'undefined') {
+          const { data: rows, error } = await supabaseClient
+            .from('app_settings')
+            .select('value')
+            .eq('key', key)
+            .limit(1);
+
+          if (!error && rows && rows.length > 0 && rows[0].value) {
+            const parsed = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
+            console.log(`✅ Supabase에서 ${key} 로드 완료`);
+            // Supabase에서 가져온 데이터를 localStorage에 캐시
+            try { localStorage.setItem(key, JSON.stringify(parsed)); } catch(e) {}
+            return parsed;
+          }
         }
       } catch (e) {
         console.error(`❌ Supabase 로드 에러 (${key}):`, e);
       }
 
-      // 2) Supabase 실패 시 localStorage에서 로드
-      try {
-        const local = localStorage.getItem(key);
-        if (local) {
-          console.log(`✅ localStorage에서 ${key} 로드 완료`);
-          return JSON.parse(local);
-        }
-      } catch (e) {}
-
-      console.log(`📌 ${key} 데이터 없음, 기본 데이터 사용`);
+      console.log(`📌 ${key} 데이터 없음`);
       return null;
     }
 
@@ -12466,7 +12528,42 @@ Option C: [제품C] - $[가격]
       await saveDataToSupabase('noticeData', data);
     }
 
-    // 페이지 로드 시 Supabase에서 데이터 불러오기
+    // 페이지 닫기/새로고침 전 localStorage에 강제 저장
+    window.addEventListener('beforeunload', function() {
+      try {
+        if (currentProject && currentProject !== 'all' && groups) {
+          projectsData[currentProject] = JSON.parse(JSON.stringify(groups));
+        }
+        localStorage.setItem('projectsData', JSON.stringify(projectsData));
+        console.log('💾 beforeunload: projectsData 저장 완료');
+      } catch(e) {
+        console.error('❌ beforeunload 저장 실패:', e);
+      }
+    });
+
+    // 페이지 로드 시 데이터 즉시 복원 (localStorage 우선이므로 지연 불필요)
+    // localStorage는 동기적이므로 500ms 대기할 필요 없음
+    (function() {
+      // localStorage에서 즉시 복원 시도
+      try {
+        const local = localStorage.getItem('projectsData');
+        if (local) {
+          const savedData = JSON.parse(local);
+          if (savedData && typeof savedData === 'object' && Object.keys(savedData).length > 0) {
+            Object.assign(projectsData, savedData);
+            Object.values(projectsData).forEach(projectGroups => {
+              if (Array.isArray(projectGroups)) projectGroups.forEach(g => g.expanded = false);
+            });
+            groups = [...(projectsData[currentProject] || [])];
+            console.log('⚡ 즉시 localStorage에서 projectsData 복원 완료');
+          }
+        }
+      } catch(e) {
+        console.error('❌ 즉시 복원 실패:', e);
+      }
+    })();
+
+    // Supabase 준비 후 추가 동기화 (프로젝트 이름, 담당자 목록 등)
     setTimeout(() => {
       loadProjectsDataFromSupabase().then(() => renderProjectDropdown());
     }, 500);
@@ -12479,20 +12576,24 @@ Option C: [제품C] - $[가격]
       extra3: '추가업무 3'
     };
 
-    // Supabase에서 프로젝트 이름 불러오기
+    // 프로젝트 이름 불러오기 (localStorage 우선)
     async function loadProjectNamesFromSupabase() {
+      // localStorage 먼저
       try {
-        const { data: rows } = await supabaseClient.from('app_settings').select('value').eq('key', 'projectNames').limit(1);
-        if (rows && rows.length > 0 && rows[0].value) {
-          const saved = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
-          Object.assign(projectNames, saved);
-        } else {
-          const local = localStorage.getItem('projectNames');
-          if (local) Object.assign(projectNames, JSON.parse(local));
+        const local = localStorage.getItem('projectNames');
+        if (local) { Object.assign(projectNames, JSON.parse(local)); return; }
+      } catch (e) {}
+      // localStorage 없으면 Supabase
+      try {
+        if (typeof supabaseClient !== 'undefined') {
+          const { data: rows } = await supabaseClient.from('app_settings').select('value').eq('key', 'projectNames').limit(1);
+          if (rows && rows.length > 0 && rows[0].value) {
+            const saved = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
+            Object.assign(projectNames, saved);
+            try { localStorage.setItem('projectNames', JSON.stringify(projectNames)); } catch(e) {}
+          }
         }
-      } catch (e) {
-        try { const local = localStorage.getItem('projectNames'); if (local) Object.assign(projectNames, JSON.parse(local)); } catch(e2) {}
-      }
+      } catch (e) {}
     }
 
     // Supabase에 프로젝트 이름 저장
@@ -13162,17 +13263,21 @@ Option C: [제품C] - $[가격]
     let assigneeList = ['운영매니저', '담당매니저', '대행사', '고객사'];
 
     async function loadAssigneeListFromSupabase() {
+      // localStorage 먼저
       try {
-        const { data: rows } = await supabaseClient.from('app_settings').select('value').eq('key', 'assigneeList').limit(1);
-        if (rows && rows.length > 0 && rows[0].value) {
-          assigneeList = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
-        } else {
-          const local = localStorage.getItem('assigneeList');
-          if (local) assigneeList = JSON.parse(local);
+        const local = localStorage.getItem('assigneeList');
+        if (local) { assigneeList = JSON.parse(local); return; }
+      } catch (e) {}
+      // localStorage 없으면 Supabase
+      try {
+        if (typeof supabaseClient !== 'undefined') {
+          const { data: rows } = await supabaseClient.from('app_settings').select('value').eq('key', 'assigneeList').limit(1);
+          if (rows && rows.length > 0 && rows[0].value) {
+            assigneeList = typeof rows[0].value === 'string' ? JSON.parse(rows[0].value) : rows[0].value;
+            try { localStorage.setItem('assigneeList', JSON.stringify(assigneeList)); } catch(e) {}
+          }
         }
-      } catch (e) {
-        try { const local = localStorage.getItem('assigneeList'); if (local) assigneeList = JSON.parse(local); } catch(e2) {}
-      }
+      } catch (e) {}
     }
 
     async function saveAssigneeListToSupabase() {
