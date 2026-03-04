@@ -13036,13 +13036,17 @@ Option C: [제품C] - $[가격]
             html += '<td style="padding:10px 20px; font-size:12px; color:#cbd5e1;">' + (idx + 1) + '</td>';
             html += '<td style="padding:10px 12px;"><div style="font-size:13px; font-weight:500; color:#334155;">' + p + '</div><div style="font-size:11px; color:#94a3b8;">' + stepText + '</div></td>';
 
-            const icons = ['⬜', '🔵', '✅'];
             const tipTexts = ['대기→진행', '진행→완료', '완료→대기'];
+            const iconSvgs = [
+              '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="16" height="16" rx="4" stroke="#94a3b8" stroke-width="2"/></svg>',
+              '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" fill="#3b82f6"/></svg>',
+              '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" fill="#10b981"/><path d="M6.5 10.5l2.5 2.5 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            ];
             steps.forEach((status, si) => {
               const sc = PU_STATUS_COLORS[status];
               html += '<td style="padding:10px 8px; text-align:center;">';
-              html += '<div class="pu-step-cell pu-tooltip" data-tip="클릭: ' + tipTexts[status] + '" onclick="puToggleStatus(\'' + escapedName + '\', ' + si + ')" style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:12px; font-size:18px; background:' + sc.bg + '20; cursor:pointer;">';
-              html += icons[status];
+              html += '<div class="pu-step-cell pu-tooltip" data-tip="클릭: ' + tipTexts[status] + '" onclick="puToggleStatus(\'' + escapedName + '\', ' + si + ')" style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:12px; background:' + sc.bg + '20; cursor:pointer;">';
+              html += iconSvgs[status];
               html += '</div></td>';
             });
 
