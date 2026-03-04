@@ -13078,7 +13078,8 @@ Option C: [제품C] - $[가격]
       if (projectId === 'extra1') {
         if (taskTableArea) taskTableArea.style.display = 'none';
         if (productUploadArea) productUploadArea.classList.remove('hidden');
-        updateHeader(projectId);
+        document.querySelector('#processView h1').textContent = '제품 업로드';
+        document.querySelector('#processView h1 + p').textContent = '제품 업로드 프로젝트 관리';
         puRenderAll(); // 즉시 렌더 (localStorage 데이터)
         // Supabase에서 최신 데이터 로드 후 다시 렌더
         if (typeof window.puCloudLoad === 'function') {
