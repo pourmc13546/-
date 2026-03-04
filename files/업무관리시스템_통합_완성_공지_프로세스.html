@@ -12876,10 +12876,62 @@ Option C: [제품C] - $[가격]
         localStorage.setItem('productUploadStates', JSON.stringify(puProductStates));
         localStorage.setItem('productUploadMemos', JSON.stringify(puProductMemos));
       } catch(e) {}
-      // Supabase 비동기 백업
-      if (typeof saveDataToSupabase === 'function') {
-        saveDataToSupabase('productUploadStates', puProductStates);
-        saveDataToSupabase('productUploadMemos', puProductMemos);
+      // Supabase 클라우드 저장 (다른 사용자 공유용)
+      puSaveToSupabase();
+    }
+
+    async function puSaveToSupabase() {
+      try {
+        if (typeof supabaseClient === 'undefined') {
+          console.error('❌ supabaseClient 미정의 - Supabase 저장 불가');
+          return;
+        }
+        // 상태 저장
+        await supabaseClient.from('app_settings').delete().eq('key', 'productUploadStates');
+        const { error: e1 } = await supabaseClient.from('app_settings').insert({
+          key: 'productUploadStates', value: JSON.stringify(puProductStates)
+        });
+        // 메모 저장
+        await supabaseClient.from('app_settings').delete().eq('key', 'productUploadMemos');
+        const { error: e2 } = await supabaseClient.from('app_settings').insert({
+          key: 'productUploadMemos', value: JSON.stringify(puProductMemos)
+        });
+        if (e1 || e2) {
+          console.error('❌ Supabase 저장 실패:', e1, e2);
+          if (typeof showToast === 'function') showToast('⚠️ 클라우드 저장 실패 - 로컬만 저장됨', 'error');
+        } else {
+          console.log('✅ 제품 업로드 상태 Supabase 저장 완료');
+        }
+      } catch(err) {
+        console.error('❌ puSaveToSupabase 에러:', err);
+        if (typeof showToast === 'function') showToast('⚠️ 클라우드 저장 실패: ' + err.message, 'error');
+      }
+    }
+
+    async function puLoadFromSupabase() {
+      try {
+        if (typeof supabaseClient === 'undefined') return;
+        const { data: rows1, error: e1 } = await supabaseClient
+          .from('app_settings').select('value').eq('key', 'productUploadStates').limit(1);
+        if (!e1 && rows1 && rows1.length > 0 && rows1[0].value) {
+          const parsed = typeof rows1[0].value === 'string' ? JSON.parse(rows1[0].value) : rows1[0].value;
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            Object.assign(puProductStates, parsed);
+            localStorage.setItem('productUploadStates', JSON.stringify(puProductStates));
+          }
+        }
+        const { data: rows2, error: e2 } = await supabaseClient
+          .from('app_settings').select('value').eq('key', 'productUploadMemos').limit(1);
+        if (!e2 && rows2 && rows2.length > 0 && rows2[0].value) {
+          const parsed = typeof rows2[0].value === 'string' ? JSON.parse(rows2[0].value) : rows2[0].value;
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            Object.assign(puProductMemos, parsed);
+            localStorage.setItem('productUploadMemos', JSON.stringify(puProductMemos));
+          }
+        }
+        console.log('✅ 제품 업로드 데이터 Supabase에서 로드 완료');
+      } catch(err) {
+        console.error('❌ puLoadFromSupabase 에러:', err);
       }
     }
 
@@ -13080,7 +13132,9 @@ Option C: [제품C] - $[가격]
         if (taskTableArea) taskTableArea.style.display = 'none';
         if (productUploadArea) productUploadArea.classList.remove('hidden');
         updateHeader(projectId);
-        puRenderAll();
+        puRenderAll(); // 즉시 렌더 (localStorage 데이터)
+        // Supabase에서 최신 데이터 로드 후 다시 렌더
+        puLoadFromSupabase().then(() => puRenderAll());
         return;
       }
 
