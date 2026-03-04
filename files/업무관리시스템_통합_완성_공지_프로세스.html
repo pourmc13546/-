@@ -12876,64 +12876,17 @@ Option C: [제품C] - $[가격]
         localStorage.setItem('productUploadStates', JSON.stringify(puProductStates));
         localStorage.setItem('productUploadMemos', JSON.stringify(puProductMemos));
       } catch(e) {}
-      // Supabase 클라우드 저장 (다른 사용자 공유용)
-      puSaveToSupabase();
-    }
-
-    async function puSaveToSupabase() {
-      try {
-        if (typeof supabaseClient === 'undefined') {
-          console.error('❌ supabaseClient 미정의 - Supabase 저장 불가');
-          return;
-        }
-        // 상태 저장
-        await supabaseClient.from('app_settings').delete().eq('key', 'productUploadStates');
-        const { error: e1 } = await supabaseClient.from('app_settings').insert({
-          key: 'productUploadStates', value: JSON.stringify(puProductStates)
-        });
-        // 메모 저장
-        await supabaseClient.from('app_settings').delete().eq('key', 'productUploadMemos');
-        const { error: e2 } = await supabaseClient.from('app_settings').insert({
-          key: 'productUploadMemos', value: JSON.stringify(puProductMemos)
-        });
-        if (e1 || e2) {
-          console.error('❌ Supabase 저장 실패:', e1, e2);
-          if (typeof showToast === 'function') showToast('⚠️ 클라우드 저장 실패 - 로컬만 저장됨', 'error');
-        } else {
-          console.log('✅ 제품 업로드 상태 Supabase 저장 완료');
-        }
-      } catch(err) {
-        console.error('❌ puSaveToSupabase 에러:', err);
-        if (typeof showToast === 'function') showToast('⚠️ 클라우드 저장 실패: ' + err.message, 'error');
+      // 기존 saveDataToSupabase 함수 사용 (검증된 저장 방식)
+      if (typeof saveDataToSupabase === 'function') {
+        saveDataToSupabase('productUploadStates', puProductStates).then(() => {
+          console.log('✅ 제품업로드 상태 클라우드 저장 완료');
+        }).catch(e => console.error('❌ 제품업로드 상태 클라우드 저장 실패:', e));
+        saveDataToSupabase('productUploadMemos', puProductMemos);
       }
     }
 
-    async function puLoadFromSupabase() {
-      try {
-        if (typeof supabaseClient === 'undefined') return;
-        const { data: rows1, error: e1 } = await supabaseClient
-          .from('app_settings').select('value').eq('key', 'productUploadStates').limit(1);
-        if (!e1 && rows1 && rows1.length > 0 && rows1[0].value) {
-          const parsed = typeof rows1[0].value === 'string' ? JSON.parse(rows1[0].value) : rows1[0].value;
-          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-            Object.assign(puProductStates, parsed);
-            localStorage.setItem('productUploadStates', JSON.stringify(puProductStates));
-          }
-        }
-        const { data: rows2, error: e2 } = await supabaseClient
-          .from('app_settings').select('value').eq('key', 'productUploadMemos').limit(1);
-        if (!e2 && rows2 && rows2.length > 0 && rows2[0].value) {
-          const parsed = typeof rows2[0].value === 'string' ? JSON.parse(rows2[0].value) : rows2[0].value;
-          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-            Object.assign(puProductMemos, parsed);
-            localStorage.setItem('productUploadMemos', JSON.stringify(puProductMemos));
-          }
-        }
-        console.log('✅ 제품 업로드 데이터 Supabase에서 로드 완료');
-      } catch(err) {
-        console.error('❌ puLoadFromSupabase 에러:', err);
-      }
-    }
+    // puLoadFromSupabase: script block 3의 loadDataFromSupabase 사용
+    // (이 함수는 script block 3 안에서 정의됨 - 아래 참조)
 
     function puToggleStatus(productName, stepIndex) {
       const current = puProductStates[productName][stepIndex];
@@ -13133,8 +13086,21 @@ Option C: [제품C] - $[가격]
         if (productUploadArea) productUploadArea.classList.remove('hidden');
         updateHeader(projectId);
         puRenderAll(); // 즉시 렌더 (localStorage 데이터)
-        // Supabase에서 최신 데이터 로드 후 다시 렌더
-        puLoadFromSupabase().then(() => puRenderAll());
+        // Supabase에서 최신 데이터 로드 후 다시 렌더 (검증된 loadDataFromSupabase 사용)
+        if (typeof loadDataFromSupabase === 'function') {
+          Promise.all([
+            loadDataFromSupabase('productUploadStates'),
+            loadDataFromSupabase('productUploadMemos')
+          ]).then(([states, memos]) => {
+            if (states && typeof states === 'object' && !Array.isArray(states)) {
+              Object.assign(puProductStates, states);
+            }
+            if (memos && typeof memos === 'object' && !Array.isArray(memos)) {
+              Object.assign(puProductMemos, memos);
+            }
+            puRenderAll();
+          }).catch(e => console.error('제품업로드 Supabase 로드 실패:', e));
+        }
         return;
       }
 
