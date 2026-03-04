@@ -15074,6 +15074,9 @@ Option C: [제품C] - $[가격]
       if (typeof renderIssueTable === 'function') renderIssueTable();
       if (typeof renderSettlementTable === 'function') renderSettlementTable();
 
+      // 제품 업로드 관리 뷰가 열려있으면 다시 렌더링
+      if (currentProject === 'extra1' && typeof puRenderAll === 'function') puRenderAll();
+
       console.log('🎉 Supabase app_settings 데이터 로드 및 화면 업데이트 완료!');
 
     } catch (error) {
