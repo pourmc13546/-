@@ -15081,55 +15081,90 @@ Option C: [제품C] - $[가격]
   loadAndRenderFromSupabase();
 
   // ===== 제품 업로드 관리 - Supabase 저장/로드 (supabaseClient 접근 가능한 블록) =====
+  // 제품 업로드 클라우드 저장 (supabaseClient 직접 접근)
   window.puCloudSave = async function() {
     try {
-      await supabaseClient.from('app_settings').delete().eq('key', 'productUploadStates');
-      const { error: e1 } = await supabaseClient.from('app_settings').insert({
+      // 방법1: upsert 시도
+      const { error: e1 } = await supabaseClient.from('app_settings').upsert({
         key: 'productUploadStates', value: JSON.stringify(puProductStates)
-      });
-      await supabaseClient.from('app_settings').delete().eq('key', 'productUploadMemos');
-      const { error: e2 } = await supabaseClient.from('app_settings').insert({
-        key: 'productUploadMemos', value: JSON.stringify(puProductMemos)
-      });
-      if (e1 || e2) {
-        console.error('❌ 제품업로드 Supabase 저장 에러:', e1, e2);
-      } else {
-        console.log('✅ 제품업로드 Supabase 저장 완료');
+      }, { onConflict: 'key' });
+
+      if (e1) {
+        // 방법2: upsert 실패 시 delete+insert
+        console.log('upsert 실패, delete+insert 시도:', e1.message);
+        await supabaseClient.from('app_settings').delete().eq('key', 'productUploadStates');
+        const { error: e1b } = await supabaseClient.from('app_settings').insert({
+          key: 'productUploadStates', value: JSON.stringify(puProductStates)
+        });
+        if (e1b) { console.error('❌ states insert도 실패:', e1b); return; }
       }
+
+      const { error: e2 } = await supabaseClient.from('app_settings').upsert({
+        key: 'productUploadMemos', value: JSON.stringify(puProductMemos)
+      }, { onConflict: 'key' });
+
+      if (e2) {
+        await supabaseClient.from('app_settings').delete().eq('key', 'productUploadMemos');
+        await supabaseClient.from('app_settings').insert({
+          key: 'productUploadMemos', value: JSON.stringify(puProductMemos)
+        });
+      }
+
+      console.log('✅ 제품업로드 클라우드 저장 완료');
     } catch(e) {
-      console.error('❌ 제품업로드 Supabase 저장 실패:', e);
+      console.error('❌ 제품업로드 클라우드 저장 실패:', e);
     }
   };
 
+  // 제품 업로드 클라우드 로드
   window.puCloudLoad = async function() {
+    let loaded = false;
     try {
+      // productUploadStates 로드
       const { data: r1, error: e1 } = await supabaseClient
-        .from('app_settings').select('value').eq('key', 'productUploadStates').limit(1);
+        .from('app_settings').select('key, value').eq('key', 'productUploadStates').limit(1);
+      console.log('puCloudLoad states 응답:', { rows: r1 ? r1.length : 0, error: e1 });
+
       if (!e1 && r1 && r1.length > 0 && r1[0].value) {
-        const parsed = typeof r1[0].value === 'string' ? JSON.parse(r1[0].value) : r1[0].value;
+        let parsed = r1[0].value;
+        if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+        // 이중 stringify 대비
+        if (typeof parsed === 'string') parsed = JSON.parse(parsed);
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-          Object.assign(puProductStates, parsed);
-          try { localStorage.setItem('productUploadStates', JSON.stringify(puProductStates)); } catch(x) {}
+          const keys = Object.keys(parsed);
+          if (keys.length > 0) {
+            puProductStates = Object.assign(puProductStates, parsed);
+            try { localStorage.setItem('productUploadStates', JSON.stringify(puProductStates)); } catch(x) {}
+            loaded = true;
+            console.log('✅ 제품업로드 상태 로드:', keys.length, '개 제품');
+          }
         }
       }
+
+      // productUploadMemos 로드
       const { data: r2, error: e2 } = await supabaseClient
-        .from('app_settings').select('value').eq('key', 'productUploadMemos').limit(1);
+        .from('app_settings').select('key, value').eq('key', 'productUploadMemos').limit(1);
       if (!e2 && r2 && r2.length > 0 && r2[0].value) {
-        const parsed = typeof r2[0].value === 'string' ? JSON.parse(r2[0].value) : r2[0].value;
+        let parsed = r2[0].value;
+        if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+        if (typeof parsed === 'string') parsed = JSON.parse(parsed);
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-          Object.assign(puProductMemos, parsed);
+          puProductMemos = Object.assign(puProductMemos, parsed);
           try { localStorage.setItem('productUploadMemos', JSON.stringify(puProductMemos)); } catch(x) {}
         }
       }
-      console.log('✅ 제품업로드 Supabase 로드 완료');
     } catch(e) {
-      console.error('❌ 제품업로드 Supabase 로드 실패:', e);
+      console.error('❌ 제품업로드 클라우드 로드 실패:', e);
     }
+    return loaded;
   };
 
-  // 초기 로드 시 Supabase에서 제품업로드 데이터도 로드
-  window.puCloudLoad().then(() => {
-    if (currentProject === 'extra1' && typeof puRenderAll === 'function') puRenderAll();
+  // 초기 로드 시 Supabase에서 제품업로드 데이터 로드
+  window.puCloudLoad().then((loaded) => {
+    console.log('puCloudLoad 결과:', loaded ? '데이터 있음' : '데이터 없음');
+    if (typeof puRenderAll === 'function') {
+      if (currentProject === 'extra1') puRenderAll();
+    }
   });
 
   // ==================== 대시보드 함수들 ====================
