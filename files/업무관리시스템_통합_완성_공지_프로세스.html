@@ -2545,6 +2545,89 @@
       <div id="pu-categories-container"></div>
     </div>
 
+    <!-- ====== 전체 업무 대시보드 ====== -->
+    <div id="dashboardArea" class="hidden" style="height:100%; display:none;">
+      <!-- 상단 회색 배경 영역 -->
+      <div style="background:#f9fafb; padding:20px 24px 20px 24px; margin:-0px -0px 20px -0px;">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-gray-900">전체 업무 현황</h2>
+          <span class="text-xs text-gray-400" id="dash-date"></span>
+        </div>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-xs text-gray-400 mr-1">바로가기</span>
+          <div id="dash-nav-buttons" class="flex items-center gap-2"></div>
+        </div>
+        <div class="grid grid-cols-5 gap-4">
+          <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px 20px;">
+            <div class="text-xs text-gray-400 mb-1">전체 업무</div>
+            <div class="text-[28px] font-bold text-gray-900 leading-tight" id="dash-total">0</div>
+          </div>
+          <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px 20px;">
+            <div class="text-xs text-gray-400 mb-1">완료</div>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-[28px] font-bold text-gray-900 leading-tight" id="dash-completed">0</span>
+              <span class="text-xs text-gray-300 font-medium" id="dash-completed-pct"></span>
+            </div>
+          </div>
+          <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px 20px;">
+            <div class="text-xs text-gray-400 mb-1">진행 중</div>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-[28px] font-bold text-gray-900 leading-tight" id="dash-progress">0</span>
+              <span class="text-xs text-gray-300 font-medium" id="dash-progress-pct"></span>
+            </div>
+          </div>
+          <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px 20px;">
+            <div class="text-xs text-gray-400 mb-1">대기</div>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-[28px] font-bold text-gray-900 leading-tight" id="dash-scheduled">0</span>
+              <span class="text-xs text-gray-300 font-medium" id="dash-scheduled-pct"></span>
+            </div>
+          </div>
+          <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px 20px;">
+            <div class="text-xs text-gray-400 mb-1">보류</div>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-[28px] font-bold text-gray-900 leading-tight" id="dash-hold">0</span>
+              <span class="text-xs text-gray-300 font-medium" id="dash-hold-pct"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단: 프로젝트별 + 마감/완료 -->
+      <div style="display:grid; grid-template-columns:3fr 2fr; gap:24px; padding:0 24px; flex:1; min-height:0;">
+        <!-- 프로젝트별 진행률 -->
+        <div style="display:flex; flex-direction:column; min-height:0;">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-gray-800">프로젝트별 진행률</h3>
+            <div class="flex items-center gap-3 text-[11px] text-gray-400">
+              <span class="flex items-center gap-1.5"><span style="width:10px;height:10px;border-radius:2px;background:#60a5fa;display:inline-block;"></span>완료</span>
+              <span class="flex items-center gap-1.5"><span style="width:10px;height:10px;border-radius:2px;background:#bfdbfe;display:inline-block;"></span>진행</span>
+              <span class="flex items-center gap-1.5"><span style="width:10px;height:10px;border-radius:2px;background:#f3f4f6;display:inline-block;"></span>나머지</span>
+            </div>
+          </div>
+          <div id="dash-projects" style="overflow:auto; flex:1; display:flex; flex-direction:column; gap:16px;"></div>
+        </div>
+
+        <!-- 오른쪽: 마감임박 + 최근완료 -->
+        <div style="display:flex; flex-direction:column; gap:20px; min-height:0;">
+          <div style="flex:1; display:flex; flex-direction:column; min-height:0;">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold text-gray-800">마감 임박</h3>
+              <span class="text-[11px] text-gray-400">D-7 이내</span>
+            </div>
+            <div id="dash-deadline" style="border:1px solid #e5e7eb; border-radius:8px; overflow:auto; flex:1;"></div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; min-height:0;">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold text-gray-800">최근 완료</h3>
+              <span class="text-[11px] text-gray-400">완료된 업무</span>
+            </div>
+            <div id="dash-recent" style="border:1px solid #e5e7eb; border-radius:8px; overflow:auto; flex:1;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- 오른쪽 상세 패널 -->
@@ -13077,37 +13160,38 @@ Option C: [제품C] - $[가격]
 
       const taskTableArea = document.getElementById('taskTableArea');
       const productUploadArea = document.getElementById('productUploadArea');
+      const dashboardArea = document.getElementById('dashboardArea');
 
-      // 제품 업로드 관리 (extra1) 선택 시 파이프라인 뷰 표시
+      // 모든 뷰 숨기기
+      if (taskTableArea) taskTableArea.style.display = 'none';
+      if (productUploadArea) { productUploadArea.classList.add('hidden'); productUploadArea.style.display = 'none'; }
+      if (dashboardArea) dashboardArea.style.display = 'none';
+
+      // 제품 업로드 관리 (extra1)
       if (projectId === 'extra1') {
-        if (taskTableArea) taskTableArea.style.display = 'none';
-        if (productUploadArea) productUploadArea.classList.remove('hidden');
+        if (productUploadArea) { productUploadArea.classList.remove('hidden'); productUploadArea.style.display = ''; }
         document.querySelector('#processView h1').textContent = '제품 업로드';
         document.querySelector('#processView h1 + p').textContent = '제품 업로드 프로젝트 관리';
-        puRenderAll(); // 즉시 렌더 (localStorage 데이터)
-        // Supabase에서 최신 데이터 로드 후 다시 렌더
+        puRenderAll();
         if (typeof window.puCloudLoad === 'function') {
           window.puCloudLoad().then(() => puRenderAll());
         }
         return;
       }
 
-      // 다른 프로젝트: 기존 테이블 표시
-      if (taskTableArea) taskTableArea.style.display = '';
-      if (productUploadArea) productUploadArea.classList.add('hidden');
-
+      // 전체 대시보드
       if (projectId === 'all') {
-        // 전체 프로젝트 병합 (extra1 제외)
-        groups = [];
-        Object.keys(projectsData).forEach(key => {
-          if (key === 'extra1') return;
-          projectsData[key].forEach(group => {
-            groups.push({...group, projectKey: key});
-          });
-        });
-      } else {
-        groups = projectsData[projectId] ? [...projectsData[projectId]] : [];
+        if (dashboardArea) dashboardArea.style.display = 'flex';
+        // 헤더 영역 숨기기 (대시보드에 자체 헤더 있음)
+        document.querySelector('#processView > div:first-child').style.display = 'none';
+        renderDashboard();
+        return;
       }
+
+      // 일반 프로젝트: 테이블 표시
+      document.querySelector('#processView > div:first-child').style.display = '';
+      if (taskTableArea) taskTableArea.style.display = '';
+      groups = projectsData[projectId] ? [...projectsData[projectId]] : [];
 
       // 헤더 업데이트
       updateHeader(projectId);
@@ -13164,6 +13248,141 @@ Option C: [제품C] - $[가격]
       }
       document.querySelector('#processView h1').textContent = title;
       document.querySelector('#processView h1 + p').textContent = desc;
+    }
+
+    // ====== 전체 업무 대시보드 렌더링 ======
+    function renderDashboard() {
+      const today = new Date();
+      const dd = today.toISOString().slice(0, 10).replace(/-/g, '.');
+      document.getElementById('dash-date').textContent = dd + ' 기준';
+
+      // 모든 태스크 수집 (extra1 제외)
+      let allTasks = [];
+      const projKeys = Object.keys(projectsData).filter(k => k !== 'extra1');
+      projKeys.forEach(key => {
+        (projectsData[key] || []).forEach(group => {
+          // 그룹의 직접 태스크 (children 포함)
+          if (group.status) allTasks.push({ ...group, _proj: key });
+          if (group.children) {
+            group.children.forEach(child => {
+              allTasks.push({ ...child, _proj: key });
+              if (child.children) child.children.forEach(sub => allTasks.push({ ...sub, _proj: key }));
+            });
+          }
+        });
+      });
+
+      // 상태별 카운트
+      const counts = { completed: 0, progress: 0, request: 0, scheduled: 0, hold: 0 };
+      allTasks.forEach(t => { if (counts[t.status] !== undefined) counts[t.status]++; });
+      const total = allTasks.length;
+      const pct = (n) => total ? Math.round(n / total * 100) : 0;
+
+      document.getElementById('dash-total').textContent = total;
+      document.getElementById('dash-completed').textContent = counts.completed;
+      document.getElementById('dash-completed-pct').textContent = '/ ' + pct(counts.completed) + '%';
+      document.getElementById('dash-progress').textContent = counts.progress;
+      document.getElementById('dash-progress-pct').textContent = '/ ' + pct(counts.progress) + '%';
+      document.getElementById('dash-scheduled').textContent = counts.scheduled + counts.request;
+      document.getElementById('dash-scheduled-pct').textContent = '/ ' + pct(counts.scheduled + counts.request) + '%';
+      document.getElementById('dash-hold').textContent = counts.hold;
+      document.getElementById('dash-hold-pct').textContent = '/ ' + pct(counts.hold) + '%';
+
+      // 바로가기 버튼
+      const navEl = document.getElementById('dash-nav-buttons');
+      let navHtml = '<button onclick="selectProject(\'all\')" style="padding:6px 12px; font-size:12px; font-weight:600; color:#fff; background:#1f2937; border:none; border-radius:8px; cursor:pointer;">전체 대시보드</button>';
+      projKeys.forEach(key => {
+        const name = projectNames[key] || key;
+        navHtml += '<button onclick="selectProject(\'' + key + '\')" style="padding:6px 12px; font-size:12px; font-weight:500; color:#4b5563; background:#fff; border:1px solid #e5e7eb; border-radius:8px; cursor:pointer;">' + name + '</button>';
+      });
+      navHtml += '<button onclick="selectProject(\'extra1\')" style="padding:6px 12px; font-size:12px; font-weight:500; color:#4b5563; background:#fff; border:1px solid #e5e7eb; border-radius:8px; cursor:pointer;">제품 업로드</button>';
+      navEl.innerHTML = navHtml;
+
+      // 프로젝트별 진행률
+      const projEl = document.getElementById('dash-projects');
+      let projHtml = '';
+      const allProjKeys = Object.keys(projectsData);
+      allProjKeys.forEach(key => {
+        const name = projectNames[key] || key;
+        let tasks = [];
+        if (key === 'extra1') {
+          // 제품 업로드: puProductStates 기반
+          let puTotal = 0, puDone = 0, puProg = 0;
+          if (typeof puCategories !== 'undefined') {
+            puCategories.forEach(cat => {
+              cat.products.forEach(p => {
+                puTotal++;
+                const st = puProductStates[p] || [0,0,0,0];
+                const done = st.every(s => s === 2);
+                const prog = st.some(s => s > 0);
+                if (done) puDone++;
+                else if (prog) puProg++;
+              });
+            });
+          }
+          const puPctVal = puTotal ? Math.round((puDone / puTotal) * 100) : 0;
+          const puProgPct = puTotal ? Math.round((puProg / puTotal) * 100) : 0;
+          projHtml += '<div><div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span style="font-size:13px; font-weight:500; color:#374151;">' + name + '</span><span style="font-size:13px; font-weight:700; color:#1f2937;">' + puPctVal + '%</span></div>';
+          projHtml += '<div style="height:10px; background:#f3f4f6; border-radius:99px; overflow:hidden; display:flex;"><div style="width:' + puPctVal + '%; background:#60a5fa; border-radius:99px;"></div><div style="width:' + puProgPct + '%; background:#bfdbfe;"></div></div>';
+          projHtml += '<div style="display:flex; gap:12px; margin-top:4px; font-size:11px; color:#9ca3af;"><span>완료 ' + puDone + '</span><span>진행 ' + puProg + '</span><span>대기 ' + (puTotal - puDone - puProg) + '</span></div></div>';
+          return;
+        }
+        (projectsData[key] || []).forEach(group => {
+          if (group.status) tasks.push(group);
+          if (group.children) {
+            group.children.forEach(c => {
+              tasks.push(c);
+              if (c.children) c.children.forEach(s => tasks.push(s));
+            });
+          }
+        });
+        const tc = tasks.length;
+        const comp = tasks.filter(t => t.status === 'completed').length;
+        const prog = tasks.filter(t => t.status === 'progress').length;
+        const compPct = tc ? Math.round(comp / tc * 100) : 0;
+        const progPct = tc ? Math.round(prog / tc * 100) : 0;
+        const rest = tc - comp - prog;
+        projHtml += '<div><div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span style="font-size:13px; font-weight:500; color:#374151;">' + name + '</span><span style="font-size:13px; font-weight:700; color:#1f2937;">' + compPct + '%</span></div>';
+        projHtml += '<div style="height:10px; background:#f3f4f6; border-radius:99px; overflow:hidden; display:flex;"><div style="width:' + compPct + '%; background:#60a5fa; border-radius:99px;"></div><div style="width:' + progPct + '%; background:#bfdbfe;"></div></div>';
+        projHtml += '<div style="display:flex; gap:12px; margin-top:4px; font-size:11px; color:#9ca3af;"><span>완료 ' + comp + '</span><span>진행 ' + prog + '</span><span>대기 ' + rest + '</span></div></div>';
+      });
+      projEl.innerHTML = projHtml;
+
+      // 마감 임박 (end 날짜 기준 D-7 이내, 완료 아닌 것)
+      const deadlineEl = document.getElementById('dash-deadline');
+      let deadlines = [];
+      allTasks.forEach(t => {
+        if (t.status === 'completed' || !t.end || t.end === '-') return;
+        const endDate = new Date(t.end);
+        const diff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+        if (diff >= 0 && diff <= 7) deadlines.push({ name: t.name, proj: projectNames[t._proj] || t._proj, who: t.who || '', diff: diff, end: t.end });
+      });
+      deadlines.sort((a, b) => a.diff - b.diff);
+      if (deadlines.length === 0) {
+        deadlineEl.innerHTML = '<div style="padding:16px; text-align:center; color:#9ca3af; font-size:13px;">마감 임박 업무가 없습니다</div>';
+      } else {
+        let dHtml = '';
+        deadlines.slice(0, 5).forEach(d => {
+          const dName = (d.name || '').replace(/[^\w가-힣\s\+\-\.]/g, '').trim();
+          dHtml += '<div style="padding:10px 16px; border-bottom:1px solid #f9fafb; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:13px; font-weight:500; color:#1f2937;">' + dName + '</div><div style="font-size:11px; color:#9ca3af;">' + d.proj + ' · ' + (d.who || '').slice(0,4) + '</div></div><span style="font-size:12px; font-weight:' + (d.diff <= 2 ? '700' : '500') + '; color:' + (d.diff <= 2 ? '#1f2937' : '#6b7280') + '; background:#f3f4f6; padding:2px 8px; border-radius:4px;">D-' + d.diff + '</span></div>';
+        });
+        deadlineEl.innerHTML = dHtml;
+      }
+
+      // 최근 완료
+      const recentEl = document.getElementById('dash-recent');
+      let completed = allTasks.filter(t => t.status === 'completed' && t.name);
+      completed = completed.slice(0, 5);
+      if (completed.length === 0) {
+        recentEl.innerHTML = '<div style="padding:16px; text-align:center; color:#9ca3af; font-size:13px;">완료된 업무가 없습니다</div>';
+      } else {
+        let rHtml = '';
+        completed.forEach(t => {
+          const tName = (t.name || '').replace(/[^\w가-힣\s\+\-\.]/g, '').trim();
+          rHtml += '<div style="padding:10px 16px; border-bottom:1px solid #f9fafb; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:13px; font-weight:500; color:#1f2937;">' + tName + '</div><div style="font-size:11px; color:#9ca3af;">' + (projectNames[t._proj] || t._proj) + ' · ' + (t.who || '').slice(0,4) + '</div></div><span style="font-size:11px; color:#9ca3af;">' + (t.end && t.end !== '-' ? t.end.slice(5) : '') + '</span></div>';
+        });
+        recentEl.innerHTML = rHtml;
+      }
     }
 
     // 필터 드롭다운 토글
