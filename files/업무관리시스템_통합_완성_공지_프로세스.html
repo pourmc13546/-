@@ -2026,11 +2026,9 @@
       </div>
     </div>
 
-    <!-- 필터 영역 -->
-    <div id="taskTableArea">
-    <div class="bg-white px-6 py-3 flex items-center justify-between border-b border-slate-100">
+    <!-- 프로젝트 선택 드롭다운 (항상 표시) -->
+    <div class="bg-white px-6 py-3 flex items-center border-b border-slate-100">
       <div class="flex items-center gap-2">
-        <!-- 프로젝트 선택 커스텀 드롭다운 -->
         <div class="relative" id="projectDropdownWrap">
           <button onclick="toggleProjectDropdown()" id="projectDropdownBtn" class="flex items-center gap-2 text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700 bg-white min-w-[160px] hover:border-slate-300 transition-colors">
             <span id="projectDropdownLabel">알리바바 입점</span>
@@ -2046,7 +2044,13 @@
             </div>
           </div>
         </div>
-        
+      </div>
+    </div>
+
+    <!-- 필터 영역 -->
+    <div id="taskTableArea">
+    <div class="bg-white px-6 py-3 flex items-center justify-between border-b border-slate-100">
+      <div class="flex items-center gap-2">
         <!-- 필터 버튼 + 드롭다운 -->
         <div class="relative">
           <button id="filterBtn" onclick="toggleFilterDropdown()" class="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
