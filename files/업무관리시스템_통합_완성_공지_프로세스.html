@@ -2736,7 +2736,7 @@
           <button class="tv-filter-pill" onclick="tvFilterClick(this)">보고완료</button>
           <button class="tv-filter-pill" onclick="tvFilterClick(this)">컨펌</button>
           <button class="tv-filter-pill" onclick="tvFilterClick(this)">반려</button>
-          <button class="tv-add-btn">+ 새 업무</button>
+          <button class="tv-add-btn" onclick="tvOpenAddModal()">+ 새 업무</button>
         </div>
         <div class="tv-table-wrap">
           <table class="tv-tbl">
@@ -2752,60 +2752,7 @@
               </tr>
             </thead>
             <tbody id="tv-task-body">
-              <tr class="active" onclick="selectTvRow(this, 0)">
-                <td><span class="tv-dot urgent"></span>알리바바 반품 정책 조사</td>
-                <td><span class="tv-tag researching">조사중</span></td>
-                <td style="font-size:12px;color:#f04452;font-weight:600;">긴급</td>
-                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
-                <td style="font-size:12px;">김채원</td>
-                <td style="font-size:12px;color:#8b95a1;">3/12</td>
-                <td style="font-size:12px;color:#c4c9d0;">3/8</td>
-              </tr>
-              <tr onclick="selectTvRow(this, 1)">
-                <td><span class="tv-dot normal"></span>POUR 제품 HS Code 확인</td>
-                <td><span class="tv-tag reported">보고완료</span></td>
-                <td style="font-size:12px;color:#3182f6;">보통</td>
-                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
-                <td style="font-size:12px;">허지은</td>
-                <td style="font-size:12px;color:#8b95a1;">3/14</td>
-                <td style="font-size:12px;color:#c4c9d0;">3/7</td>
-              </tr>
-              <tr onclick="selectTvRow(this, 2)">
-                <td><span class="tv-dot low"></span>물류사 Extrans 단가 비교</td>
-                <td><span class="tv-tag waiting">대기</span></td>
-                <td style="font-size:12px;color:#8b95a1;">낮음</td>
-                <td style="font-size:12px;color:#8b95a1;">대표님</td>
-                <td style="font-size:12px;">김채원</td>
-                <td style="font-size:12px;color:#8b95a1;">3/20</td>
-                <td style="font-size:12px;color:#c4c9d0;">3/10</td>
-              </tr>
-              <tr onclick="selectTvRow(this, 3)">
-                <td><span class="tv-dot urgent"></span>바이어 Liam 요청 샘플 수량 확인</td>
-                <td><span class="tv-tag confirmed">컨펌</span></td>
-                <td style="font-size:12px;color:#f04452;font-weight:600;">긴급</td>
-                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
-                <td style="font-size:12px;">허지은</td>
-                <td style="font-size:12px;color:#8b95a1;">3/11</td>
-                <td style="font-size:12px;color:#c4c9d0;">3/6</td>
-              </tr>
-              <tr onclick="selectTvRow(this, 4)">
-                <td><span class="tv-dot normal"></span>알리바바 스토어 메인 배너 시안 요청</td>
-                <td><span class="tv-tag researching">조사중</span></td>
-                <td style="font-size:12px;color:#3182f6;">보통</td>
-                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
-                <td style="font-size:12px;">김채원</td>
-                <td style="font-size:12px;color:#8b95a1;">3/15</td>
-                <td style="font-size:12px;color:#c4c9d0;">3/9</td>
-              </tr>
-              <tr onclick="selectTvRow(this, 5)">
-                <td><span class="tv-dot normal"></span>경쟁사 가격 벤치마킹</td>
-                <td><span class="tv-tag waiting">대기</span></td>
-                <td style="font-size:12px;color:#3182f6;">보통</td>
-                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
-                <td style="font-size:12px;">허지은</td>
-                <td style="font-size:12px;color:#8b95a1;">3/18</td>
-                <td style="font-size:12px;color:#c4c9d0;">3/10</td>
-              </tr>
+              <!-- JS tvRenderTable()에서 동적 렌더링 -->
             </tbody>
           </table>
         </div>
@@ -2828,29 +2775,90 @@
               </div>
             </div>
             <div class="td-actions">
-              <button class="td-btn">수정</button>
-              <button class="td-btn" style="color:#f04452;border-color:#fecaca;">삭제</button>
+              <button class="td-btn" onclick="tvOpenEditModal()">수정</button>
+              <button class="td-btn" style="color:#f04452;border-color:#fecaca;" onclick="tvDeleteTask()">삭제</button>
             </div>
           </div>
 
-          <!-- 3단계 가로 배치 -->
-          <div class="step-cards" id="tvStepCards">
-            <div class="sc">
-              <div class="sc-head"><span class="sc-num n1">1</span><span class="sc-label">지시사항</span></div>
-              <div class="sc-body">알리바바 플랫폼의 반품/환불 정책을 조사해주세요.<br><br>- 셀러 귀책 vs 바이어 귀책 기준<br>- 반품 시 물류비 부담 주체<br>- Trade Assurance 적용 시 차이점</div>
-            </div>
-            <div class="sc">
-              <div class="sc-head"><span class="sc-num n2">2</span><span class="sc-label">알아본 내용</span></div>
-              <div class="sc-body">1. 셀러 귀책 (상품 불량/오배송): 셀러 100% 부담<br>2. 바이어 귀책 (단순 변심): 바이어 부담, 단 7일 이내<br>3. Trade Assurance 적용 시 알리바바가 중재<br><br>참고: Trade Assurance 분쟁 해결 기간 평균 15~30일</div>
-            </div>
-            <div class="sc">
-              <div class="sc-head"><span class="sc-num n3">3</span><span class="sc-label">보고 및 컨펌</span></div>
-              <div class="sc-body empty">아직 작성되지 않았습니다</div>
-            </div>
-          </div>
+          <!-- 3단계 가로 배치 (JS tvShowDetail()에서 동적 렌더링) -->
+          <div class="step-cards" id="tvStepCards"></div>
         </div>
       </div>
     </div><!-- /taskTabContent -->
+
+    <!-- 업무지시 새 업무 / 수정 모달 -->
+    <div id="tvModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:200; display:none; align-items:center; justify-content:center;">
+      <div style="background:#fff; border-radius:16px; width:520px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="padding:20px 24px; border-bottom:1px solid #f4f5f7; display:flex; align-items:center; justify-content:space-between;">
+          <h3 id="tvModalTitle" style="font-size:16px; font-weight:800; color:#202454; margin:0;">새 업무 추가</h3>
+          <button onclick="tvCloseModal()" style="background:none; border:none; cursor:pointer; padding:4px;">
+            <svg width="20" height="20" fill="none" stroke="#8b95a1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div style="padding:24px;">
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">업무명 <span style="color:#f04452;">*</span></label>
+            <input id="tvM-title" type="text" placeholder="업무 제목을 입력하세요" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; outline:none; transition:border 0.15s;" onfocus="this.style.borderColor='#202454'" onblur="this.style.borderColor='#e5e8eb'">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div>
+              <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">지시자</label>
+              <select id="tvM-from" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; outline:none; background:#fff;">
+                <option value="팀장님">팀장님</option>
+                <option value="대표님">대표님</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">담당자</label>
+              <select id="tvM-to" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; outline:none; background:#fff;">
+                <option value="김채원">김채원</option>
+                <option value="허지은">허지은</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div>
+              <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">우선순위</label>
+              <select id="tvM-priority" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; outline:none; background:#fff;">
+                <option value="긴급">긴급</option>
+                <option value="보통" selected>보통</option>
+                <option value="낮음">낮음</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">상태</label>
+              <select id="tvM-status" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; outline:none; background:#fff;">
+                <option value="대기">대기</option>
+                <option value="조사중">조사중</option>
+                <option value="보고완료">보고완료</option>
+                <option value="컨펌">컨펌</option>
+                <option value="반려">반려</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">마감일</label>
+            <input id="tvM-deadline" type="date" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; outline:none;">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">지시사항</label>
+            <textarea id="tvM-step1" rows="3" placeholder="지시 내용을 입력하세요" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; outline:none; resize:vertical; font-family:inherit;" onfocus="this.style.borderColor='#202454'" onblur="this.style.borderColor='#e5e8eb'"></textarea>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">알아본 내용</label>
+            <textarea id="tvM-step2" rows="3" placeholder="조사/알아본 내용을 입력하세요" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; outline:none; resize:vertical; font-family:inherit;" onfocus="this.style.borderColor='#202454'" onblur="this.style.borderColor='#e5e8eb'"></textarea>
+          </div>
+          <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">보고 및 컨펌</label>
+            <textarea id="tvM-step3" rows="3" placeholder="보고/컨펌 내용을 입력하세요" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; outline:none; resize:vertical; font-family:inherit;" onfocus="this.style.borderColor='#202454'" onblur="this.style.borderColor='#e5e8eb'"></textarea>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button onclick="tvCloseModal()" style="padding:10px 20px; border:1px solid #e5e8eb; border-radius:8px; background:#fff; color:#6b7684; font-size:13px; font-weight:600; cursor:pointer;">취소</button>
+            <button onclick="tvSaveModal()" style="padding:10px 20px; border:none; border-radius:8px; background:#202454; color:#fff; font-size:13px; font-weight:600; cursor:pointer;">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -13409,55 +13417,290 @@ Option C: [제품C] - $[가격]
       }
     }
 
-    // 업무지시 행 선택
-    const tvTaskData = [
-      { title: '알리바바 반품 정책 조사', from: '팀장님', to: '김채원', deadline: '3/12', priority: '긴급', priorityColor: '#f04452',
-        step1: '알리바바 플랫폼의 반품/환불 정책을 조사해주세요.<br><br>- 셀러 귀책 vs 바이어 귀책 기준<br>- 반품 시 물류비 부담 주체<br>- Trade Assurance 적용 시 차이점',
-        step2: '1. 셀러 귀책 (상품 불량/오배송): 셀러 100% 부담<br>2. 바이어 귀책 (단순 변심): 바이어 부담, 단 7일 이내<br>3. Trade Assurance 적용 시 알리바바가 중재<br><br>참고: Trade Assurance 분쟁 해결 기간 평균 15~30일',
+    // ─── 업무지시 데이터 ───
+    const TV_STATUS_MAP = {
+      '대기': { cls: 'waiting', label: '대기' },
+      '조사중': { cls: 'researching', label: '조사중' },
+      '보고완료': { cls: 'reported', label: '보고완료' },
+      '컨펌': { cls: 'confirmed', label: '컨펌' },
+      '반려': { cls: 'rejected', label: '반려' }
+    };
+    const TV_PRIORITY_MAP = {
+      '긴급': { color: '#f04452', dot: 'urgent' },
+      '보통': { color: '#3182f6', dot: 'normal' },
+      '낮음': { color: '#8b95a1', dot: 'low' }
+    };
+
+    let tvTaskData = [];
+    let tvSelectedIdx = 0;
+    let tvCurrentFilter = '전체';
+    let tvEditIdx = -1; // -1 = 신규, 0+ = 수정 대상 인덱스
+
+    // 기본 데이터
+    const tvDefaultData = [
+      { title: '알리바바 반품 정책 조사', from: '팀장님', to: '김채원', deadline: '3/12', priority: '긴급', status: '조사중', regDate: '3/8',
+        step1: '알리바바 플랫폼의 반품/환불 정책을 조사해주세요.\n\n- 셀러 귀책 vs 바이어 귀책 기준\n- 반품 시 물류비 부담 주체\n- Trade Assurance 적용 시 차이점',
+        step2: '1. 셀러 귀책 (상품 불량/오배송): 셀러 100% 부담\n2. 바이어 귀책 (단순 변심): 바이어 부담, 단 7일 이내\n3. Trade Assurance 적용 시 알리바바가 중재\n\n참고: Trade Assurance 분쟁 해결 기간 평균 15~30일',
         step3: '' },
-      { title: 'POUR 제품 HS Code 확인', from: '팀장님', to: '허지은', deadline: '3/14', priority: '보통', priorityColor: '#3182f6',
-        step1: 'POUR 제품 라인업의 HS Code를 확인해주세요.<br><br>- 각 제품별 정확한 HS Code 조회<br>- 관세율 확인',
-        step2: 'HS Code 조회 완료.<br>POUR 클렌저: 3304.99<br>POUR 세럼: 3304.99<br>POUR 크림: 3304.99<br><br>관세율: 6.5% (한-중 FTA 적용 시 0%)',
+      { title: 'POUR 제품 HS Code 확인', from: '팀장님', to: '허지은', deadline: '3/14', priority: '보통', status: '보고완료', regDate: '3/7',
+        step1: 'POUR 제품 라인업의 HS Code를 확인해주세요.\n\n- 각 제품별 정확한 HS Code 조회\n- 관세율 확인',
+        step2: 'HS Code 조회 완료.\nPOUR 클렌저: 3304.99\nPOUR 세럼: 3304.99\nPOUR 크림: 3304.99\n\n관세율: 6.5% (한-중 FTA 적용 시 0%)',
         step3: '확인했습니다. FTA 원산지 증명서 준비해주세요.' },
-      { title: '물류사 Extrans 단가 비교', from: '대표님', to: '김채원', deadline: '3/20', priority: '낮음', priorityColor: '#8b95a1',
-        step1: '현재 물류사와 Extrans의 단가를 비교 분석해주세요.',
-        step2: '', step3: '' },
-      { title: '바이어 Liam 요청 샘플 수량 확인', from: '팀장님', to: '허지은', deadline: '3/11', priority: '긴급', priorityColor: '#f04452',
+      { title: '물류사 Extrans 단가 비교', from: '대표님', to: '김채원', deadline: '3/20', priority: '낮음', status: '대기', regDate: '3/10',
+        step1: '현재 물류사와 Extrans의 단가를 비교 분석해주세요.', step2: '', step3: '' },
+      { title: '바이어 Liam 요청 샘플 수량 확인', from: '팀장님', to: '허지은', deadline: '3/11', priority: '긴급', status: '컨펌', regDate: '3/6',
         step1: '바이어 Liam이 요청한 샘플 수량을 확인하고 재고 현황을 체크해주세요.',
-        step2: '요청 수량: 각 제품당 5개씩, 총 35개<br>현재 재고 충분함.',
+        step2: '요청 수량: 각 제품당 5개씩, 총 35개\n현재 재고 충분함.',
         step3: '확인 완료. 샘플 발송 진행해주세요.' },
-      { title: '알리바바 스토어 메인 배너 시안 요청', from: '팀장님', to: '김채원', deadline: '3/15', priority: '보통', priorityColor: '#3182f6',
-        step1: '알리바바 스토어 메인 페이지 배너 시안을 디자이너에게 요청해주세요.<br><br>- 사이즈: 1920x460px<br>- 브랜드 컬러 반영',
-        step2: '디자이너에게 요청 완료. 3/13 전달 예정.',
-        step3: '' },
-      { title: '경쟁사 가격 벤치마킹', from: '팀장님', to: '허지은', deadline: '3/18', priority: '보통', priorityColor: '#3182f6',
-        step1: '알리바바 내 경쟁사 스킨케어 브랜드의 가격대를 조사해주세요.',
-        step2: '', step3: '' }
+      { title: '알리바바 스토어 메인 배너 시안 요청', from: '팀장님', to: '김채원', deadline: '3/15', priority: '보통', status: '조사중', regDate: '3/9',
+        step1: '알리바바 스토어 메인 페이지 배너 시안을 디자이너에게 요청해주세요.\n\n- 사이즈: 1920x460px\n- 브랜드 컬러 반영',
+        step2: '디자이너에게 요청 완료. 3/13 전달 예정.', step3: '' },
+      { title: '경쟁사 가격 벤치마킹', from: '팀장님', to: '허지은', deadline: '3/18', priority: '보통', status: '대기', regDate: '3/10',
+        step1: '알리바바 내 경쟁사 스킨케어 브랜드의 가격대를 조사해주세요.', step2: '', step3: '' }
     ];
 
-    function selectTvRow(el, idx) {
-      document.querySelectorAll('.tv-tbl tr').forEach(r => r.classList.remove('active'));
-      el.classList.add('active');
-      const d = tvTaskData[idx];
-      if (!d) return;
-      document.getElementById('tvDetailTitle').textContent = d.title;
-      document.getElementById('tvDetailMeta').innerHTML =
-        '<span>📌 ' + d.from + '</span>' +
-        '<span>👤 ' + d.to + '</span>' +
-        '<span>📅 마감 ' + d.deadline + '</span>' +
-        '<span style="color:' + d.priorityColor + ';font-weight:600;">' + d.priority + '</span>';
-      const cards = document.getElementById('tvStepCards');
-      cards.innerHTML =
-        '<div class="sc"><div class="sc-head"><span class="sc-num n1">1</span><span class="sc-label">지시사항</span></div><div class="sc-body">' + (d.step1 || '<span class="empty">아직 작성되지 않았습니다</span>') + '</div></div>' +
-        '<div class="sc"><div class="sc-head"><span class="sc-num n2">2</span><span class="sc-label">알아본 내용</span></div><div class="sc-body' + (d.step2 ? '' : ' empty') + '">' + (d.step2 || '아직 작성되지 않았습니다') + '</div></div>' +
-        '<div class="sc"><div class="sc-head"><span class="sc-num n3">3</span><span class="sc-label">보고 및 컨펌</span></div><div class="sc-body' + (d.step3 ? '' : ' empty') + '">' + (d.step3 || '아직 작성되지 않았습니다') + '</div></div>';
+    // ─── 초기화 & 저장/로드 ───
+    function tvInitData() {
+      try {
+        const saved = localStorage.getItem('tvTaskInstructions');
+        if (saved) {
+          tvTaskData = JSON.parse(saved);
+        } else {
+          tvTaskData = JSON.parse(JSON.stringify(tvDefaultData));
+        }
+      } catch(e) {
+        tvTaskData = JSON.parse(JSON.stringify(tvDefaultData));
+      }
+      tvRenderTable();
+      tvShowDetail(0);
+      // Supabase에서도 로드 시도
+      tvCloudLoad();
     }
 
-    // 업무지시 필터 클릭
+    function tvSaveData() {
+      try { localStorage.setItem('tvTaskInstructions', JSON.stringify(tvTaskData)); } catch(e) {}
+      if (typeof saveDataToSupabase === 'function') {
+        saveDataToSupabase('tvTaskInstructions', tvTaskData);
+      }
+    }
+
+    async function tvCloudLoad() {
+      if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_KEY === 'undefined') {
+        // Supabase 변수가 아직 로드 안 됨 — 나중에 재시도
+        setTimeout(tvCloudLoad, 2000);
+        return;
+      }
+      try {
+        const resp = await fetch(SUPABASE_URL + '/rest/v1/task_data?key=eq.tvTaskInstructions&select=value', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        if (resp.ok) {
+          const rows = await resp.json();
+          if (rows.length > 0 && rows[0].value) {
+            let val = rows[0].value;
+            if (typeof val === 'string') { try { val = JSON.parse(val); } catch(e) {} }
+            if (Array.isArray(val) && val.length > 0) {
+              tvTaskData = val;
+              try { localStorage.setItem('tvTaskInstructions', JSON.stringify(tvTaskData)); } catch(e) {}
+              tvRenderTable();
+              tvShowDetail(tvSelectedIdx < tvTaskData.length ? tvSelectedIdx : 0);
+            }
+          }
+        }
+      } catch(e) {}
+    }
+
+    // ─── 필터링 ───
+    function tvGetFiltered() {
+      if (tvCurrentFilter === '전체') return tvTaskData;
+      return tvTaskData.filter(t => t.status === tvCurrentFilter);
+    }
+
     function tvFilterClick(btn) {
       document.querySelectorAll('.tv-filter-pill').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      tvCurrentFilter = btn.textContent.trim();
+      tvRenderTable();
+      // 필터 후 첫 항목 선택
+      const filtered = tvGetFiltered();
+      if (filtered.length > 0) {
+        const realIdx = tvTaskData.indexOf(filtered[0]);
+        tvShowDetail(realIdx);
+      } else {
+        tvShowEmptyDetail();
+      }
     }
+
+    // ─── 테이블 렌더링 ───
+    function tvRenderTable() {
+      const tbody = document.getElementById('tv-task-body');
+      if (!tbody) return;
+      const filtered = tvGetFiltered();
+      let html = '';
+      filtered.forEach((t, fi) => {
+        const realIdx = tvTaskData.indexOf(t);
+        const pr = TV_PRIORITY_MAP[t.priority] || TV_PRIORITY_MAP['보통'];
+        const st = TV_STATUS_MAP[t.status] || TV_STATUS_MAP['대기'];
+        const isActive = realIdx === tvSelectedIdx;
+        html += '<tr' + (isActive ? ' class="active"' : '') + ' onclick="selectTvRow(this,' + realIdx + ')">' +
+          '<td><span class="tv-dot ' + pr.dot + '"></span>' + tvEsc(t.title) + '</td>' +
+          '<td><span class="tv-tag ' + st.cls + '">' + st.label + '</span></td>' +
+          '<td style="font-size:12px;color:' + pr.color + ';' + (t.priority === '긴급' ? 'font-weight:600;' : '') + '">' + t.priority + '</td>' +
+          '<td style="font-size:12px;color:#8b95a1;">' + tvEsc(t.from) + '</td>' +
+          '<td style="font-size:12px;">' + tvEsc(t.to) + '</td>' +
+          '<td style="font-size:12px;color:#8b95a1;">' + tvEsc(t.deadline) + '</td>' +
+          '<td style="font-size:12px;color:#c4c9d0;">' + tvEsc(t.regDate || '') + '</td>' +
+          '</tr>';
+      });
+      if (filtered.length === 0) {
+        html = '<tr><td colspan="7" style="text-align:center; padding:30px; color:#c4c9d0; font-size:13px;">해당 상태의 업무가 없습니다</td></tr>';
+      }
+      tbody.innerHTML = html;
+    }
+
+    function tvEsc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function tvNl2br(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g, '<br>'); }
+
+    // ─── 디테일 표시 ───
+    function tvShowDetail(idx) {
+      if (idx < 0 || idx >= tvTaskData.length) { tvShowEmptyDetail(); return; }
+      tvSelectedIdx = idx;
+      const d = tvTaskData[idx];
+      const pr = TV_PRIORITY_MAP[d.priority] || TV_PRIORITY_MAP['보통'];
+      document.getElementById('tvDetailTitle').textContent = d.title;
+      document.getElementById('tvDetailMeta').innerHTML =
+        '<span>📌 ' + tvEsc(d.from) + '</span>' +
+        '<span>👤 ' + tvEsc(d.to) + '</span>' +
+        '<span>📅 마감 ' + tvEsc(d.deadline) + '</span>' +
+        '<span style="color:' + pr.color + ';font-weight:600;">' + d.priority + '</span>';
+      document.getElementById('tvStepCards').innerHTML =
+        '<div class="sc"><div class="sc-head"><span class="sc-num n1">1</span><span class="sc-label">지시사항</span></div><div class="sc-body' + (d.step1 ? '' : ' empty') + '">' + (tvNl2br(d.step1) || '아직 작성되지 않았습니다') + '</div></div>' +
+        '<div class="sc"><div class="sc-head"><span class="sc-num n2">2</span><span class="sc-label">알아본 내용</span></div><div class="sc-body' + (d.step2 ? '' : ' empty') + '">' + (tvNl2br(d.step2) || '아직 작성되지 않았습니다') + '</div></div>' +
+        '<div class="sc"><div class="sc-head"><span class="sc-num n3">3</span><span class="sc-label">보고 및 컨펌</span></div><div class="sc-body' + (d.step3 ? '' : ' empty') + '">' + (tvNl2br(d.step3) || '아직 작성되지 않았습니다') + '</div></div>';
+      // 테이블 active 업데이트
+      tvRenderTable();
+    }
+
+    function tvShowEmptyDetail() {
+      tvSelectedIdx = -1;
+      document.getElementById('tvDetailTitle').textContent = '업무를 선택하세요';
+      document.getElementById('tvDetailMeta').innerHTML = '';
+      document.getElementById('tvStepCards').innerHTML =
+        '<div style="display:flex; align-items:center; justify-content:center; height:120px; color:#c4c9d0; font-size:13px;">좌측 목록에서 업무를 선택하거나 새 업무를 추가하세요</div>';
+    }
+
+    // ─── 행 선택 ───
+    function selectTvRow(el, idx) {
+      tvShowDetail(idx);
+    }
+
+    // ─── 모달: 새 업무 ───
+    function tvOpenAddModal() {
+      tvEditIdx = -1;
+      document.getElementById('tvModalTitle').textContent = '새 업무 추가';
+      document.getElementById('tvM-title').value = '';
+      document.getElementById('tvM-from').value = '팀장님';
+      document.getElementById('tvM-to').value = '김채원';
+      document.getElementById('tvM-priority').value = '보통';
+      document.getElementById('tvM-status').value = '대기';
+      document.getElementById('tvM-deadline').value = '';
+      document.getElementById('tvM-step1').value = '';
+      document.getElementById('tvM-step2').value = '';
+      document.getElementById('tvM-step3').value = '';
+      document.getElementById('tvModal').style.display = 'flex';
+    }
+
+    // ─── 모달: 수정 ───
+    function tvOpenEditModal() {
+      if (tvSelectedIdx < 0 || tvSelectedIdx >= tvTaskData.length) return;
+      tvEditIdx = tvSelectedIdx;
+      const d = tvTaskData[tvEditIdx];
+      document.getElementById('tvModalTitle').textContent = '업무 수정';
+      document.getElementById('tvM-title').value = d.title || '';
+      document.getElementById('tvM-from').value = d.from || '팀장님';
+      document.getElementById('tvM-to').value = d.to || '김채원';
+      document.getElementById('tvM-priority').value = d.priority || '보통';
+      document.getElementById('tvM-status').value = d.status || '대기';
+      // deadline 변환: "3/12" → date input format
+      const dlVal = d.deadline || '';
+      if (dlVal.includes('/')) {
+        const parts = dlVal.split('/');
+        const m = parts[0].padStart(2, '0');
+        const day = parts[1].padStart(2, '0');
+        document.getElementById('tvM-deadline').value = '2026-' + m + '-' + day;
+      } else {
+        document.getElementById('tvM-deadline').value = '';
+      }
+      document.getElementById('tvM-step1').value = d.step1 || '';
+      document.getElementById('tvM-step2').value = d.step2 || '';
+      document.getElementById('tvM-step3').value = d.step3 || '';
+      document.getElementById('tvModal').style.display = 'flex';
+    }
+
+    function tvCloseModal() {
+      document.getElementById('tvModal').style.display = 'none';
+    }
+
+    function tvSaveModal() {
+      const title = document.getElementById('tvM-title').value.trim();
+      if (!title) { alert('업무명을 입력하세요.'); return; }
+      const from = document.getElementById('tvM-from').value;
+      const to = document.getElementById('tvM-to').value;
+      const priority = document.getElementById('tvM-priority').value;
+      const status = document.getElementById('tvM-status').value;
+      const deadlineRaw = document.getElementById('tvM-deadline').value; // "2026-03-12"
+      let deadline = '';
+      if (deadlineRaw) {
+        const parts = deadlineRaw.split('-');
+        deadline = parseInt(parts[1]) + '/' + parseInt(parts[2]);
+      }
+      const step1 = document.getElementById('tvM-step1').value;
+      const step2 = document.getElementById('tvM-step2').value;
+      const step3 = document.getElementById('tvM-step3').value;
+
+      if (tvEditIdx >= 0 && tvEditIdx < tvTaskData.length) {
+        // 수정
+        const t = tvTaskData[tvEditIdx];
+        t.title = title; t.from = from; t.to = to; t.priority = priority;
+        t.status = status; t.deadline = deadline;
+        t.step1 = step1; t.step2 = step2; t.step3 = step3;
+        tvSelectedIdx = tvEditIdx;
+      } else {
+        // 신규
+        const today = new Date();
+        const regDate = (today.getMonth() + 1) + '/' + today.getDate();
+        tvTaskData.unshift({
+          title, from, to, priority, status, deadline, regDate,
+          step1, step2, step3
+        });
+        tvSelectedIdx = 0;
+      }
+
+      tvSaveData();
+      tvRenderTable();
+      tvShowDetail(tvSelectedIdx);
+      tvCloseModal();
+      if (typeof showToast === 'function') showToast('✅ 업무가 저장되었습니다');
+    }
+
+    // ─── 삭제 ───
+    function tvDeleteTask() {
+      if (tvSelectedIdx < 0 || tvSelectedIdx >= tvTaskData.length) return;
+      const t = tvTaskData[tvSelectedIdx];
+      if (!confirm('"' + t.title + '" 업무를 삭제하시겠습니까?')) return;
+      tvTaskData.splice(tvSelectedIdx, 1);
+      tvSaveData();
+      tvRenderTable();
+      if (tvTaskData.length > 0) {
+        tvShowDetail(Math.min(tvSelectedIdx, tvTaskData.length - 1));
+      } else {
+        tvShowEmptyDetail();
+      }
+      if (typeof showToast === 'function') showToast('🗑️ 업무가 삭제되었습니다');
+    }
+
+    // ─── 초기화 실행 ───
+    tvInitData();
 
     // 리사이즈 핸들
     (function() {
