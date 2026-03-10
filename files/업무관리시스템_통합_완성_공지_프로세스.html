@@ -596,6 +596,93 @@
     .project-item:hover .project-actions { opacity: 1; }
     .project-actions { opacity: 0; transition: opacity 0.15s; }
 
+    /* processView 컨테이너 */
+    .pv-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+    .pv-container.hidden { display: none !important; }
+
+    /* ─── 메인 탭 (프로세스 / 업무지시) ─── */
+    .pv-main-tabs { display: flex; gap: 0; border-top: 1px solid #e5e8eb; }
+    .pv-main-tab {
+      padding: 10px 22px; font-size: 13px; font-weight: 600; color: #8b95a1;
+      cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s;
+      background: none; border-top: none; border-left: none; border-right: none;
+    }
+    .pv-main-tab:hover { color: #4e5968; }
+    .pv-main-tab.active { color: #202454; border-bottom-color: #202454; }
+
+    /* ─── 업무지시·보고 뷰 (상하 분할) ─── */
+    .tv-view { height: 100%; display: none; flex-direction: column; overflow: hidden; }
+    .tv-view.active { display: flex; }
+    .tv-top { flex-shrink: 0; background: #fff; display: flex; flex-direction: column; border-bottom: 2px solid #e5e8eb; }
+    .tv-toolbar { padding: 14px 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f4f5f7; }
+    .tv-filter-pill { padding: 4px 12px; font-size: 11px; font-weight: 500; border: 1px solid #e5e8eb; border-radius: 14px; background: #fff; color: #8b95a1; cursor: pointer; }
+    .tv-filter-pill.active { background: #202454; color: #fff; border-color: #202454; }
+    .tv-add-btn { margin-left: auto; padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 7px; border: none; background: #202454; color: #fff; cursor: pointer; }
+    .tv-table-wrap { max-height: 220px; overflow-y: auto; }
+    .tv-table-wrap::-webkit-scrollbar { width: 3px; }
+    .tv-table-wrap::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+    .tv-tbl { width: 100%; border-collapse: collapse; }
+    .tv-tbl th {
+      padding: 8px 14px; font-size: 10px; font-weight: 700; color: #8b95a1;
+      text-align: left; background: #fafbfc; border-bottom: 1px solid #e5e8eb;
+      text-transform: uppercase; letter-spacing: 0.04em; position: sticky; top: 0; z-index: 1;
+    }
+    .tv-tbl td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f4f5f7; cursor: pointer; }
+    .tv-tbl tr:hover td { background: #fafbfc; }
+    .tv-tbl tr.active td { background: #f0f4ff; }
+    .tv-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+    .tv-dot.urgent { background: #f04452; }
+    .tv-dot.normal { background: #3182f6; }
+    .tv-dot.low { background: #d1d6db; }
+    .tv-tag { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+    .tv-tag.waiting { background: #fff8e1; color: #e8590c; }
+    .tv-tag.researching { background: #e8f4fd; color: #1971c2; }
+    .tv-tag.reported { background: #e6fcf5; color: #0ca678; }
+    .tv-tag.confirmed { background: #f0ebff; color: #7048e8; }
+    .tv-tag.rejected { background: #fee2e2; color: #dc2626; }
+
+    /* 하단: 디테일 */
+    .tv-bottom { flex: 1; overflow-y: auto; background: #fafbfc; }
+    .tv-bottom::-webkit-scrollbar { width: 4px; }
+    .tv-bottom::-webkit-scrollbar-thumb { background: #d1d6db; border-radius: 4px; }
+    .td-wrap { padding: 24px 28px; }
+    .td-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+    .td-left { flex: 1; }
+    .td-title { font-size: 17px; font-weight: 800; color: #222; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .td-meta { display: flex; gap: 14px; font-size: 12px; color: #8b95a1; flex-wrap: wrap; }
+    .td-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .td-btn { padding: 6px 14px; font-size: 12px; font-weight: 500; border: 1px solid #e5e8eb; border-radius: 6px; background: #fff; color: #6b7684; cursor: pointer; }
+    .td-btn:hover { background: #f4f5f7; }
+    .step-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .sc { background: #fff; border: 1px solid #e5e8eb; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+    .sc-head {
+      padding: 10px 14px; display: flex; align-items: center; gap: 7px;
+      border-bottom: 1px solid #f4f5f7; background: #fafbfc; flex-shrink: 0;
+    }
+    .sc-num {
+      width: 20px; height: 20px; border-radius: 5px; font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .sc-num.n1 { background: #202454; }
+    .sc-num.n2 { background: #3182f6; }
+    .sc-num.n3 { background: #0ca678; }
+    .sc-label { font-size: 11px; font-weight: 700; color: #4e5968; }
+    .sc-body { padding: 14px; font-size: 12px; line-height: 1.7; color: #4e5968; white-space: pre-wrap; flex: 1; }
+    .sc-body.empty { color: #d1d6db; font-style: italic; }
+    .cf-bar { display: flex; gap: 6px; padding: 8px 14px 12px; }
+    .cf-btn { padding: 6px 14px; font-size: 11px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; }
+    .cf-btn.ok { background: #0ca678; color: #fff; }
+    .cf-btn.no { background: #f04452; color: #fff; }
+    .cf-result { margin: 0 14px 12px; padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .cf-result.ok { background: #f0ebff; color: #7048e8; }
+    .cf-result.no { background: #fee2e2; color: #dc2626; }
+    .resize-handle {
+      height: 6px; background: #e5e8eb; cursor: row-resize; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.15s;
+    }
+    .resize-handle:hover { background: #c4c9d0; }
+    .resize-handle::after { content: ''; width: 32px; height: 2px; background: #b0b8c1; border-radius: 1px; }
+
     /* 확장/거래관리 상세 모달 스타일 */
     .detail-section { margin-bottom: 24px; }
     .detail-section:last-child { margin-bottom: 0; }
@@ -2005,7 +2092,7 @@
       </div>
       <!-- ==================== 프로세스 현황 뷰 (완성본) ==================== -->
       <!-- 프로세스 현황 페이지 -->
-  <div id="processView" class="fade-in">
+  <div id="processView" class="fade-in pv-container">
     <!-- 헤더 -->
     <div class="bg-white border-b border-slate-200 px-6 py-4">
       <div class="flex items-center gap-3">
@@ -2025,6 +2112,14 @@
         </div>
       </div>
     </div>
+    <!-- 메인 탭: 프로세스 / 업무지시·보고 -->
+    <div class="pv-main-tabs" id="pvMainTabs">
+      <button class="pv-main-tab active" onclick="switchProcessTab('process', this)">프로세스</button>
+      <button class="pv-main-tab" onclick="switchProcessTab('tasks', this)">업무지시·보고</button>
+    </div>
+
+    <!-- ===== 프로세스 탭 콘텐츠 ===== -->
+    <div id="processTabContent" style="flex:1; overflow-y:auto;">
 
     <!-- 프로젝트 선택 드롭다운 (항상 표시) -->
     <div class="bg-white px-6 py-3 flex items-center border-b border-slate-100">
@@ -2627,6 +2722,135 @@
         </div>
       </div>
     </div>
+
+    </div><!-- /processTabContent -->
+
+    <!-- ===== 업무지시·보고 탭 콘텐츠 ===== -->
+    <div class="tv-view" id="taskTabContent">
+      <!-- 상단: 업무 리스트 테이블 -->
+      <div class="tv-top">
+        <div class="tv-toolbar">
+          <button class="tv-filter-pill active" onclick="tvFilterClick(this)">전체</button>
+          <button class="tv-filter-pill" onclick="tvFilterClick(this)">대기</button>
+          <button class="tv-filter-pill" onclick="tvFilterClick(this)">조사중</button>
+          <button class="tv-filter-pill" onclick="tvFilterClick(this)">보고완료</button>
+          <button class="tv-filter-pill" onclick="tvFilterClick(this)">컨펌</button>
+          <button class="tv-filter-pill" onclick="tvFilterClick(this)">반려</button>
+          <button class="tv-add-btn">+ 새 업무</button>
+        </div>
+        <div class="tv-table-wrap">
+          <table class="tv-tbl">
+            <thead>
+              <tr>
+                <th style="width:40%;">업무명</th>
+                <th style="width:10%;">상태</th>
+                <th style="width:10%;">우선순위</th>
+                <th style="width:12%;">지시자</th>
+                <th style="width:12%;">담당자</th>
+                <th style="width:8%;">마감일</th>
+                <th style="width:8%;">등록일</th>
+              </tr>
+            </thead>
+            <tbody id="tv-task-body">
+              <tr class="active" onclick="selectTvRow(this, 0)">
+                <td><span class="tv-dot urgent"></span>알리바바 반품 정책 조사</td>
+                <td><span class="tv-tag researching">조사중</span></td>
+                <td style="font-size:12px;color:#f04452;font-weight:600;">긴급</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">김채원</td>
+                <td style="font-size:12px;color:#8b95a1;">3/12</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/8</td>
+              </tr>
+              <tr onclick="selectTvRow(this, 1)">
+                <td><span class="tv-dot normal"></span>POUR 제품 HS Code 확인</td>
+                <td><span class="tv-tag reported">보고완료</span></td>
+                <td style="font-size:12px;color:#3182f6;">보통</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">허지은</td>
+                <td style="font-size:12px;color:#8b95a1;">3/14</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/7</td>
+              </tr>
+              <tr onclick="selectTvRow(this, 2)">
+                <td><span class="tv-dot low"></span>물류사 Extrans 단가 비교</td>
+                <td><span class="tv-tag waiting">대기</span></td>
+                <td style="font-size:12px;color:#8b95a1;">낮음</td>
+                <td style="font-size:12px;color:#8b95a1;">대표님</td>
+                <td style="font-size:12px;">김채원</td>
+                <td style="font-size:12px;color:#8b95a1;">3/20</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/10</td>
+              </tr>
+              <tr onclick="selectTvRow(this, 3)">
+                <td><span class="tv-dot urgent"></span>바이어 Liam 요청 샘플 수량 확인</td>
+                <td><span class="tv-tag confirmed">컨펌</span></td>
+                <td style="font-size:12px;color:#f04452;font-weight:600;">긴급</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">허지은</td>
+                <td style="font-size:12px;color:#8b95a1;">3/11</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/6</td>
+              </tr>
+              <tr onclick="selectTvRow(this, 4)">
+                <td><span class="tv-dot normal"></span>알리바바 스토어 메인 배너 시안 요청</td>
+                <td><span class="tv-tag researching">조사중</span></td>
+                <td style="font-size:12px;color:#3182f6;">보통</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">김채원</td>
+                <td style="font-size:12px;color:#8b95a1;">3/15</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/9</td>
+              </tr>
+              <tr onclick="selectTvRow(this, 5)">
+                <td><span class="tv-dot normal"></span>경쟁사 가격 벤치마킹</td>
+                <td><span class="tv-tag waiting">대기</span></td>
+                <td style="font-size:12px;color:#3182f6;">보통</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">허지은</td>
+                <td style="font-size:12px;color:#8b95a1;">3/18</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/10</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 리사이즈 핸들 -->
+      <div class="resize-handle" id="tvResizeHandle"></div>
+
+      <!-- 하단: 디테일 -->
+      <div class="tv-bottom" id="tvDetail">
+        <div class="td-wrap">
+          <div class="td-header">
+            <div class="td-left">
+              <div class="td-title" id="tvDetailTitle">알리바바 반품 정책 조사</div>
+              <div class="td-meta" id="tvDetailMeta">
+                <span>📌 팀장님</span>
+                <span>👤 김채원</span>
+                <span>📅 마감 3/12</span>
+                <span style="color:#f04452;font-weight:600;">긴급</span>
+              </div>
+            </div>
+            <div class="td-actions">
+              <button class="td-btn">수정</button>
+              <button class="td-btn" style="color:#f04452;border-color:#fecaca;">삭제</button>
+            </div>
+          </div>
+
+          <!-- 3단계 가로 배치 -->
+          <div class="step-cards" id="tvStepCards">
+            <div class="sc">
+              <div class="sc-head"><span class="sc-num n1">1</span><span class="sc-label">지시사항</span></div>
+              <div class="sc-body">알리바바 플랫폼의 반품/환불 정책을 조사해주세요.<br><br>- 셀러 귀책 vs 바이어 귀책 기준<br>- 반품 시 물류비 부담 주체<br>- Trade Assurance 적용 시 차이점</div>
+            </div>
+            <div class="sc">
+              <div class="sc-head"><span class="sc-num n2">2</span><span class="sc-label">알아본 내용</span></div>
+              <div class="sc-body">1. 셀러 귀책 (상품 불량/오배송): 셀러 100% 부담<br>2. 바이어 귀책 (단순 변심): 바이어 부담, 단 7일 이내<br>3. Trade Assurance 적용 시 알리바바가 중재<br><br>참고: Trade Assurance 분쟁 해결 기간 평균 15~30일</div>
+            </div>
+            <div class="sc">
+              <div class="sc-head"><span class="sc-num n3">3</span><span class="sc-label">보고 및 컨펌</span></div>
+              <div class="sc-body empty">아직 작성되지 않았습니다</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /taskTabContent -->
 
   </div>
 
@@ -13169,14 +13393,119 @@ Option C: [제품C] - $[가격]
     puInitData();
     // ===== 제품 업로드 관리 끝 =====
 
+    // ===== 업무지시·보고 탭 기능 =====
+    // 탭 전환
+    function switchProcessTab(tab, btn) {
+      document.querySelectorAll('.pv-main-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      const processContent = document.getElementById('processTabContent');
+      const taskContent = document.getElementById('taskTabContent');
+      if (tab === 'process') {
+        processContent.style.display = '';
+        taskContent.classList.remove('active');
+      } else {
+        processContent.style.display = 'none';
+        taskContent.classList.add('active');
+      }
+    }
+
+    // 업무지시 행 선택
+    const tvTaskData = [
+      { title: '알리바바 반품 정책 조사', from: '팀장님', to: '김채원', deadline: '3/12', priority: '긴급', priorityColor: '#f04452',
+        step1: '알리바바 플랫폼의 반품/환불 정책을 조사해주세요.<br><br>- 셀러 귀책 vs 바이어 귀책 기준<br>- 반품 시 물류비 부담 주체<br>- Trade Assurance 적용 시 차이점',
+        step2: '1. 셀러 귀책 (상품 불량/오배송): 셀러 100% 부담<br>2. 바이어 귀책 (단순 변심): 바이어 부담, 단 7일 이내<br>3. Trade Assurance 적용 시 알리바바가 중재<br><br>참고: Trade Assurance 분쟁 해결 기간 평균 15~30일',
+        step3: '' },
+      { title: 'POUR 제품 HS Code 확인', from: '팀장님', to: '허지은', deadline: '3/14', priority: '보통', priorityColor: '#3182f6',
+        step1: 'POUR 제품 라인업의 HS Code를 확인해주세요.<br><br>- 각 제품별 정확한 HS Code 조회<br>- 관세율 확인',
+        step2: 'HS Code 조회 완료.<br>POUR 클렌저: 3304.99<br>POUR 세럼: 3304.99<br>POUR 크림: 3304.99<br><br>관세율: 6.5% (한-중 FTA 적용 시 0%)',
+        step3: '확인했습니다. FTA 원산지 증명서 준비해주세요.' },
+      { title: '물류사 Extrans 단가 비교', from: '대표님', to: '김채원', deadline: '3/20', priority: '낮음', priorityColor: '#8b95a1',
+        step1: '현재 물류사와 Extrans의 단가를 비교 분석해주세요.',
+        step2: '', step3: '' },
+      { title: '바이어 Liam 요청 샘플 수량 확인', from: '팀장님', to: '허지은', deadline: '3/11', priority: '긴급', priorityColor: '#f04452',
+        step1: '바이어 Liam이 요청한 샘플 수량을 확인하고 재고 현황을 체크해주세요.',
+        step2: '요청 수량: 각 제품당 5개씩, 총 35개<br>현재 재고 충분함.',
+        step3: '확인 완료. 샘플 발송 진행해주세요.' },
+      { title: '알리바바 스토어 메인 배너 시안 요청', from: '팀장님', to: '김채원', deadline: '3/15', priority: '보통', priorityColor: '#3182f6',
+        step1: '알리바바 스토어 메인 페이지 배너 시안을 디자이너에게 요청해주세요.<br><br>- 사이즈: 1920x460px<br>- 브랜드 컬러 반영',
+        step2: '디자이너에게 요청 완료. 3/13 전달 예정.',
+        step3: '' },
+      { title: '경쟁사 가격 벤치마킹', from: '팀장님', to: '허지은', deadline: '3/18', priority: '보통', priorityColor: '#3182f6',
+        step1: '알리바바 내 경쟁사 스킨케어 브랜드의 가격대를 조사해주세요.',
+        step2: '', step3: '' }
+    ];
+
+    function selectTvRow(el, idx) {
+      document.querySelectorAll('.tv-tbl tr').forEach(r => r.classList.remove('active'));
+      el.classList.add('active');
+      const d = tvTaskData[idx];
+      if (!d) return;
+      document.getElementById('tvDetailTitle').textContent = d.title;
+      document.getElementById('tvDetailMeta').innerHTML =
+        '<span>📌 ' + d.from + '</span>' +
+        '<span>👤 ' + d.to + '</span>' +
+        '<span>📅 마감 ' + d.deadline + '</span>' +
+        '<span style="color:' + d.priorityColor + ';font-weight:600;">' + d.priority + '</span>';
+      const cards = document.getElementById('tvStepCards');
+      cards.innerHTML =
+        '<div class="sc"><div class="sc-head"><span class="sc-num n1">1</span><span class="sc-label">지시사항</span></div><div class="sc-body">' + (d.step1 || '<span class="empty">아직 작성되지 않았습니다</span>') + '</div></div>' +
+        '<div class="sc"><div class="sc-head"><span class="sc-num n2">2</span><span class="sc-label">알아본 내용</span></div><div class="sc-body' + (d.step2 ? '' : ' empty') + '">' + (d.step2 || '아직 작성되지 않았습니다') + '</div></div>' +
+        '<div class="sc"><div class="sc-head"><span class="sc-num n3">3</span><span class="sc-label">보고 및 컨펌</span></div><div class="sc-body' + (d.step3 ? '' : ' empty') + '">' + (d.step3 || '아직 작성되지 않았습니다') + '</div></div>';
+    }
+
+    // 업무지시 필터 클릭
+    function tvFilterClick(btn) {
+      document.querySelectorAll('.tv-filter-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // 리사이즈 핸들
+    (function() {
+      const handle = document.getElementById('tvResizeHandle');
+      if (!handle) return;
+      const top = handle.previousElementSibling;
+      let startY, startH;
+      handle.addEventListener('mousedown', function(e) {
+        startY = e.clientY;
+        startH = top.offsetHeight;
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'row-resize';
+      });
+      function onMove(e) {
+        const h = Math.max(120, Math.min(startH + (e.clientY - startY), window.innerHeight * 0.6));
+        top.style.height = h + 'px';
+        top.querySelector('.tv-table-wrap').style.maxHeight = (h - 50) + 'px';
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+      }
+    })();
+    // ===== 업무지시·보고 탭 끝 =====
+
     // 프로젝트 선택
     function selectProject(projectId) {
       currentProject = projectId;
 
+      // 프로젝트 선택 시 항상 프로세스 탭으로 전환
+      const processTabContent = document.getElementById('processTabContent');
+      const taskTabContent = document.getElementById('taskTabContent');
+      if (processTabContent) processTabContent.style.display = '';
+      if (taskTabContent) taskTabContent.classList.remove('active');
+      document.querySelectorAll('.pv-main-tab').forEach((t, i) => {
+        t.classList.toggle('active', i === 0);
+      });
+
       const taskTableArea = document.getElementById('taskTableArea');
       const productUploadArea = document.getElementById('productUploadArea');
       const dashboardArea = document.getElementById('dashboardArea');
-      const dropdownBar = document.querySelector('#processView > div:nth-child(2)'); // 프로젝트 드롭다운 바
+      const pvHeader = document.querySelector('#processView > div:first-child');
+      const pvTabs = document.getElementById('pvMainTabs');
+      const dropdownBar = document.getElementById('projectDropdownWrap') ? document.getElementById('projectDropdownWrap').closest('.bg-white.px-6.py-3') : null;
 
       // 모든 뷰 숨기기
       if (taskTableArea) taskTableArea.style.display = 'none';
@@ -13185,6 +13514,8 @@ Option C: [제품C] - $[가격]
 
       // 제품 업로드 관리 (extra1)
       if (projectId === 'extra1') {
+        if (pvHeader) pvHeader.style.display = '';
+        if (pvTabs) pvTabs.style.display = '';
         if (dropdownBar) dropdownBar.style.display = '';
         if (productUploadArea) { productUploadArea.classList.remove('hidden'); productUploadArea.style.display = ''; }
         document.querySelector('#processView h1').textContent = '제품 업로드';
@@ -13199,15 +13530,16 @@ Option C: [제품C] - $[가격]
       // 전체 대시보드
       if (projectId === 'all') {
         if (dashboardArea) dashboardArea.style.display = 'flex';
-        // 헤더 + 드롭다운 숨기기 (대시보드에 자체 헤더/네비 있음)
-        document.querySelector('#processView > div:first-child').style.display = 'none';
+        if (pvHeader) pvHeader.style.display = 'none';
+        if (pvTabs) pvTabs.style.display = 'none';
         if (dropdownBar) dropdownBar.style.display = 'none';
         renderDashboard();
         return;
       }
 
       // 일반 프로젝트: 테이블 표시
-      document.querySelector('#processView > div:first-child').style.display = '';
+      if (pvHeader) pvHeader.style.display = '';
+      if (pvTabs) pvTabs.style.display = '';
       if (dropdownBar) dropdownBar.style.display = '';
       if (taskTableArea) taskTableArea.style.display = '';
       groups = projectsData[projectId] ? [...projectsData[projectId]] : [];
