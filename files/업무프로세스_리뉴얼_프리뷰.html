@@ -121,81 +121,91 @@
   .prog-bar { width: 60px; height: 4px; background: #e5e8eb; border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 6px; }
   .prog-fill { height: 100%; border-radius: 2px; }
 
-  /* ─── 업무지시 뷰 (좌우 패널) ─── */
-  .task-view { height: 100%; display: none; flex-direction: row; overflow: hidden; }
+  /* ─── 업무지시 뷰 (상하 분할) ─── */
+  .task-view { height: 100%; display: none; flex-direction: column; overflow: hidden; }
   .task-view.active { display: flex; }
 
-  /* 좌측: 리스트 */
-  .tv-list { width: 360px; border-right: 1px solid #e5e8eb; display: flex; flex-direction: column; background: #fff; flex-shrink: 0; }
-  .tv-list-header { padding: 14px 18px; border-bottom: 1px solid #f4f5f7; display: flex; align-items: center; gap: 8px; }
+  /* 상단: 리스트 테이블 */
+  .tv-top { flex-shrink: 0; background: #fff; display: flex; flex-direction: column; border-bottom: 2px solid #e5e8eb; }
+  .tv-toolbar { padding: 14px 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f4f5f7; }
   .tv-filter { padding: 4px 12px; font-size: 11px; font-weight: 500; border: 1px solid #e5e8eb; border-radius: 14px; background: #fff; color: #8b95a1; cursor: pointer; }
   .tv-filter.active { background: #202454; color: #fff; border-color: #202454; }
-  .tv-add { margin-left: auto; width: 28px; height: 28px; border-radius: 7px; border: none; background: #202454; color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .tv-scroll { flex: 1; overflow-y: auto; }
-  .tv-scroll::-webkit-scrollbar { width: 3px; }
-  .tv-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+  .tv-add { margin-left: auto; padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 7px; border: none; background: #202454; color: #fff; cursor: pointer; }
 
-  .tv-item {
-    padding: 14px 18px; border-bottom: 1px solid #f4f5f7; cursor: pointer;
-    display: flex; gap: 10px; align-items: flex-start; transition: background 0.1s;
+  .tv-table-wrap { max-height: 220px; overflow-y: auto; }
+  .tv-table-wrap::-webkit-scrollbar { width: 3px; }
+  .tv-table-wrap::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+  .tv-table { width: 100%; border-collapse: collapse; }
+  .tv-table th {
+    padding: 8px 14px; font-size: 10px; font-weight: 700; color: #8b95a1;
+    text-align: left; background: #fafbfc; border-bottom: 1px solid #e5e8eb;
+    text-transform: uppercase; letter-spacing: 0.04em; position: sticky; top: 0; z-index: 1;
   }
-  .tv-item:hover { background: #fafbfc; }
-  .tv-item.active { background: #f0f4ff; }
-  .tv-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .tv-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f4f5f7; cursor: pointer; }
+  .tv-table tr:hover td { background: #fafbfc; }
+  .tv-table tr.active td { background: #f0f4ff; }
+
+  .tv-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 8px; }
   .tv-dot.urgent { background: #f04452; }
   .tv-dot.normal { background: #3182f6; }
   .tv-dot.low { background: #d1d6db; }
-  .tv-body { flex: 1; min-width: 0; }
-  .tv-title { font-size: 13px; font-weight: 600; color: #333d4b; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tv-sub { font-size: 11px; color: #8b95a1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tv-tags { display: flex; gap: 5px; margin-top: 5px; align-items: center; }
-  .tv-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+
+  .tv-tag { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; display: inline-block; }
   .tv-tag.waiting { background: #fff8e1; color: #e8590c; }
   .tv-tag.researching { background: #e8f4fd; color: #1971c2; }
   .tv-tag.reported { background: #e6fcf5; color: #0ca678; }
   .tv-tag.confirmed { background: #f0ebff; color: #7048e8; }
   .tv-tag.rejected { background: #fee2e2; color: #dc2626; }
-  .tv-meta { font-size: 10px; color: #c4c9d0; }
 
-  /* 우측: 디테일 */
-  .tv-detail { flex: 1; overflow-y: auto; padding: 28px 32px; background: #fafbfc; }
-  .tv-detail::-webkit-scrollbar { width: 3px; }
-  .tv-detail::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+  /* 하단: 디테일 */
+  .tv-bottom { flex: 1; overflow-y: auto; background: #fafbfc; }
+  .tv-bottom::-webkit-scrollbar { width: 4px; }
+  .tv-bottom::-webkit-scrollbar-thumb { background: #d1d6db; border-radius: 4px; }
 
-  .tv-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #c4c9d0; font-size: 14px; }
+  .tv-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #c4c9d0; font-size: 13px; }
 
-  .td-header { margin-bottom: 24px; }
-  .td-title { font-size: 19px; font-weight: 800; color: #222; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .td-wrap { padding: 24px 28px; }
+  .td-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .td-left { flex: 1; }
+  .td-title { font-size: 17px; font-weight: 800; color: #222; margin-bottom: 6px; letter-spacing: -0.02em; }
   .td-meta { display: flex; gap: 14px; font-size: 12px; color: #8b95a1; flex-wrap: wrap; }
-  .td-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .td-actions { display: flex; gap: 8px; flex-shrink: 0; }
   .td-btn { padding: 6px 14px; font-size: 12px; font-weight: 500; border: 1px solid #e5e8eb; border-radius: 6px; background: #fff; color: #6b7684; cursor: pointer; }
   .td-btn:hover { background: #f4f5f7; }
 
-  /* 스텝 카드 */
-  .step-cards { display: flex; flex-direction: column; gap: 14px; }
-  .sc { background: #fff; border: 1px solid #e5e8eb; border-radius: 12px; overflow: hidden; }
+  /* 스텝 카드 — 가로 3열 */
+  .step-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .sc { background: #fff; border: 1px solid #e5e8eb; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
   .sc-head {
-    padding: 12px 16px; display: flex; align-items: center; gap: 8px;
-    border-bottom: 1px solid #f4f5f7; background: #fafbfc;
+    padding: 10px 14px; display: flex; align-items: center; gap: 7px;
+    border-bottom: 1px solid #f4f5f7; background: #fafbfc; flex-shrink: 0;
   }
   .sc-num {
-    width: 22px; height: 22px; border-radius: 6px; font-size: 10px; font-weight: 700;
+    width: 20px; height: 20px; border-radius: 5px; font-size: 10px; font-weight: 700;
     display: flex; align-items: center; justify-content: center; color: #fff;
   }
   .sc-num.n1 { background: #202454; }
   .sc-num.n2 { background: #3182f6; }
   .sc-num.n3 { background: #0ca678; }
-  .sc-label { font-size: 12px; font-weight: 700; color: #4e5968; }
-  .sc-body { padding: 14px 16px; font-size: 13px; line-height: 1.7; color: #4e5968; white-space: pre-wrap; }
+  .sc-label { font-size: 11px; font-weight: 700; color: #4e5968; }
+  .sc-body { padding: 14px; font-size: 12px; line-height: 1.7; color: #4e5968; white-space: pre-wrap; flex: 1; }
   .sc-body.empty { color: #d1d6db; font-style: italic; }
 
-  .cf-bar { display: flex; gap: 8px; padding: 10px 16px 14px; }
-  .cf-btn { padding: 7px 18px; font-size: 12px; font-weight: 600; border: none; border-radius: 7px; cursor: pointer; }
+  .cf-bar { display: flex; gap: 6px; padding: 8px 14px 12px; }
+  .cf-btn { padding: 6px 14px; font-size: 11px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; }
   .cf-btn.ok { background: #0ca678; color: #fff; }
   .cf-btn.no { background: #f04452; color: #fff; }
-  .cf-result { margin: 0 16px 14px; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+  .cf-result { margin: 0 14px 12px; padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; }
   .cf-result.ok { background: #f0ebff; color: #7048e8; }
   .cf-result.no { background: #fee2e2; color: #dc2626; }
+
+  /* 리사이즈 핸들 */
+  .resize-handle {
+    height: 6px; background: #e5e8eb; cursor: row-resize; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.15s;
+  }
+  .resize-handle:hover { background: #c4c9d0; }
+  .resize-handle::after { content: ''; width: 32px; height: 2px; background: #b0b8c1; border-radius: 1px; }
 </style>
 </head>
 <body>
@@ -260,14 +270,6 @@
 
     <!-- ─── 프로세스 뷰 ─── -->
     <div class="process-view active" id="processView">
-      <div class="legend">
-        <div class="legend-item"><span class="legend-dot" style="background:#0ca678"></span>완료</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#3182f6"></span>진행</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#e8590c"></span>요청</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#8b95a1"></span>대기</div>
-        <div class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>보류</div>
-      </div>
-
       <div class="filter-bar">
         <button class="f-pill active">전체 업무</button>
         <button class="f-pill">내 업무</button>
@@ -275,6 +277,14 @@
         <button class="f-pill">완료</button>
         <span class="f-count">총 <strong>30</strong>건</span>
         <button class="f-add-btn">+ 업무 추가</button>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#0ca678"></span>완료</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#3182f6"></span>진행</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#e8590c"></span>요청</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#8b95a1"></span>대기</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>보류</div>
       </div>
 
       <table class="task-table">
@@ -315,123 +325,129 @@
       </table>
     </div>
 
-    <!-- ─── 업무지시·보고 뷰 (좌우 패널) ─── -->
+    <!-- ─── 업무지시·보고 뷰 (상하 분할) ─── -->
     <div class="task-view" id="taskView">
 
-      <!-- 좌측 리스트 -->
-      <div class="tv-list">
-        <div class="tv-list-header">
+      <!-- 상단: 업무 리스트 테이블 -->
+      <div class="tv-top">
+        <div class="tv-toolbar">
           <button class="tv-filter active">전체</button>
           <button class="tv-filter">대기</button>
           <button class="tv-filter">조사중</button>
-          <button class="tv-filter">보고</button>
+          <button class="tv-filter">보고완료</button>
           <button class="tv-filter">컨펌</button>
-          <button class="tv-add">+</button>
+          <button class="tv-filter">반려</button>
+          <button class="tv-add">+ 새 업무</button>
         </div>
-        <div class="tv-scroll">
-          <!-- 아이템 1 -->
-          <div class="tv-item active" onclick="selectTvItem(this)">
-            <div class="tv-dot urgent"></div>
-            <div class="tv-body">
-              <div class="tv-title">알리바바 반품 정책 조사</div>
-              <div class="tv-sub">알리바바 플랫폼의 반품/환불 정책을 조사해주세요.</div>
-              <div class="tv-tags">
-                <span class="tv-tag researching">조사중</span>
-                <span class="tv-meta">김채원 · 3/12</span>
-              </div>
-            </div>
-          </div>
-          <!-- 아이템 2 -->
-          <div class="tv-item" onclick="selectTvItem(this)">
-            <div class="tv-dot normal"></div>
-            <div class="tv-body">
-              <div class="tv-title">POUR 제품 HS Code 확인</div>
-              <div class="tv-sub">PRC-100, PRC-200, PRC-300 제품의 HS Code 확인</div>
-              <div class="tv-tags">
-                <span class="tv-tag reported">보고완료</span>
-                <span class="tv-meta">허지은 · 3/14</span>
-              </div>
-            </div>
-          </div>
-          <!-- 아이템 3 -->
-          <div class="tv-item" onclick="selectTvItem(this)">
-            <div class="tv-dot low"></div>
-            <div class="tv-body">
-              <div class="tv-title">물류사 Extrans 단가 비교</div>
-              <div class="tv-sub">Extrans 물류사의 항공/해운 단가를 타 물류사와 비교</div>
-              <div class="tv-tags">
-                <span class="tv-tag waiting">대기</span>
-                <span class="tv-meta">김채원 · 3/20</span>
-              </div>
-            </div>
-          </div>
-          <!-- 아이템 4 -->
-          <div class="tv-item" onclick="selectTvItem(this)">
-            <div class="tv-dot urgent"></div>
-            <div class="tv-body">
-              <div class="tv-title">바이어 Liam 요청 샘플 수량 확인</div>
-              <div class="tv-sub">바이어 Liam이 요청한 샘플 수량과 배송지 확인</div>
-              <div class="tv-tags">
-                <span class="tv-tag confirmed">컨펌</span>
-                <span class="tv-meta">허지은 · 3/11</span>
-              </div>
-            </div>
-          </div>
-          <!-- 아이템 5 -->
-          <div class="tv-item" onclick="selectTvItem(this)">
-            <div class="tv-dot normal"></div>
-            <div class="tv-body">
-              <div class="tv-title">알리바바 스토어 메인 배너 시안 요청</div>
-              <div class="tv-sub">스토어 메인 배너 3종 디자인 시안 요청</div>
-              <div class="tv-tags">
-                <span class="tv-tag researching">조사중</span>
-                <span class="tv-meta">김채원 · 3/15</span>
-              </div>
-            </div>
-          </div>
-          <!-- 아이템 6 -->
-          <div class="tv-item" onclick="selectTvItem(this)">
-            <div class="tv-dot normal"></div>
-            <div class="tv-body">
-              <div class="tv-title">경쟁사 가격 벤치마킹</div>
-              <div class="tv-sub">주요 경쟁사 5곳의 유사 제품 가격 조사</div>
-              <div class="tv-tags">
-                <span class="tv-tag waiting">대기</span>
-                <span class="tv-meta">허지은 · 3/18</span>
-              </div>
-            </div>
-          </div>
+        <div class="tv-table-wrap">
+          <table class="tv-table">
+            <thead>
+              <tr>
+                <th style="width:40%;">업무명</th>
+                <th style="width:10%;">상태</th>
+                <th style="width:10%;">우선순위</th>
+                <th style="width:12%;">지시자</th>
+                <th style="width:12%;">담당자</th>
+                <th style="width:8%;">마감일</th>
+                <th style="width:8%;">등록일</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="active" onclick="selectTvRow(this)">
+                <td><span class="tv-dot urgent"></span>알리바바 반품 정책 조사</td>
+                <td><span class="tv-tag researching">조사중</span></td>
+                <td style="font-size:12px;color:#f04452;font-weight:600;">긴급</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">김채원</td>
+                <td style="font-size:12px;color:#8b95a1;">3/12</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/8</td>
+              </tr>
+              <tr onclick="selectTvRow(this)">
+                <td><span class="tv-dot normal"></span>POUR 제품 HS Code 확인</td>
+                <td><span class="tv-tag reported">보고완료</span></td>
+                <td style="font-size:12px;color:#3182f6;">보통</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">허지은</td>
+                <td style="font-size:12px;color:#8b95a1;">3/14</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/7</td>
+              </tr>
+              <tr onclick="selectTvRow(this)">
+                <td><span class="tv-dot low"></span>물류사 Extrans 단가 비교</td>
+                <td><span class="tv-tag waiting">대기</span></td>
+                <td style="font-size:12px;color:#8b95a1;">낮음</td>
+                <td style="font-size:12px;color:#8b95a1;">대표님</td>
+                <td style="font-size:12px;">김채원</td>
+                <td style="font-size:12px;color:#8b95a1;">3/20</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/10</td>
+              </tr>
+              <tr onclick="selectTvRow(this)">
+                <td><span class="tv-dot urgent"></span>바이어 Liam 요청 샘플 수량 확인</td>
+                <td><span class="tv-tag confirmed">컨펌</span></td>
+                <td style="font-size:12px;color:#f04452;font-weight:600;">긴급</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">허지은</td>
+                <td style="font-size:12px;color:#8b95a1;">3/11</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/6</td>
+              </tr>
+              <tr onclick="selectTvRow(this)">
+                <td><span class="tv-dot normal"></span>알리바바 스토어 메인 배너 시안 요청</td>
+                <td><span class="tv-tag researching">조사중</span></td>
+                <td style="font-size:12px;color:#3182f6;">보통</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">김채원</td>
+                <td style="font-size:12px;color:#8b95a1;">3/15</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/9</td>
+              </tr>
+              <tr onclick="selectTvRow(this)">
+                <td><span class="tv-dot normal"></span>경쟁사 가격 벤치마킹</td>
+                <td><span class="tv-tag waiting">대기</span></td>
+                <td style="font-size:12px;color:#3182f6;">보통</td>
+                <td style="font-size:12px;color:#8b95a1;">팀장님</td>
+                <td style="font-size:12px;">허지은</td>
+                <td style="font-size:12px;color:#8b95a1;">3/18</td>
+                <td style="font-size:12px;color:#c4c9d0;">3/10</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- 우측 디테일 -->
-      <div class="tv-detail" id="tvDetail">
-        <div class="td-header">
-          <div class="td-title">알리바바 반품 정책 조사</div>
-          <div class="td-meta">
-            <span>📌 팀장님</span>
-            <span>👤 김채원</span>
-            <span>📅 3/12</span>
-            <span>🕐 2일 전</span>
-          </div>
-          <div class="td-actions">
-            <button class="td-btn">수정</button>
-            <button class="td-btn" style="color:#f04452;border-color:#fecaca;">삭제</button>
-          </div>
-        </div>
+      <!-- 리사이즈 핸들 -->
+      <div class="resize-handle" id="resizeHandle"></div>
 
-        <div class="step-cards">
-          <div class="sc">
-            <div class="sc-head"><span class="sc-num n1">1</span><span class="sc-label">지시사항</span></div>
-            <div class="sc-body">알리바바 플랫폼의 반품/환불 정책을 조사해주세요.<br><br>- 셀러 귀책 vs 바이어 귀책 기준<br>- 반품 시 물류비 부담 주체<br>- Trade Assurance 적용 시 차이점</div>
+      <!-- 하단: 디테일 -->
+      <div class="tv-bottom" id="tvDetail">
+        <div class="td-wrap">
+          <div class="td-header">
+            <div class="td-left">
+              <div class="td-title">알리바바 반품 정책 조사</div>
+              <div class="td-meta">
+                <span>📌 팀장님</span>
+                <span>👤 김채원</span>
+                <span>📅 마감 3/12</span>
+                <span style="color:#f04452;font-weight:600;">긴급</span>
+              </div>
+            </div>
+            <div class="td-actions">
+              <button class="td-btn">수정</button>
+              <button class="td-btn" style="color:#f04452;border-color:#fecaca;">삭제</button>
+            </div>
           </div>
-          <div class="sc">
-            <div class="sc-head"><span class="sc-num n2">2</span><span class="sc-label">알아본 내용</span></div>
-            <div class="sc-body">1. 셀러 귀책 (상품 불량/오배송): 셀러 100% 부담<br>2. 바이어 귀책 (단순 변심): 바이어 부담, 단 7일 이내<br>3. Trade Assurance 적용 시 알리바바가 중재<br><br>참고: Trade Assurance 분쟁 해결 기간 평균 15~30일</div>
-          </div>
-          <div class="sc">
-            <div class="sc-head"><span class="sc-num n3">3</span><span class="sc-label">보고 및 컨펌</span></div>
-            <div class="sc-body empty">아직 작성되지 않았습니다</div>
+
+          <!-- 3단계 가로 배치 -->
+          <div class="step-cards">
+            <div class="sc">
+              <div class="sc-head"><span class="sc-num n1">1</span><span class="sc-label">지시사항</span></div>
+              <div class="sc-body">알리바바 플랫폼의 반품/환불 정책을 조사해주세요.<br><br>- 셀러 귀책 vs 바이어 귀책 기준<br>- 반품 시 물류비 부담 주체<br>- Trade Assurance 적용 시 차이점</div>
+            </div>
+            <div class="sc">
+              <div class="sc-head"><span class="sc-num n2">2</span><span class="sc-label">알아본 내용</span></div>
+              <div class="sc-body">1. 셀러 귀책 (상품 불량/오배송): 셀러 100% 부담<br>2. 바이어 귀책 (단순 변심): 바이어 부담, 단 7일 이내<br>3. Trade Assurance 적용 시 알리바바가 중재<br><br>참고: Trade Assurance 분쟁 해결 기간 평균 15~30일</div>
+            </div>
+            <div class="sc">
+              <div class="sc-head"><span class="sc-num n3">3</span><span class="sc-label">보고 및 컨펌</span></div>
+              <div class="sc-body empty">아직 작성되지 않았습니다</div>
+            </div>
           </div>
         </div>
       </div>
@@ -448,10 +464,36 @@ function switchView(view, btn) {
   document.getElementById('taskView').classList.toggle('active', view === 'tasks');
 }
 
-function selectTvItem(el) {
-  document.querySelectorAll('.tv-item').forEach(i => i.classList.remove('active'));
+function selectTvRow(el) {
+  document.querySelectorAll('.tv-table tr').forEach(r => r.classList.remove('active'));
   el.classList.add('active');
 }
+
+// 리사이즈 핸들 (상단 리스트 높이 조절)
+(function() {
+  const handle = document.getElementById('resizeHandle');
+  const top = handle.previousElementSibling;
+  let startY, startH;
+  handle.addEventListener('mousedown', function(e) {
+    startY = e.clientY;
+    startH = top.offsetHeight;
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'row-resize';
+  });
+  function onMove(e) {
+    const h = Math.max(120, Math.min(startH + (e.clientY - startY), window.innerHeight * 0.6));
+    top.style.height = h + 'px';
+    top.querySelector('.tv-table-wrap').style.maxHeight = (h - 50) + 'px';
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+  }
+})();
 
 function selProject(name) {
   document.getElementById('selProjectLabel').textContent = name;
