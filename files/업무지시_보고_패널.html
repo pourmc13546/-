@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>업무 지시·보고 — 패널 뷰</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: #fff; color: #333d4b; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* 헤더 */
+  .top-bar { border-bottom: 1px solid #e5e8eb; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .top-bar h1 { font-size: 16px; font-weight: 700; color: #202454; }
+  .top-bar .sub { font-size: 12px; color: #8b95a1; margin-left: 8px; }
+  .hdr-right { display: flex; align-items: center; gap: 10px; }
+  .add-btn { padding: 7px 16px; font-size: 12px; font-weight: 600; background: #202454; color: #fff; border: none; border-radius: 7px; cursor: pointer; }
+  .add-btn:hover { opacity: 0.85; }
+  .filter-pill { padding: 5px 14px; font-size: 12px; font-weight: 500; border: 1px solid #e5e8eb; border-radius: 16px; background: #fff; color: #8b95a1; cursor: pointer; }
+  .filter-pill.active { background: #202454; color: #fff; border-color: #202454; }
+
+  /* 메인 레이아웃: 좌측 리스트 + 우측 디테일 */
+  .main { flex: 1; display: flex; overflow: hidden; }
+
+  /* 좌측: 리스트 */
+  .list-pane { width: 380px; border-right: 1px solid #e5e8eb; display: flex; flex-direction: column; flex-shrink: 0; }
+  .list-scroll { flex: 1; overflow-y: auto; }
+  .list-scroll::-webkit-scrollbar { width: 3px; }
+  .list-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+  .list-item {
+    padding: 16px 20px; border-bottom: 1px solid #f4f5f7; cursor: pointer; transition: background 0.1s;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .list-item:hover { background: #fafbfc; }
+  .list-item.active { background: #f0f4ff; }
+
+  .li-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .li-dot.urgent { background: #f04452; }
+  .li-dot.normal { background: #3182f6; }
+  .li-dot.low { background: #d1d6db; }
+
+  .li-body { flex: 1; min-width: 0; }
+  .li-title { font-size: 14px; font-weight: 600; color: #333d4b; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .li-desc { font-size: 12px; color: #8b95a1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+  .li-tags { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .li-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .li-tag.waiting { background: #fff8e1; color: #e8590c; }
+  .li-tag.researching { background: #e8f4fd; color: #1971c2; }
+  .li-tag.reported { background: #e6fcf5; color: #0ca678; }
+  .li-tag.confirmed { background: #f0ebff; color: #7048e8; }
+  .li-tag.rejected { background: #fee2e2; color: #dc2626; }
+  .li-meta { font-size: 10px; color: #b0b8c1; }
+
+  /* 우측: 디테일 */
+  .detail-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fafbfc; }
+  .detail-scroll { flex: 1; overflow-y: auto; padding: 28px 32px; }
+  .detail-scroll::-webkit-scrollbar { width: 3px; }
+  .detail-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+  .detail-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #c4c9d0; font-size: 14px; }
+
+  .d-header { margin-bottom: 28px; }
+  .d-title { font-size: 20px; font-weight: 800; color: #222; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .d-meta { display: flex; gap: 16px; font-size: 12px; color: #8b95a1; flex-wrap: wrap; }
+  .d-meta span { display: flex; align-items: center; gap: 4px; }
+  .d-actions { margin-top: 12px; display: flex; gap: 8px; }
+  .d-btn { padding: 6px 14px; font-size: 12px; font-weight: 500; border: 1px solid #e5e8eb; border-radius: 6px; background: #fff; color: #6b7684; cursor: pointer; }
+  .d-btn:hover { background: #f4f5f7; }
+  .d-btn.danger { color: #f04452; border-color: #fecaca; }
+  .d-btn.danger:hover { background: #fee2e2; }
+
+  /* 스텝 카드 */
+  .step-cards { display: flex; flex-direction: column; gap: 16px; }
+  .s-card { background: #fff; border: 1px solid #e5e8eb; border-radius: 12px; overflow: hidden; }
+  .s-card-head {
+    padding: 14px 18px; display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid #f4f5f7; background: #fafbfc;
+  }
+  .s-num {
+    width: 24px; height: 24px; border-radius: 7px; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; color: #fff;
+  }
+  .s-num.n1 { background: #202454; }
+  .s-num.n2 { background: #3182f6; }
+  .s-num.n3 { background: #0ca678; }
+  .s-card-label { font-size: 13px; font-weight: 700; color: #4e5968; }
+  .s-card-body { padding: 16px 18px; font-size: 13px; line-height: 1.7; color: #4e5968; white-space: pre-wrap; min-height: 60px; }
+  .s-card-body:empty::before { content: '아직 작성되지 않았습니다'; color: #d1d6db; font-style: italic; }
+
+  /* 컨펌 */
+  .confirm-bar { display: flex; gap: 8px; margin: 12px 18px 16px; }
+  .cf-btn { padding: 8px 20px; font-size: 13px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
+  .cf-btn:hover { opacity: 0.85; }
+  .cf-btn.ok { background: #0ca678; color: #fff; }
+  .cf-btn.no { background: #f04452; color: #fff; }
+  .cf-result { margin: 0 18px 16px; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+  .cf-result.ok { background: #f0ebff; color: #7048e8; }
+  .cf-result.no { background: #fee2e2; color: #dc2626; }
+
+  /* 모달 */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 16px; width: 560px; max-width: 92vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); animation: pop 0.2s ease; }
+  @keyframes pop { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
+  .m-top { padding: 20px 22px 0; display: flex; align-items: center; justify-content: space-between; }
+  .m-top h2 { font-size: 16px; font-weight: 700; }
+  .m-x { background: none; border: none; font-size: 20px; color: #8b95a1; cursor: pointer; width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .m-x:hover { background: #f2f4f6; }
+  .m-body { padding: 16px 22px 22px; }
+  .fg { margin-bottom: 14px; }
+  .fl { font-size: 11px; font-weight: 600; color: #8b95a1; margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: 0.03em; }
+  .fi { width: 100%; border: 1px solid #e5e8eb; border-radius: 8px; padding: 9px 12px; font-size: 13px; font-family: inherit; color: #333d4b; }
+  .fi:focus { outline: none; border-color: #3182f6; box-shadow: 0 0 0 3px rgba(49,130,246,0.08); }
+  textarea.fi { min-height: 72px; resize: vertical; line-height: 1.6; }
+  .fr { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .m-foot { padding: 14px 22px; border-top: 1px solid #f2f4f6; display: flex; justify-content: flex-end; gap: 8px; }
+  .btn-c { padding: 8px 18px; font-size: 13px; border: 1px solid #e5e8eb; border-radius: 8px; background: #fff; color: #6b7684; cursor: pointer; }
+  .btn-s { padding: 8px 22px; font-size: 13px; font-weight: 600; border: none; border-radius: 8px; background: #202454; color: #fff; cursor: pointer; }
+  .btn-s:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div><h1>업무 지시·보고<span class="sub">패널 뷰</span></h1></div>
+  <div class="hdr-right">
+    <button class="filter-pill active" onclick="setFilter('all',this)">전체</button>
+    <button class="filter-pill" onclick="setFilter('waiting',this)">대기</button>
+    <button class="filter-pill" onclick="setFilter('researching',this)">조사중</button>
+    <button class="filter-pill" onclick="setFilter('reported',this)">보고</button>
+    <button class="filter-pill" onclick="setFilter('confirmed',this)">컨펌</button>
+    <button class="add-btn" onclick="openModal()">+ 새 업무</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 좌측 리스트 -->
+  <div class="list-pane">
+    <div class="list-scroll" id="listScroll"></div>
+  </div>
+
+  <!-- 우측 디테일 -->
+  <div class="detail-pane">
+    <div class="detail-scroll" id="detailScroll">
+      <div class="detail-empty">← 좌측에서 업무를 선택하세요</div>
+    </div>
+  </div>
+</div>
+
+<!-- 등록/수정 모달 -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="m-top">
+      <h2 id="mTitle">새 업무 등록</h2>
+      <button class="m-x" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="m-body">
+      <div class="fg"><label class="fl">업무 제목 *</label><input class="fi" id="fTitle" placeholder="예: 알리바바 반품 정책 확인"></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">우선순위</label><select class="fi" id="fPri"><option value="normal">보통</option><option value="urgent">긴급</option><option value="low">낮음</option></select></div>
+        <div class="fg"><label class="fl">마감일</label><input type="date" class="fi" id="fDead"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">지시자</label><input class="fi" id="fFrom" placeholder="예: 팀장님"></div>
+        <div class="fg"><label class="fl">담당자</label><select class="fi" id="fWho"><option value="김채원">김채원</option><option value="허지은">허지은</option></select></div>
+      </div>
+      <div class="fg"><label class="fl">지시사항</label><textarea class="fi" id="fInst" placeholder="업무 내용 상세..."></textarea></div>
+      <div class="fg"><label class="fl">알아본 내용</label><textarea class="fi" id="fRes" placeholder="조사 결과..."></textarea></div>
+      <div class="fg"><label class="fl">보고 내용</label><textarea class="fi" id="fRep" placeholder="보고 내용..."></textarea></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn-c" onclick="closeModal()">취소</button>
+      <button class="btn-s" id="btnSave" onclick="saveTask()">등록</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let tasks = [], currentFilter = 'all', selectedId = null, editingId = null;
+const SLABEL = { waiting:'대기', researching:'조사중', reported:'보고완료', confirmed:'컨펌', rejected:'반려' };
+const PLABEL = { urgent:'긴급', normal:'보통', low:'낮음' };
+
+(function init() {
+  loadLocal();
+  if (!tasks.length) tasks = getSample();
+  renderList();
+})();
+
+// ===== 리스트 렌더 =====
+function renderList() {
+  const pane = document.getElementById('listScroll');
+  let list = currentFilter === 'all' ? tasks : tasks.filter(t => t.status === currentFilter);
+  const po = {urgent:0,normal:1,low:2};
+  list = [...list].sort((a,b) => (po[a.priority]||1)-(po[b.priority]||1) || new Date(b.createdAt)-new Date(a.createdAt));
+
+  if (!list.length) { pane.innerHTML = '<div style="text-align:center;padding:40px;color:#c4c9d0;font-size:13px;">업무가 없습니다</div>'; return; }
+
+  pane.innerHTML = list.map(t =>
+    '<div class="list-item' + (selectedId===t.id?' active':'') + '" onclick="selectTask('+t.id+')">' +
+      '<div class="li-dot '+t.priority+'"></div>' +
+      '<div class="li-body">' +
+        '<div class="li-title">'+esc(t.title)+'</div>' +
+        '<div class="li-desc">'+esc(t.instruction||'내용 없음')+'</div>' +
+        '<div class="li-tags">' +
+          '<span class="li-tag '+t.status+'">'+SLABEL[t.status]+'</span>' +
+          '<span class="li-meta">'+esc(t.assignee)+' · '+(t.deadline?fmtDate(t.deadline):'기한 없음')+'</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+}
+
+// ===== 디테일 렌더 =====
+function selectTask(id) {
+  selectedId = id;
+  renderList();
+  const t = tasks.find(x => x.id===id);
+  if (!t) return;
+
+  const ds = document.getElementById('detailScroll');
+  const isOverdue = t.deadline && new Date(t.deadline)<new Date() && t.status!=='confirmed';
+
+  let confirmHtml = '';
+  if (t.status==='confirmed') confirmHtml = '<div class="cf-result ok">✓ 컨펌 완료</div>';
+  else if (t.status==='rejected') confirmHtml = '<div class="cf-result no">✗ 반려 — 재조사 필요</div>';
+  else if (t.report) confirmHtml = '<div class="confirm-bar"><button class="cf-btn ok" onclick="doConfirm('+t.id+',\'confirmed\')">✓ 컨펌</button><button class="cf-btn no" onclick="doConfirm('+t.id+',\'rejected\')">✗ 반려</button></div>';
+
+  ds.innerHTML =
+    '<div class="d-header">' +
+      '<div class="d-title">'+esc(t.title)+'</div>' +
+      '<div class="d-meta">' +
+        '<span>📌 '+esc(t.from||'-')+'</span>' +
+        '<span>👤 '+esc(t.assignee)+'</span>' +
+        (t.deadline ? '<span style="'+(isOverdue?'color:#f04452;font-weight:600;':'')+'">📅 '+fmtDate(t.deadline)+(isOverdue?' (기한초과)':'')+'</span>' : '') +
+        '<span>🕐 '+timeAgo(t.createdAt)+'</span>' +
+      '</div>' +
+      '<div class="d-actions">' +
+        '<button class="d-btn" onclick="openEdit('+t.id+')">수정</button>' +
+        '<button class="d-btn danger" onclick="delTask('+t.id+')">삭제</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="step-cards">' +
+      '<div class="s-card"><div class="s-card-head"><span class="s-num n1">1</span><span class="s-card-label">지시사항</span></div><div class="s-card-body">'+esc(t.instruction)+'</div></div>' +
+      '<div class="s-card"><div class="s-card-head"><span class="s-num n2">2</span><span class="s-card-label">알아본 내용</span></div><div class="s-card-body">'+esc(t.research)+'</div></div>' +
+      '<div class="s-card"><div class="s-card-head"><span class="s-num n3">3</span><span class="s-card-label">보고 및 컨펌</span></div><div class="s-card-body">'+esc(t.report)+'</div>'+confirmHtml+'</div>' +
+    '</div>';
+}
+
+function doConfirm(id, status) {
+  const t = tasks.find(x => x.id===id);
+  if (t) { t.status = status; saveLocal(); renderList(); selectTask(id); }
+}
+
+function delTask(id) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  tasks = tasks.filter(t => t.id!==id);
+  saveLocal(); selectedId = null;
+  document.getElementById('detailScroll').innerHTML = '<div class="detail-empty">← 좌측에서 업무를 선택하세요</div>';
+  renderList();
+}
+
+// ===== 필터 =====
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+// ===== 모달 =====
+function openModal() {
+  editingId = null;
+  document.getElementById('mTitle').textContent = '새 업무 등록';
+  document.getElementById('btnSave').textContent = '등록';
+  ['fTitle','fFrom','fInst','fRes','fRep','fDead'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('fPri').value='normal'; document.getElementById('fWho').value='김채원';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function openEdit(id) {
+  const t = tasks.find(x => x.id===id); if(!t) return;
+  editingId = id;
+  document.getElementById('mTitle').textContent = '업무 수정';
+  document.getElementById('btnSave').textContent = '저장';
+  document.getElementById('fTitle').value = t.title;
+  document.getElementById('fPri').value = t.priority;
+  document.getElementById('fDead').value = t.deadline||'';
+  document.getElementById('fFrom').value = t.from||'';
+  document.getElementById('fWho').value = t.assignee||'김채원';
+  document.getElementById('fInst').value = t.instruction||'';
+  document.getElementById('fRes').value = t.research||'';
+  document.getElementById('fRep').value = t.report||'';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function saveTask() {
+  const title = document.getElementById('fTitle').value.trim();
+  if (!title) { alert('제목을 입력하세요.'); return; }
+  const d = {
+    title, priority: document.getElementById('fPri').value, deadline: document.getElementById('fDead').value,
+    from: document.getElementById('fFrom').value.trim(), assignee: document.getElementById('fWho').value,
+    instruction: document.getElementById('fInst').value.trim(), research: document.getElementById('fRes').value.trim(),
+    report: document.getElementById('fRep').value.trim()
+  };
+  d.status = d.report ? 'reported' : d.research ? 'researching' : 'waiting';
+  if (editingId) {
+    const t = tasks.find(x => x.id===editingId);
+    if (t) { if(t.status==='confirmed'||t.status==='rejected') d.status=t.status; Object.assign(t,d); }
+    selectedId = editingId;
+  } else {
+    d.id = Date.now(); d.createdAt = new Date().toISOString();
+    tasks.unshift(d); selectedId = d.id;
+  }
+  saveLocal(); closeModal(); renderList(); selectTask(selectedId);
+}
+
+// ===== 저장 =====
+function saveLocal() { try { localStorage.setItem('taskInstructions', JSON.stringify(tasks)); } catch(e) {} }
+function loadLocal() { try { const s = localStorage.getItem('taskInstructions'); if(s) tasks = JSON.parse(s); } catch(e) {} }
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function fmtDate(d) { const dt=new Date(d); return (dt.getMonth()+1)+'/'+dt.getDate(); }
+function timeAgo(s) { const m=Math.floor((Date.now()-new Date(s))/60000); if(m<60)return m+'분 전'; const h=Math.floor(m/60); if(h<24)return h+'시간 전'; return Math.floor(h/24)+'일 전'; }
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+
+function getSample() {
+  return [
+    { id:1, title:'알리바바 반품 정책 조사', priority:'urgent', status:'researching', from:'팀장님', assignee:'김채원', deadline:'2026-03-12',
+      instruction:'알리바바 플랫폼의 반품/환불 정책을 조사해주세요.\n- 셀러 귀책 vs 바이어 귀책 기준\n- 반품 시 물류비 부담 주체\n- Trade Assurance 적용 시 차이점',
+      research:'1. 셀러 귀책 (상품 불량/오배송): 셀러 100% 부담\n2. 바이어 귀책 (단순 변심): 바이어 부담, 단 7일 이내\n3. Trade Assurance 적용 시 알리바바가 중재', report:'', createdAt:'2026-03-08T09:00:00' },
+    { id:2, title:'POUR 제품 HS Code 확인', priority:'normal', status:'reported', from:'팀장님', assignee:'허지은', deadline:'2026-03-14',
+      instruction:'PRC-100, PRC-200, PRC-300 제품의 HS Code를 관세청에서 확인해주세요.',
+      research:'관세청 품목분류 조회 결과:\n- PRC-100 (프라이머): 3209.10-0000\n- PRC-200 (탑코트): 3209.10-0000\n- PRC-300 (방수재): 3214.10-1000',
+      report:'3개 제품 모두 HS Code 확인 완료.\n동일 카테고리(3209) 2개, 방수재만 별도(3214).\n관세율은 모두 6.5%로 동일합니다.', createdAt:'2026-03-07T14:30:00' },
+    { id:3, title:'물류사 Extrans 단가 비교', priority:'low', status:'waiting', from:'대표님', assignee:'김채원', deadline:'2026-03-20',
+      instruction:'Extrans 물류사의 항공/해운 단가를 타 물류사와 비교해주세요.', research:'', report:'', createdAt:'2026-03-10T10:00:00' },
+    { id:4, title:'바이어 Liam 요청 샘플 수량 확인', priority:'urgent', status:'confirmed', from:'팀장님', assignee:'허지은', deadline:'2026-03-11',
+      instruction:'바이어 Liam이 요청한 샘플 수량과 배송지를 확인해주세요.',
+      research:'Liam 요청 내역:\n- PRC-100 x 2ea\n- PRC-300 x 3ea\n- 배송지: Melbourne, Australia\n- DHL Express 요청',
+      report:'샘플 수량 확인 완료.\nDHL Express 견적: $45 (3~5일 소요)\n발송 준비 완료 상태입니다.', createdAt:'2026-03-06T11:00:00' }
+  ];
+}
+</script>
+</body>
+</html>
