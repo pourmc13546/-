@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상품정보표 입력 관리</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; height: 100vh; overflow: hidden; color: #222; }
+  .scroll-thin::-webkit-scrollbar { width: 4px; }
+  .scroll-thin::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 4px; }
+  .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+  input, textarea, select {
+    width: 100%; border: 1px solid #d4d4d4; border-radius: 8px; padding: 9px 12px;
+    font-size: 13px; color: #222; background: #fff; transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.08); }
+  input::placeholder, textarea::placeholder { color: #bbb; }
+  textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+  .field-label { font-size: 11px; font-weight: 600; color: #888; margin-bottom: 5px; letter-spacing: 0.02em; text-transform: uppercase; display: flex; align-items: center; gap: 3px; }
+  .field-label .req { color: #3b82f6; font-size: 13px; }
+  .product-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.1s; }
+  .product-item:hover { background: #fafafa; }
+  .product-item.active { background: #f0f6ff; }
+  .tab-btn { padding: 7px 16px; font-size: 12px; font-weight: 500; border: none; border-radius: 20px; cursor: pointer; background: transparent; color: #888; transition: all 0.15s; }
+  .tab-btn.active { background: #222; color: #fff; }
+  .tab-btn:hover:not(.active) { color: #222; background: #f0f0f0; }
+  .progress-bar { height: 3px; background: #e5e5e5; border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #3b82f6; border-radius: 99px; transition: width 0.3s; }
+  .ko-translation { font-size: 11px; color: #aaa; margin-top: 4px; padding: 0; min-height: 14px; line-height: 1.4; }
+  .ko-translation:empty { display: none; }
+  .model-header { padding: 10px 14px; font-size: 11px; font-weight: 700; color: #666; background: #fafafa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-transform: uppercase; letter-spacing: 0.03em; }
+  .model-header:hover { background: #f0f0f0; }
+  .badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+  .form-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 20px; }
+</style>
+</head>
+<body>
+<div style="display:flex; height:100vh;">
+  <!-- 좌측: 제품 목록 -->
+  <div style="width:280px; border-right:1px solid #eee; display:flex; flex-direction:column; background:#fff;">
+    <div style="padding:20px 16px 16px;">
+      <h1 style="font-size:16px; font-weight:800; color:#222; margin-bottom:10px; letter-spacing:-0.02em;">상품정보표</h1>
+      <div style="display:flex; gap:12px; font-size:11px; color:#aaa;">
+        <span>전체 <strong id="stat-total" style="color:#222;">0</strong></span>
+        <span>완료 <strong id="stat-done" style="color:#3b82f6;">0</strong></span>
+        <span>미완료 <strong id="stat-incomplete" style="color:#e67e22;">0</strong></span>
+      </div>
+      <div class="progress-bar" style="margin-top:10px;">
+        <div class="progress-fill" id="stat-bar" style="width:0%"></div>
+      </div>
+    </div>
+    <div style="padding:4px 12px 8px;">
+      <input type="text" id="searchInput" placeholder="검색..." style="font-size:12px; padding:7px 12px; background:#f5f5f5; border:none;" oninput="filterProducts()">
+    </div>
+    <div id="productList" class="scroll-thin" style="flex:1; overflow-y:auto;"></div>
+  </div>
+
+  <!-- 우측: 입력 폼 -->
+  <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+    <!-- 상단 헤더 -->
+    <div style="padding:16px 28px; background:#fff; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div id="formTitle" style="font-size:16px; font-weight:700; color:#222;">제품을 선택하세요</div>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+          <span id="formModel" style="font-size:12px; color:#aaa;"></span>
+          <span id="formProgress" style="font-size:12px; color:#aaa;"></span>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button onclick="saveProduct()" style="padding:8px 20px; font-size:12px; font-weight:600; background:#222; color:#fff; border:none; border-radius:8px; cursor:pointer; transition:opacity 0.15s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">저장</button>
+        <button onclick="exportToExcel()" style="padding:8px 20px; font-size:12px; font-weight:600; background:#fff; color:#222; border:1px solid #d4d4d4; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:5px; transition:background 0.15s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+          엑셀 다운로드
+        </button>
+      </div>
+    </div>
+    <!-- 탭 -->
+    <div style="padding:12px 28px; background:#fff; border-bottom:1px solid #eee; display:flex; gap:4px;">
+      <button class="tab-btn active" onclick="switchTab('basic', this)">기본 상품정보</button>
+      <button class="tab-btn" onclick="switchTab('price', this)">가격</button>
+      <button class="tab-btn" onclick="switchTab('shipping', this)">발송</button>
+      <button class="tab-btn" onclick="switchTab('fulfillment', this)">물류</button>
+      <button class="tab-btn" onclick="switchTab('custom', this)">맞춤형 서비스</button>
+    </div>
+    <!-- 폼 영역 -->
+    <div id="formArea" class="scroll-thin" style="flex:1; overflow-y:auto; padding:24px 28px; background:#f5f5f5;">
+      <div id="emptyState" style="display:flex; align-items:center; justify-content:center; height:100%; color:#bbb; font-size:14px;">
+        좌측에서 제품을 선택하세요
+      </div>
+      <div id="formContent" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const fields = [
+  {key:'modelName', label:'모델명', required:true, group:'basic', type:'text'},
+  {key:'productName', label:'상품명', required:true, group:'basic', type:'text'},
+  {key:'material', label:'상품 제질', required:true, group:'basic', type:'text'},
+  {key:'usage', label:'상품 용도', required:true, group:'basic', type:'textarea'},
+  {key:'ingredient', label:'성분', required:true, group:'basic', type:'text'},
+  {key:'feature', label:'특징', required:true, group:'basic', type:'textarea'},
+  {key:'brand', label:'브랜드명', required:true, group:'basic', type:'text'},
+  {key:'origin', label:'원산지', required:true, group:'basic', type:'text'},
+  {key:'advantage', label:'상품 장점', required:true, group:'basic', type:'textarea'},
+  {key:'category', label:'카테고리', required:true, group:'basic', type:'text'},
+  {key:'keywords', label:'키워드 (유니크 15개 이상)', required:true, group:'basic', type:'textarea'},
+  {key:'extraInfo', label:'추가 정보', required:false, group:'basic', type:'textarea'},
+  {key:'customService', label:'맞춤형 서비스 지원 여부', required:true, group:'basic', type:'select', options:['','Yes','No']},
+  {key:'moq1', label:'MOQ (단계1)', required:true, group:'price', type:'text', placeholder:'예: 1~50'},
+  {key:'price1', label:'가격 (단계1)', required:true, group:'price', type:'text', placeholder:'예: 10'},
+  {key:'moq2', label:'MOQ (단계2)', required:false, group:'price', type:'text', placeholder:'예: 51~100'},
+  {key:'price2', label:'가격 (단계2)', required:false, group:'price', type:'text'},
+  {key:'moq3', label:'MOQ (단계3)', required:false, group:'price', type:'text'},
+  {key:'price3', label:'가격 (단계3)', required:false, group:'price', type:'text'},
+  {key:'moq4', label:'MOQ (단계4)', required:false, group:'price', type:'text'},
+  {key:'price4', label:'가격 (단계4)', required:false, group:'price', type:'text'},
+  {key:'qty1', label:'수량 (단계1)', required:true, group:'shipping', type:'text', placeholder:'예: 1~50'},
+  {key:'leadTime1', label:'리드 타임 (단계1)', required:true, group:'shipping', type:'text', placeholder:'일수 (예: 3)'},
+  {key:'qty2', label:'수량 (단계2)', required:false, group:'shipping', type:'text'},
+  {key:'leadTime2', label:'리드 타임 (단계2)', required:false, group:'shipping', type:'text'},
+  {key:'qty3', label:'수량 (단계3)', required:false, group:'shipping', type:'text'},
+  {key:'leadTime3', label:'리드 타임 (단계3)', required:false, group:'shipping', type:'text'},
+  {key:'qty4', label:'수량 (단계4)', required:false, group:'shipping', type:'text'},
+  {key:'leadTime4', label:'리드 타임 (단계4)', required:false, group:'shipping', type:'text'},
+  {key:'rts', label:'RTS 등록 여부', required:false, group:'fulfillment', type:'select', options:['','네','아니오']},
+  {key:'weight', label:'제품 무게 (MOQ당)', required:true, group:'fulfillment', type:'text', placeholder:'예: 0.05kg'},
+  {key:'logistics', label:'추천 물류 템플릿 사용', required:true, group:'fulfillment', type:'select', options:['','사용','미사용']},
+  {key:'customLogo', label:'사용자 지정 로고 최소수량', required:false, group:'custom', type:'text'},
+  {key:'customPack', label:'맞춤형 포장 최소수량', required:false, group:'custom', type:'text'},
+  {key:'customGraphic', label:'그래픽 사용자 지정 최소수량', required:false, group:'custom', type:'text'},
+];
+
+let products = [];
+let currentProduct = null;
+let currentTab = 'basic';
+let collapsedModels = {};
+
+fetch('product_data.json').then(r => r.json()).then(data => {
+  products = data.products;
+  restoreFromLocal(); // localStorage에서 이전 입력값 복원
+  renderProductList();
+  updateStats();
+}).catch(() => {
+  // 로컬 파일 접근 불가 시 샘플 데이터
+  products = [
+    {num:'Product 1', model:'PRC-100\nPOUR Primer Coat System', modelName:'PRC-100\nPOUR Primer Coat System', productName:'Steel Structure Anti-Corrosive Coating', material:'Water-Based Acrylic Polymer', usage:'Steel & H-Beam Rust Prevention / Long-Term Corrosion Resistance', ingredient:'Water-Based Acrylic Polymer', feature:'Powerful Adhesion / Excellent Elasticity / Rust-Proofing / Crack-Bridging', brand:'POUR', origin:'South Korea', advantage:'Excellent waterproofing strength and elasticity', category:'Construction & Real Estate > Paint & Coating > Waterproof Coating', keywords:'anti-corrosion coating, rust prevention paint, steel protection coating', extraInfo:'Function: Waterproof and anti-corrosion coating for concrete', customService:'Yes', moq1:'', price1:'', moq2:'', price2:'', moq3:'', price3:'', moq4:'', price4:'', qty1:'', leadTime1:'', qty2:'', leadTime2:'', qty3:'', leadTime3:'', qty4:'', leadTime4:'', rts:'', weight:'', logistics:'', customLogo:'', customPack:'', customGraphic:''},
+    {num:'Product 2', model:'PRC-100\nPOUR Primer Coat System', productName:'Container Anti-Rust Waterproof Paint', usage:'Container Exterior Anti-Rust Protection', feature:'Powerful Adhesion / Rust-Proofing / Salt Resistance', advantage:'Excellent corrosion protection for marine containers', keywords:'container coating, rust-proof paint, marine protection, salt resistant', material:'', ingredient:'', brand:'', origin:'', category:'', extraInfo:'', customService:'', modelName:'', moq1:'', price1:'', moq2:'', price2:'', moq3:'', price3:'', moq4:'', price4:'', qty1:'', leadTime1:'', qty2:'', leadTime2:'', qty3:'', leadTime3:'', qty4:'', leadTime4:'', rts:'', weight:'', logistics:'', customLogo:'', customPack:'', customGraphic:''},
+    {num:'Product 3', model:'PRC-100\nPOUR Primer Coat System', productName:'Waterborne Wood Protective Coating', usage:'Wood Surface Moisture Blocking / Mold Prevention Coating', feature:'Film Formation / Moisture & Mold Resistance', advantage:'Penetrates deeply to protect wood fibers', keywords:'wood coating, transparent finish, mold prevention, water-based', material:'', ingredient:'', brand:'', origin:'', category:'', extraInfo:'', customService:'', modelName:'', moq1:'', price1:'', moq2:'', price2:'', moq3:'', price3:'', moq4:'', price4:'', qty1:'', leadTime1:'', qty2:'', leadTime2:'', qty3:'', leadTime3:'', qty4:'', leadTime4:'', rts:'', weight:'', logistics:'', customLogo:'', customPack:'', customGraphic:''},
+    {num:'Product 20', model:'PRC-200\nPOUR Intermediate Coat System', modelName:'PRC-200\nPOUR Intermediate Coat System', productName:'Concrete Waterproof Coating', material:'Water-Based Acrylic Polymer', usage:'Concrete waterproof protection / crack prevention', ingredient:'Water-Based Acrylic Polymer', feature:'Strong adhesion to concrete substrates / stable waterproof film', brand:'POUR', origin:'South Korea', advantage:'Enhances durability of concrete surfaces with stable waterproof film', category:'', keywords:'', extraInfo:'', customService:'', moq1:'', price1:'', moq2:'', price2:'', moq3:'', price3:'', moq4:'', price4:'', qty1:'', leadTime1:'', qty2:'', leadTime2:'', qty3:'', leadTime3:'', qty4:'', leadTime4:'', rts:'', weight:'', logistics:'', customLogo:'', customPack:'', customGraphic:''},
+    {num:'Product 40', model:'PRC-300\nPOUR Top Coat System', modelName:'PRC-300\nPOUR Top Coat System', productName:'Roof UV-Shield Top Coat', material:'Water-based acrylic top coat', usage:'Rooftop UV protection / heat-shielding top coat', ingredient:'Water-Based Acrylic Polymer', feature:'Provides stable UV-resistant and heat-shielding film', brand:'POUR', origin:'South Korea', advantage:'Enhances rooftop waterproof layer durability with UV and heat protection', category:'', keywords:'', extraInfo:'', customService:'', moq1:'', price1:'', moq2:'', price2:'', moq3:'', price3:'', moq4:'', price4:'', qty1:'', leadTime1:'', qty2:'', leadTime2:'', qty3:'', leadTime3:'', qty4:'', leadTime4:'', rts:'', weight:'', logistics:'', customLogo:'', customPack:'', customGraphic:''},
+  ];
+  restoreFromLocal();
+  renderProductList();
+  updateStats();
+});
+
+function getRequiredFields() { return fields.filter(f => f.required); }
+function getFilledCount(p) { return getRequiredFields().filter(f => p[f.key] && String(p[f.key]).trim()).length; }
+function isProductComplete(p) { return getFilledCount(p) === getRequiredFields().length; }
+
+function updateStats() {
+  const total = products.length;
+  const done = products.filter(p => isProductComplete(p)).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-incomplete').textContent = total - done;
+  document.getElementById('stat-bar').style.width = (total ? Math.round(done/total*100) : 0) + '%';
+}
+
+function renderProductList() {
+  const container = document.getElementById('productList');
+  const search = (document.getElementById('searchInput').value || '').toLowerCase();
+  const grouped = {};
+  products.forEach((p, idx) => {
+    const m = p.model || '기타';
+    if (!grouped[m]) grouped[m] = [];
+    if (search && !(p.productName||'').toLowerCase().includes(search) && !(p.num||'').toLowerCase().includes(search) && !m.toLowerCase().includes(search)) return;
+    grouped[m].push({...p, _idx: idx});
+  });
+
+  let html = '';
+  Object.entries(grouped).forEach(([model, prods]) => {
+    const modelShort = model.split('\n')[0];
+    const collapsed = collapsedModels[model];
+    const reqCount = getRequiredFields().length;
+    const avgFill = prods.length ? Math.round(prods.reduce((s,p) => s + getFilledCount(p), 0) / prods.length) : 0;
+    const completePct = Math.round(avgFill / reqCount * 100);
+
+    html += '<div class="model-header" onclick="toggleModel(\'' + model.replace(/'/g, "\\'").replace(/\n/g, "\\n") + '\')">';
+    html += '<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:9px;color:#bbb;">' + (collapsed ? '▶' : '▼') + '</span>' + modelShort + ' <span style="font-size:10px;color:#bbb;font-weight:400;">' + prods.length + '</span></div>';
+    html += '<span class="badge" style="background:' + (completePct >= 80 ? '#e8f4fd;color:#2563eb' : completePct >= 40 ? '#fef9e7;color:#d97706' : '#f5f5f5;color:#999') + ';">' + completePct + '%</span>';
+    html += '</div>';
+
+    if (!collapsed) {
+      prods.forEach(p => {
+        const filled = getFilledCount(p);
+        const reqCount = getRequiredFields().length;
+        const isActive = currentProduct && currentProduct._idx === p._idx;
+        const complete = filled === reqCount;
+        html += '<div class="product-item' + (isActive ? ' active' : '') + '" onclick="selectProduct(' + p._idx + ')">';
+        html += '<div style="display:flex; align-items:center; justify-content:space-between;">';
+        html += '<div style="min-width:0;flex:1;">';
+        html += '<div style="font-size:12px; font-weight:500; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + escHtml(p.productName || p.num) + '</div>';
+        html += '<div style="font-size:10px; color:#bbb; margin-top:1px;">' + escHtml(p.num) + '</div>';
+        html += '</div>';
+        html += '<span style="font-size:10px;color:' + (complete ? '#3b82f6' : '#ccc') + ';flex-shrink:0;margin-left:8px;">' + filled + '/' + reqCount + '</span>';
+        html += '</div></div>';
+      });
+    }
+  });
+  container.innerHTML = html || '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;">검색 결과 없음</div>';
+}
+
+function toggleModel(model) { collapsedModels[model] = !collapsedModels[model]; renderProductList(); }
+function filterProducts() { renderProductList(); }
+function selectProduct(idx) { currentProduct = {...products[idx], _idx: idx}; renderProductList(); renderForm(); }
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderForm();
+}
+
+function renderForm() {
+  if (!currentProduct) return;
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('formContent').style.display = '';
+  const p = currentProduct;
+  const filled = getFilledCount(p);
+  const reqCount = getRequiredFields().length;
+  document.getElementById('formTitle').textContent = p.productName || p.num;
+  document.getElementById('formModel').textContent = (p.model || '').split('\n')[0];
+  document.getElementById('formProgress').textContent = '필수 입력: ' + filled + ' / ' + reqCount;
+
+  const tabFields = fields.filter(f => f.group === currentTab);
+  let html = '';
+
+  if (currentTab === 'basic') {
+    html += '<div class="form-card"><div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">';
+    tabFields.forEach(f => {
+      const val = p[f.key] || '';
+      const isLong = f.type === 'textarea';
+      const koVal = getTranslationCache(p.num, f.key);
+      html += '<div style="' + (isLong ? 'grid-column:1/-1;' : '') + '">';
+      html += '<div class="field-label">' + (f.required ? '<span class="req">*</span>' : '') + f.label + '</div>';
+      if (f.type === 'textarea') {
+        html += '<textarea data-key="' + f.key + '">' + escHtml(val) + '</textarea>';
+        html += '<div class="ko-translation" id="ko-' + f.key + '">' + escHtml(koVal) + '</div>';
+      } else if (f.type === 'select') {
+        html += '<select data-key="' + f.key + '">';
+        f.options.forEach(o => { html += '<option value="' + o + '"' + (val === o ? ' selected' : '') + '>' + (o || '선택...') + '</option>'; });
+        html += '</select>';
+      } else {
+        html += '<input type="text" data-key="' + f.key + '" value="' + escAttr(val) + '">';
+        html += '<div class="ko-translation" id="ko-' + f.key + '">' + escHtml(koVal) + '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+  } else if (currentTab === 'price') {
+    html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">';
+    for (let i = 0; i < 4; i++) {
+      const s = i + 1;
+      const moqVal = p['moq' + s] || '', priceVal = p['price' + s] || '';
+      html += '<div class="form-card" style="' + (i===0 ? 'border-color:#3b82f6;' : '') + '">';
+      html += '<div style="font-size:12px;font-weight:700;color:' + (i===0?'#3b82f6':'#aaa') + ';margin-bottom:12px;">단계 ' + s + (i===0 ? ' (필수)' : '') + '</div>';
+      html += '<div class="field-label">' + (i===0?'<span class="req">*</span>':'') + 'MOQ 범위</div>';
+      html += '<input type="text" data-key="moq' + s + '" value="' + escAttr(moqVal) + '" placeholder="예: 1~50" style="margin-bottom:10px;">';
+      html += '<div class="field-label">' + (i===0?'<span class="req">*</span>':'') + '단가 ($)</div>';
+      html += '<input type="text" data-key="price' + s + '" value="' + escAttr(priceVal) + '" placeholder="예: 10">';
+      html += '</div>';
+    }
+    html += '</div>';
+  } else if (currentTab === 'shipping') {
+    html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">';
+    for (let i = 0; i < 4; i++) {
+      const s = i + 1;
+      html += '<div class="form-card" style="' + (i===0 ? 'border-color:#3b82f6;' : '') + '">';
+      html += '<div style="font-size:12px;font-weight:700;color:' + (i===0?'#3b82f6':'#aaa') + ';margin-bottom:12px;">단계 ' + s + (i===0 ? ' (필수)' : '') + '</div>';
+      html += '<div class="field-label">' + (i===0?'<span class="req">*</span>':'') + '수량 범위</div>';
+      html += '<input type="text" data-key="qty' + s + '" value="' + escAttr(p['qty'+s]||'') + '" placeholder="예: 1~50" style="margin-bottom:10px;">';
+      html += '<div class="field-label">' + (i===0?'<span class="req">*</span>':'') + '리드 타임 (일)</div>';
+      html += '<input type="text" data-key="leadTime' + s + '" value="' + escAttr(p['leadTime'+s]||'') + '" placeholder="예: 3">';
+      html += '</div>';
+    }
+    html += '</div>';
+  } else if (currentTab === 'fulfillment') {
+    html += '<div class="form-card"><div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">';
+    tabFields.forEach(f => {
+      const val = p[f.key] || '';
+      html += '<div>';
+      html += '<div class="field-label">' + (f.required ? '<span class="req">*</span>' : '') + f.label + '</div>';
+      if (f.type === 'select') {
+        html += '<select data-key="' + f.key + '">';
+        f.options.forEach(o => { html += '<option value="' + o + '"' + (val === o ? ' selected' : '') + '>' + (o || '선택...') + '</option>'; });
+        html += '</select>';
+      } else {
+        html += '<input type="text" data-key="' + f.key + '" value="' + escAttr(val) + '" placeholder="' + (f.placeholder || '') + '">';
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+    html += '<div style="margin-top:14px;padding:14px 16px;background:#fff;border:1px solid #e5e5e5;border-radius:10px;font-size:11px;color:#888;">※ Extrans 물류사 사용 시: 총 포장 무게 ≤70kg (MOQ × MOQ당 제품 무게)</div>';
+  } else if (currentTab === 'custom') {
+    html += '<div class="form-card">';
+    html += '<p style="font-size:12px;color:#aaa;margin-bottom:16px;">맞춤형 서비스를 지원하지 않으면 작성 불필요</p>';
+    html += '<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px;">';
+    tabFields.forEach(f => {
+      html += '<div>';
+      html += '<div class="field-label">' + f.label + '</div>';
+      html += '<input type="text" data-key="' + f.key + '" value="' + escAttr(p[f.key]||'') + '" placeholder="예: 5000">';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  document.getElementById('formContent').innerHTML = html;
+
+  // 이미 값이 있는 필드의 번역을 로드
+  if (currentTab === 'basic') {
+    tabFields.forEach(f => {
+      if (f.type !== 'select') {
+        const val = p[f.key] || '';
+        if (val.trim() && !getTranslationCache(p.num, f.key)) {
+          translateToKorean(val, f.key, p.num);
+        }
+      }
+    });
+  }
+
+  document.querySelectorAll('#formContent input, #formContent textarea, #formContent select').forEach(el => {
+    el.addEventListener('input', () => {
+      const key = el.dataset.key;
+      if (key && currentProduct) {
+        currentProduct[key] = el.value;
+        products[currentProduct._idx][key] = el.value;
+        // 번역 트리거 (basic 탭의 text/textarea만)
+        if (currentTab === 'basic' && el.tagName !== 'SELECT') {
+          debouncedTranslate(el.value, key, currentProduct.num);
+        }
+      }
+    });
+  });
+}
+
+function saveProduct() {
+  if (!currentProduct) return;
+  updateStats();
+  renderProductList();
+  const filled = getFilledCount(currentProduct);
+  const reqCount = getRequiredFields().length;
+  document.getElementById('formProgress').textContent = '필수 입력: ' + filled + ' / ' + reqCount;
+
+  // 변경사항을 localStorage에 자동 저장
+  try { localStorage.setItem('productInfoData', JSON.stringify(products)); } catch(e) {}
+  showToast('저장 완료 (' + filled + '/' + reqCount + ')');
+}
+
+// localStorage에서 이전 데이터 복원
+function restoreFromLocal() {
+  try {
+    const saved = localStorage.getItem('productInfoData');
+    if (saved) {
+      const savedProducts = JSON.parse(saved);
+      // 저장된 데이터로 products 업데이트 (같은 num 기준 매칭)
+      savedProducts.forEach(sp => {
+        const idx = products.findIndex(p => p.num === sp.num);
+        if (idx >= 0) {
+          fields.forEach(f => {
+            if (sp[f.key] !== undefined && sp[f.key] !== '') {
+              products[idx][f.key] = sp[f.key];
+            }
+          });
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+// 엑셀 다운로드 (원본 구조 유지)
+function exportToExcel() {
+  if (!products.length) { alert('데이터가 없습니다.'); return; }
+
+  // 필드 → 엑셀 열 매핑 (원본 상품정보표 구조)
+  const colMap = {
+    modelName:1, productName:2, material:3, usage:4, ingredient:5, feature:6,
+    brand:7, origin:8, advantage:9, category:10, keywords:11, extraInfo:12,
+    customService:13, moq1:14, price1:15, moq2:16, price2:17, moq3:18,
+    price3:19, moq4:20, price4:21, qty1:22, leadTime1:23, qty2:24,
+    leadTime2:25, qty3:26, leadTime3:27, qty4:28, leadTime4:29,
+    rts:30, weight:31, logistics:32, customLogo:37, customPack:38, customGraphic:39
+  };
+
+  // 워크시트 데이터 생성
+  const wsData = [];
+
+  // 행1: 주의 사항
+  const r1 = []; r1[1] = '주의 사항'; wsData.push(r1);
+  // 행2~4: 안내
+  const r2 = []; r2[1] = '1. 모두 영어로 작성해주십시오'; wsData.push(r2);
+  const r3 = []; r3[1] = '2. *로 표시되는 부분은 필수 항목입니다.'; wsData.push(r3);
+  const r4 = []; r4[1] = '3. 모델명과 해당 제품의 폴더명과 매칭해야 합니다.'; wsData.push(r4);
+  // 행5: 그룹 헤더
+  const r5 = [];
+  r5[1] = '기본 상품정보';
+  r5[14] = '가격(필수 항목) 최대 4단계로 설정할 수 있음 (1~ 설정 권장)';
+  r5[22] = '발송 가능 시간(필수 항목) 최대 4단계로 설정할 수 있음(30일 이내 권장)';
+  r5[31] = 'Fulfillment information';
+  r5[37] = '맞춤형 서비스 지원/Customization service';
+  wsData.push(r5);
+  // 행6: 컬럼 헤더
+  const r6 = [];
+  r6[1] = '모델명*'; r6[2] = '상품명*'; r6[3] = '상품 제질*'; r6[4] = '상품 용도*';
+  r6[5] = '성분*'; r6[6] = '특징*'; r6[7] = '브랜드명*'; r6[8] = '원산지*';
+  r6[9] = '상품 장점*'; r6[10] = '카테고리*'; r6[11] = '키워드(유니크 키워드 15개 이상)*';
+  r6[12] = '추가 정보'; r6[13] = '맞춤형 서비스 지원 여부*';
+  r6[14] = 'MOQ(단계1)*'; r6[15] = '가격(단계1)*'; r6[16] = 'MOQ(단계2)'; r6[17] = '가격(단계2)';
+  r6[18] = 'MOQ(단계3)'; r6[19] = '가격(단계3)'; r6[20] = 'MOQ(단계4)'; r6[21] = '가격(단계4)';
+  r6[22] = '수량(단계1)*'; r6[23] = '리드 타임*'; r6[24] = '수량(단계2)'; r6[25] = '리드 타임';
+  r6[26] = '수량(단계3)'; r6[27] = '리드 타임'; r6[28] = '수량(단계4)'; r6[29] = '리드 타임';
+  r6[30] = 'RTS제품 등록 여부'; r6[31] = '제품 무게(MOQ당)*'; r6[32] = '추천 물류 템플릿 사용 여부*';
+  r6[37] = '사용자 지정 로고의 최소 수량'; r6[38] = '맞춤형 포장의 최소 수량'; r6[39] = '그래픽 사용자 지정의 최소 수량';
+  wsData.push(r6);
+  // 행7: 예시
+  const r7 = [];
+  r7[0] = '예시'; r7[1] = 'AU-465'; r7[2] = 'moisturizing facial cream'; r7[3] = 'Coconut Oil, Collagen';
+  r7[4] = 'facial cream'; r7[5] = 'Coconut Oil, Collagen'; r7[6] = 'Oil Control and Cleansing';
+  r7[7] = 'ALIBABA'; r7[8] = 'South Korea'; r7[9] = 'Repair and Anti-Aging, eco-friendly';
+  r7[10] = 'skin care'; r7[11] = 'face cream, made in korea, Facial Cleanser';
+  r7[13] = '네/아니오'; r7[14] = '1~50'; r7[15] = '10'; r7[22] = '1~50'; r7[23] = '3';
+  wsData.push(r7);
+
+  // 제품 데이터 행
+  products.forEach(p => {
+    const row = [];
+    row[0] = p.num;
+    Object.entries(colMap).forEach(([key, col]) => {
+      if (p[key]) row[col] = p[key];
+    });
+    wsData.push(row);
+  });
+
+  // SheetJS로 엑셀 생성
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // 열 너비 설정
+  ws['!cols'] = [
+    {wch:12}, // A (Product N)
+    {wch:20}, // B (모델명)
+    {wch:35}, // C (상품명)
+    {wch:25}, // D (제질)
+    {wch:40}, // E (용도)
+    {wch:25}, // F (성분)
+    {wch:40}, // G (특징)
+    {wch:15}, // H (브랜드)
+    {wch:15}, // I (원산지)
+    {wch:40}, // J (장점)
+    {wch:30}, // K (카테고리)
+    {wch:50}, // L (키워드)
+    {wch:30}, // M (추가정보)
+    {wch:12}, // N (맞춤형)
+    {wch:12}, // O (MOQ1)
+    {wch:10}, // P (가격1)
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, '상품정보표');
+
+  // 다운로드
+  const now = new Date();
+  const dateStr = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+  XLSX.writeFile(wb, '상품정보표_제출본_' + dateStr + '.xlsx');
+  showToast('엑셀 파일 다운로드 완료!');
+}
+
+// 토스트 메시지
+function showToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 24px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+}
+
+// ===== 번역 기능 =====
+const translationCache = {}; // { "Product 1__modelName": "한국어 번역" }
+const translateTimers = {};
+
+function getTranslationCache(productNum, fieldKey) {
+  return translationCache[productNum + '__' + fieldKey] || '';
+}
+
+function setTranslationCache(productNum, fieldKey, koText) {
+  translationCache[productNum + '__' + fieldKey] = koText;
+}
+
+function debouncedTranslate(text, fieldKey, productNum) {
+  const timerId = fieldKey;
+  if (translateTimers[timerId]) clearTimeout(translateTimers[timerId]);
+  if (!text.trim()) {
+    const koEl = document.getElementById('ko-' + fieldKey);
+    if (koEl) koEl.textContent = '';
+    setTranslationCache(productNum, fieldKey, '');
+    return;
+  }
+  translateTimers[timerId] = setTimeout(() => {
+    translateToKorean(text, fieldKey, productNum);
+  }, 600);
+}
+
+async function translateToKorean(text, fieldKey, productNum) {
+  if (!text.trim()) return;
+  try {
+    const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ko&dt=t&q=' + encodeURIComponent(text);
+    const res = await fetch(url);
+    const data = await res.json();
+    let translated = '';
+    if (data && data[0]) {
+      data[0].forEach(seg => { if (seg[0]) translated += seg[0]; });
+    }
+    setTranslationCache(productNum, fieldKey, translated);
+    const koEl = document.getElementById('ko-' + fieldKey);
+    if (koEl) koEl.textContent = translated;
+  } catch(e) {
+    console.warn('Translation failed:', e);
+  }
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
