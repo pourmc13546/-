@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>업무 지시·보고 관리</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: #f9fafb; color: #333d4b; min-height: 100vh; }
+
+  /* ── 상단 헤더 ── */
+  .top-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: #fff; border-bottom: 1px solid #e5e8eb;
+    padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar h1 { font-size: 18px; font-weight: 700; color: #202454; }
+  .top-bar .sub { font-size: 13px; color: #8b95a1; margin-left: 10px; font-weight: 400; }
+
+  /* ── 필터/액션 바 ── */
+  .action-bar {
+    padding: 16px 32px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 7px 16px; font-size: 13px; font-weight: 500; border: 1px solid #e5e8eb;
+    border-radius: 20px; background: #fff; color: #6b7684; cursor: pointer; transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: #c4c9d0; }
+  .filter-btn.active { background: #202454; color: #fff; border-color: #202454; }
+  .add-btn {
+    margin-left: auto; padding: 8px 20px; font-size: 13px; font-weight: 600;
+    background: #202454; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.15s;
+  }
+  .add-btn:hover { opacity: 0.85; }
+
+  /* ── 카드 리스트 ── */
+  .card-list { padding: 0 32px 32px; display: flex; flex-direction: column; gap: 12px; }
+
+  .task-card {
+    background: #fff; border: 1px solid #e5e8eb; border-radius: 14px;
+    overflow: hidden; transition: box-shadow 0.15s;
+  }
+  .task-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+
+  /* 카드 헤더 */
+  .card-header {
+    padding: 18px 22px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer;
+    user-select: none;
+  }
+  .card-header:hover { background: #fafbfc; }
+
+  .priority-dot {
+    width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+  }
+  .priority-dot.urgent { background: #f04452; }
+  .priority-dot.normal { background: #3182f6; }
+  .priority-dot.low { background: #c4c9d0; }
+
+  .card-summary { flex: 1; min-width: 0; }
+  .card-title { font-size: 15px; font-weight: 600; color: #333d4b; margin-bottom: 4px; }
+  .card-meta { font-size: 12px; color: #8b95a1; display: flex; gap: 12px; flex-wrap: wrap; }
+  .card-meta span { display: flex; align-items: center; gap: 3px; }
+
+  /* 상태 배지 */
+  .status-badge {
+    padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+    flex-shrink: 0; white-space: nowrap;
+  }
+  .status-badge.waiting { background: #fff3e0; color: #e8590c; }
+  .status-badge.researching { background: #e8f4fd; color: #1971c2; }
+  .status-badge.reported { background: #e6fcf5; color: #0ca678; }
+  .status-badge.confirmed { background: #f0ebff; color: #7048e8; }
+  .status-badge.rejected { background: #fee2e2; color: #dc2626; }
+
+  /* ── 카드 펼침 영역 ── */
+  .card-body { display: none; border-top: 1px solid #f2f4f6; }
+  .card-body.open { display: block; }
+
+  .step-flow {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; min-height: 0;
+  }
+
+  .step {
+    padding: 22px; border-right: 1px solid #f2f4f6; display: flex; flex-direction: column;
+  }
+  .step:last-child { border-right: none; }
+
+  .step-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #8b95a1; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .step-num {
+    width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; color: #fff;
+  }
+  .step-num.s1 { background: #202454; }
+  .step-num.s2 { background: #3182f6; }
+  .step-num.s3 { background: #0ca678; }
+
+  .step-content {
+    flex: 1; font-size: 13px; line-height: 1.7; color: #4e5968;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .step-content:empty::before {
+    content: '아직 작성되지 않았습니다';
+    color: #c4c9d0; font-style: italic;
+  }
+
+  /* 컨펌 영역 */
+  .confirm-area {
+    margin-top: 14px; display: flex; gap: 8px;
+  }
+  .confirm-btn {
+    padding: 6px 16px; font-size: 12px; font-weight: 600;
+    border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.15s;
+  }
+  .confirm-btn:hover { opacity: 0.8; }
+  .confirm-btn.approve { background: #0ca678; color: #fff; }
+  .confirm-btn.reject { background: #f04452; color: #fff; }
+  .confirm-btn.pending { background: #e5e8eb; color: #6b7684; }
+
+  /* 카드 하단 액션 */
+  .card-actions {
+    padding: 12px 22px; border-top: 1px solid #f2f4f6; display: flex; gap: 8px; justify-content: flex-end;
+  }
+  .action-link {
+    font-size: 12px; font-weight: 500; color: #3182f6; cursor: pointer;
+    padding: 4px 10px; border-radius: 6px; transition: background 0.15s;
+    background: none; border: none;
+  }
+  .action-link:hover { background: #e8f4fd; }
+  .action-link.danger { color: #f04452; }
+  .action-link.danger:hover { background: #fee2e2; }
+
+  /* ── 모달 ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #fff; border-radius: 16px; width: 640px; max-width: 92vw;
+    max-height: 88vh; overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .modal-header {
+    padding: 22px 24px 0; display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h2 { font-size: 17px; font-weight: 700; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 8px; border: none; background: none;
+    cursor: pointer; font-size: 18px; color: #8b95a1; display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: #f2f4f6; }
+
+  .modal-body { padding: 20px 24px 24px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 600; color: #6b7684; margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%; border: 1px solid #e5e8eb; border-radius: 8px; padding: 10px 12px;
+    font-size: 13px; font-family: inherit; color: #333d4b; transition: border-color 0.15s;
+  }
+  .form-input:focus { outline: none; border-color: #3182f6; box-shadow: 0 0 0 3px rgba(49,130,246,0.08); }
+  textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.6; }
+  select.form-input { cursor: pointer; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer {
+    padding: 16px 24px; border-top: 1px solid #f2f4f6; display: flex; justify-content: flex-end; gap: 8px;
+  }
+  .btn-cancel {
+    padding: 9px 20px; font-size: 13px; font-weight: 500; border: 1px solid #e5e8eb;
+    border-radius: 8px; background: #fff; color: #6b7684; cursor: pointer;
+  }
+  .btn-cancel:hover { background: #f9fafb; }
+  .btn-save {
+    padding: 9px 24px; font-size: 13px; font-weight: 600;
+    border: none; border-radius: 8px; background: #202454; color: #fff; cursor: pointer;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  /* ── 빈 상태 ── */
+  .empty-state {
+    text-align: center; padding: 80px 20px; color: #c4c9d0;
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── 통계 바 ── */
+  .stats-bar {
+    padding: 0 32px 8px; display: flex; gap: 20px;
+  }
+  .stat-item { font-size: 12px; color: #8b95a1; }
+  .stat-item strong { color: #333d4b; font-weight: 700; margin-right: 2px; }
+
+  /* 반응형 */
+  @media (max-width: 768px) {
+    .step-flow { grid-template-columns: 1fr; }
+    .step { border-right: none; border-bottom: 1px solid #f2f4f6; }
+    .step:last-child { border-bottom: none; }
+    .top-bar, .action-bar, .card-list, .stats-bar { padding-left: 16px; padding-right: 16px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== 상단 헤더 ====== -->
+<div class="top-bar">
+  <div>
+    <h1>업무 지시·보고<span class="sub">사소한 업무 지시사항 관리 및 보고 체크</span></h1>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-size:12px;color:#8b95a1;" id="lastSync"></span>
+  </div>
+</div>
+
+<!-- ====== 필터/액션 바 ====== -->
+<div class="action-bar">
+  <button class="filter-btn active" onclick="setFilter('all', this)">전체</button>
+  <button class="filter-btn" onclick="setFilter('waiting', this)">대기</button>
+  <button class="filter-btn" onclick="setFilter('researching', this)">조사중</button>
+  <button class="filter-btn" onclick="setFilter('reported', this)">보고완료</button>
+  <button class="filter-btn" onclick="setFilter('confirmed', this)">컨펌</button>
+  <button class="filter-btn" onclick="setFilter('rejected', this)">반려</button>
+  <button class="add-btn" onclick="openModal()">+ 새 업무 등록</button>
+</div>
+
+<!-- ====== 통계 바 ====== -->
+<div class="stats-bar" id="statsBar"></div>
+
+<!-- ====== 카드 리스트 ====== -->
+<div class="card-list" id="cardList"></div>
+
+<!-- ====== 등록/수정 모달 ====== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">새 업무 등록</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">업무 제목 *</label>
+        <input type="text" class="form-input" id="fTitle" placeholder="예: 알리바바 반품 정책 확인">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">우선순위</label>
+          <select class="form-input" id="fPriority">
+            <option value="normal">보통</option>
+            <option value="urgent">긴급</option>
+            <option value="low">낮음</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">마감일</label>
+          <input type="date" class="form-input" id="fDeadline">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">지시자</label>
+          <input type="text" class="form-input" id="fFrom" placeholder="예: 팀장님">
+        </div>
+        <div class="form-group">
+          <label class="form-label">담당자</label>
+          <select class="form-input" id="fAssignee">
+            <option value="김채원">김채원</option>
+            <option value="허지은">허지은</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">지시사항 (상세 내용)</label>
+        <textarea class="form-input" id="fInstruction" placeholder="업무 내용을 상세히 작성해주세요..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">알아본 내용 (조사/리서치)</label>
+        <textarea class="form-input" id="fResearch" placeholder="조사한 내용을 정리해주세요..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">보고 내용</label>
+        <textarea class="form-input" id="fReport" placeholder="보고할 내용을 작성해주세요..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-save" id="btnSave" onclick="saveTask()">등록</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 데이터 =====
+let tasks = [];
+let currentFilter = 'all';
+let editingId = null;
+
+const STATUS_MAP = {
+  waiting: { label: '대기', cls: 'waiting' },
+  researching: { label: '조사중', cls: 'researching' },
+  reported: { label: '보고완료', cls: 'reported' },
+  confirmed: { label: '컨펌완료', cls: 'confirmed' },
+  rejected: { label: '반려', cls: 'rejected' }
+};
+
+const PRIORITY_MAP = {
+  urgent: '긴급',
+  normal: '보통',
+  low: '낮음'
+};
+
+// ===== 초기 로드 =====
+(function init() {
+  loadFromLocal();
+  if (!tasks.length) {
+    // 샘플 데이터
+    tasks = [
+      {
+        id: 1, title: '알리바바 반품 정책 조사',
+        priority: 'urgent', status: 'researching',
+        from: '팀장님', assignee: '김채원',
+        deadline: '2026-03-12',
+        instruction: '알리바바 플랫폼의 반품/환불 정책을 조사해주세요.\n- 셀러 귀책 vs 바이어 귀책 기준\n- 반품 시 물류비 부담 주체\n- Trade Assurance 적용 시 차이점',
+        research: '1. 셀러 귀책 (상품 불량/오배송): 셀러 100% 부담\n2. 바이어 귀책 (단순 변심): 바이어 부담, 단 7일 이내\n3. Trade Assurance 적용 시 알리바바가 중재',
+        report: '',
+        createdAt: '2026-03-08T09:00:00'
+      },
+      {
+        id: 2, title: 'POUR 제품 HS Code 확인',
+        priority: 'normal', status: 'reported',
+        from: '팀장님', assignee: '허지은',
+        deadline: '2026-03-14',
+        instruction: 'PRC-100, PRC-200, PRC-300 제품의 HS Code를 관세청에서 확인해주세요.',
+        research: '관세청 품목분류 조회 결과:\n- PRC-100 (프라이머): 3209.10-0000\n- PRC-200 (탑코트): 3209.10-0000\n- PRC-300 (방수재): 3214.10-1000',
+        report: '3개 제품 모두 HS Code 확인 완료했습니다.\n동일 카테고리(3209) 2개, 방수재만 별도(3214)입니다.\n관세율은 모두 6.5%로 동일합니다.',
+        createdAt: '2026-03-07T14:30:00'
+      },
+      {
+        id: 3, title: '물류사 Extrans 단가 비교',
+        priority: 'low', status: 'waiting',
+        from: '대표님', assignee: '김채원',
+        deadline: '2026-03-20',
+        instruction: 'Extrans 물류사의 항공/해운 단가를 타 물류사와 비교해주세요.',
+        research: '',
+        report: '',
+        createdAt: '2026-03-10T10:00:00'
+      },
+      {
+        id: 4, title: '바이어 Liam 요청 샘플 수량 확인',
+        priority: 'urgent', status: 'confirmed',
+        from: '팀장님', assignee: '허지은',
+        deadline: '2026-03-11',
+        instruction: '바이어 Liam이 요청한 샘플 수량과 배송지를 확인해주세요.',
+        research: 'Liam 요청 내역:\n- PRC-100 x 2ea\n- PRC-300 x 3ea\n- 배송지: Melbourne, Australia\n- DHL Express 요청',
+        report: '샘플 수량 확인 완료.\nDHL Express 견적: $45 (3~5일 소요)\n발송 준비 완료 상태입니다.',
+        createdAt: '2026-03-06T11:00:00'
+      }
+    ];
+  }
+  render();
+})();
+
+// ===== 렌더링 =====
+function render() {
+  renderStats();
+  renderCards();
+}
+
+function renderStats() {
+  const total = tasks.length;
+  const counts = { waiting: 0, researching: 0, reported: 0, confirmed: 0, rejected: 0 };
+  tasks.forEach(t => { if (counts[t.status] !== undefined) counts[t.status]++; });
+
+  document.getElementById('statsBar').innerHTML =
+    '<div class="stat-item"><strong>' + total + '</strong>전체</div>' +
+    '<div class="stat-item"><strong>' + counts.waiting + '</strong>대기</div>' +
+    '<div class="stat-item"><strong>' + counts.researching + '</strong>조사중</div>' +
+    '<div class="stat-item"><strong>' + counts.reported + '</strong>보고완료</div>' +
+    '<div class="stat-item"><strong>' + counts.confirmed + '</strong>컨펌</div>' +
+    (counts.rejected ? '<div class="stat-item"><strong>' + counts.rejected + '</strong>반려</div>' : '');
+}
+
+function renderCards() {
+  const list = document.getElementById('cardList');
+  const filtered = currentFilter === 'all' ? tasks : tasks.filter(t => t.status === currentFilter);
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>등록된 업무가 없습니다</p></div>';
+    return;
+  }
+
+  // 정렬: 긴급 → 보통 → 낮음, 최신순
+  const prioOrder = { urgent: 0, normal: 1, low: 2 };
+  const sorted = [...filtered].sort((a, b) => {
+    if (prioOrder[a.priority] !== prioOrder[b.priority]) return prioOrder[a.priority] - prioOrder[b.priority];
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
+  list.innerHTML = sorted.map(t => {
+    const st = STATUS_MAP[t.status] || STATUS_MAP.waiting;
+    const deadlineStr = t.deadline ? formatDate(t.deadline) : '';
+    const isOverdue = t.deadline && new Date(t.deadline) < new Date() && t.status !== 'confirmed';
+
+    return '<div class="task-card" id="card-' + t.id + '">' +
+      '<div class="card-header" onclick="toggleCard(' + t.id + ')">' +
+        '<div class="priority-dot ' + t.priority + '"></div>' +
+        '<div class="card-summary">' +
+          '<div class="card-title">' + esc(t.title) + '</div>' +
+          '<div class="card-meta">' +
+            '<span>📌 ' + esc(t.from || '-') + '</span>' +
+            '<span>👤 ' + esc(t.assignee) + '</span>' +
+            (deadlineStr ? '<span style="' + (isOverdue ? 'color:#f04452;font-weight:600;' : '') + '">📅 ' + deadlineStr + (isOverdue ? ' (기한초과)' : '') + '</span>' : '') +
+            '<span>🕐 ' + timeAgo(t.createdAt) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="status-badge ' + st.cls + '">' + st.label + '</div>' +
+      '</div>' +
+      '<div class="card-body" id="body-' + t.id + '">' +
+        '<div class="step-flow">' +
+          '<div class="step">' +
+            '<div class="step-label"><span class="step-num s1">1</span>지시사항</div>' +
+            '<div class="step-content">' + esc(t.instruction) + '</div>' +
+          '</div>' +
+          '<div class="step">' +
+            '<div class="step-label"><span class="step-num s2">2</span>알아본 내용</div>' +
+            '<div class="step-content">' + esc(t.research) + '</div>' +
+          '</div>' +
+          '<div class="step">' +
+            '<div class="step-label"><span class="step-num s3">3</span>보고 및 컨펌</div>' +
+            '<div class="step-content">' + esc(t.report) + '</div>' +
+            (t.status !== 'confirmed' && t.status !== 'rejected' && t.report ?
+              '<div class="confirm-area">' +
+                '<button class="confirm-btn approve" onclick="event.stopPropagation();confirmTask(' + t.id + ',\'confirmed\')">✓ 컨펌</button>' +
+                '<button class="confirm-btn reject" onclick="event.stopPropagation();confirmTask(' + t.id + ',\'rejected\')">✗ 반려</button>' +
+              '</div>' : '') +
+            (t.status === 'confirmed' ? '<div style="margin-top:12px;padding:8px 12px;background:#f0ebff;border-radius:8px;font-size:12px;color:#7048e8;font-weight:600;">✓ 컨펌 완료</div>' : '') +
+            (t.status === 'rejected' ? '<div style="margin-top:12px;padding:8px 12px;background:#fee2e2;border-radius:8px;font-size:12px;color:#dc2626;font-weight:600;">✗ 반려됨 — 재조사 필요</div>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="card-actions">' +
+          '<button class="action-link" onclick="openEditModal(' + t.id + ')">수정</button>' +
+          '<button class="action-link danger" onclick="deleteTask(' + t.id + ')">삭제</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ===== 카드 토글 =====
+function toggleCard(id) {
+  const body = document.getElementById('body-' + id);
+  body.classList.toggle('open');
+}
+
+// ===== 필터 =====
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+}
+
+// ===== 모달 =====
+function openModal() {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = '새 업무 등록';
+  document.getElementById('btnSave').textContent = '등록';
+  clearForm();
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function openEditModal(id) {
+  event.stopPropagation();
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = '업무 수정';
+  document.getElementById('btnSave').textContent = '저장';
+  document.getElementById('fTitle').value = t.title;
+  document.getElementById('fPriority').value = t.priority;
+  document.getElementById('fDeadline').value = t.deadline || '';
+  document.getElementById('fFrom').value = t.from || '';
+  document.getElementById('fAssignee').value = t.assignee || '김채원';
+  document.getElementById('fInstruction').value = t.instruction || '';
+  document.getElementById('fResearch').value = t.research || '';
+  document.getElementById('fReport').value = t.report || '';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function clearForm() {
+  ['fTitle','fFrom','fInstruction','fResearch','fReport','fDeadline'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fPriority').value = 'normal';
+  document.getElementById('fAssignee').value = '김채원';
+}
+
+function saveTask() {
+  const title = document.getElementById('fTitle').value.trim();
+  if (!title) { alert('업무 제목을 입력해주세요.'); return; }
+
+  const data = {
+    title,
+    priority: document.getElementById('fPriority').value,
+    deadline: document.getElementById('fDeadline').value,
+    from: document.getElementById('fFrom').value.trim(),
+    assignee: document.getElementById('fAssignee').value,
+    instruction: document.getElementById('fInstruction').value.trim(),
+    research: document.getElementById('fResearch').value.trim(),
+    report: document.getElementById('fReport').value.trim(),
+  };
+
+  // 상태 자동 결정
+  if (data.report) data.status = 'reported';
+  else if (data.research) data.status = 'researching';
+  else data.status = 'waiting';
+
+  if (editingId) {
+    const idx = tasks.findIndex(t => t.id === editingId);
+    if (idx >= 0) {
+      // 컨펌/반려 상태면 유지
+      if (tasks[idx].status === 'confirmed' || tasks[idx].status === 'rejected') {
+        data.status = tasks[idx].status;
+      }
+      Object.assign(tasks[idx], data);
+    }
+  } else {
+    data.id = Date.now();
+    data.createdAt = new Date().toISOString();
+    tasks.unshift(data);
+  }
+
+  saveToLocal();
+  closeModal();
+  render();
+}
+
+// ===== 컨펌/반려 =====
+function confirmTask(id, status) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  t.status = status;
+  saveToLocal();
+  render();
+}
+
+// ===== 삭제 =====
+function deleteTask(id) {
+  event.stopPropagation();
+  if (!confirm('이 업무를 삭제하시겠습니까?')) return;
+  tasks = tasks.filter(t => t.id !== id);
+  saveToLocal();
+  render();
+}
+
+// ===== localStorage =====
+function saveToLocal() {
+  try { localStorage.setItem('taskInstructions', JSON.stringify(tasks)); } catch(e) {}
+}
+function loadFromLocal() {
+  try {
+    const saved = localStorage.getItem('taskInstructions');
+    if (saved) tasks = JSON.parse(saved);
+  } catch(e) {}
+}
+
+// ===== 유틸 =====
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+function formatDate(d) {
+  const dt = new Date(d);
+  return (dt.getMonth()+1) + '/' + dt.getDate();
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return mins + '분 전';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + '시간 전';
+  const days = Math.floor(hrs / 24);
+  return days + '일 전';
+}
+
+// 모달 외부 클릭 닫기
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
