@@ -13485,26 +13485,23 @@ Option C: [제품C] - $[가격]
     }
 
     async function tvCloudLoad() {
-      if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_KEY === 'undefined') {
-        // Supabase 변수가 아직 로드 안 됨 — 나중에 재시도
+      if (typeof supabaseClient === 'undefined') {
         setTimeout(tvCloudLoad, 2000);
         return;
       }
       try {
-        const resp = await fetch(SUPABASE_URL + '/rest/v1/task_data?key=eq.tvTaskInstructions&select=value', {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-        });
-        if (resp.ok) {
-          const rows = await resp.json();
-          if (rows.length > 0 && rows[0].value) {
-            let val = rows[0].value;
-            if (typeof val === 'string') { try { val = JSON.parse(val); } catch(e) {} }
-            if (Array.isArray(val) && val.length > 0) {
-              tvTaskData = val;
-              try { localStorage.setItem('tvTaskInstructions', JSON.stringify(tvTaskData)); } catch(e) {}
-              tvRenderTable();
-              tvShowDetail(tvSelectedIdx < tvTaskData.length ? tvSelectedIdx : 0);
-            }
+        const { data: rows, error } = await supabaseClient
+          .from('app_settings')
+          .select('value')
+          .eq('key', 'tvTaskInstructions');
+        if (!error && rows && rows.length > 0 && rows[0].value) {
+          let val = rows[0].value;
+          if (typeof val === 'string') { try { val = JSON.parse(val); } catch(e) {} }
+          if (Array.isArray(val) && val.length > 0) {
+            tvTaskData = val;
+            try { localStorage.setItem('tvTaskInstructions', JSON.stringify(tvTaskData)); } catch(e) {}
+            tvRenderTable();
+            tvShowDetail(tvSelectedIdx < tvTaskData.length ? tvSelectedIdx : 0);
           }
         }
       } catch(e) {}
