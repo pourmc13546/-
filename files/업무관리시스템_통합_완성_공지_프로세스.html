@@ -2097,11 +2097,11 @@
     <div class="bg-white border-b border-slate-200 px-6 py-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-gradient-to-br from-navy-500 to-navy-600 rounded-xl flex items-center justify-center shadow-lg">
-          <span class="text-white text-lg">📋</span>
+          <span class="text-white text-lg" id="pvHeaderIcon">📋</span>
         </div>
         <div class="flex-1">
-          <h1 class="text-lg font-bold text-slate-800">프로세스 진행 현황</h1>
-          <p class="text-sm text-slate-500">알리바바닷컴 입점을 위한 프로세스 관리</p>
+          <h1 class="text-lg font-bold text-slate-800" id="pvHeaderTitle">프로세스 진행 현황</h1>
+          <p class="text-sm text-slate-500" id="pvHeaderDesc">알리바바닷컴 입점을 위한 프로세스 관리</p>
         </div>
         <div class="flex items-center gap-3 text-xs">
           <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span><span class="text-slate-500">완료</span></div>
@@ -13408,12 +13408,21 @@ Option C: [제품C] - $[가격]
       btn.classList.add('active');
       const processContent = document.getElementById('processTabContent');
       const taskContent = document.getElementById('taskTabContent');
+      const hTitle = document.getElementById('pvHeaderTitle');
+      const hDesc = document.getElementById('pvHeaderDesc');
+      const hIcon = document.getElementById('pvHeaderIcon');
       if (tab === 'process') {
         processContent.style.display = '';
         taskContent.classList.remove('active');
+        if (hTitle) hTitle.textContent = '프로세스 진행 현황';
+        if (hDesc) hDesc.textContent = '알리바바닷컴 입점을 위한 프로세스 관리';
+        if (hIcon) hIcon.textContent = '📋';
       } else {
         processContent.style.display = 'none';
         taskContent.classList.add('active');
+        if (hTitle) hTitle.textContent = '업무지시 · 보고 관리';
+        if (hDesc) hDesc.textContent = '업무 지시사항 확인 및 보고 현황';
+        if (hIcon) hIcon.textContent = '📝';
       }
     }
 
