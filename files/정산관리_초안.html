@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정산관리 초안</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Pretendard',sans-serif;background:#f2f4f6;color:#191f28;}
+
+  .page{max-width:1100px;margin:0 auto;padding:28px 24px 80px;}
+
+  /* 헤더 */
+  .pg-header{margin-bottom:24px;}
+  .pg-header h1{font-size:20px;font-weight:800;color:#202454;}
+  .pg-header p{font-size:13px;color:#8b95a1;margin-top:4px;}
+
+  /* 요약 바 */
+  .summary-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+  .sb-card{background:#fff;border:1px solid #e5e8eb;border-radius:12px;padding:16px 20px;}
+  .sb-label{font-size:11px;font-weight:600;color:#8b95a1;}
+  .sb-val{font-size:22px;font-weight:800;margin-top:4px;}
+  .sb-val.in{color:#0ca678;}
+  .sb-val.out{color:#f04452;}
+  .sb-val.net{color:#202454;}
+  .sb-sub{font-size:11px;color:#aeb4bc;margin-top:2px;}
+
+  /* 탭 */
+  .tabs{display:flex;gap:4px;margin-bottom:20px;}
+  .tab{padding:9px 24px;border-radius:8px;border:1px solid #e5e8eb;background:#fff;color:#6b7684;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .tab:hover{background:#f1f5f9;}
+  .tab.active{background:#202454;color:#fff;border-color:#202454;}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* 카드 */
+  .card{background:#fff;border:1px solid #e5e8eb;border-radius:14px;padding:20px 22px;}
+
+  /* 툴바 */
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  .toolbar-left{display:flex;gap:8px;align-items:center;}
+  .toolbar input[type="month"],.toolbar select{padding:7px 12px;border:1px solid #e5e8eb;border-radius:8px;font-size:13px;font-family:inherit;}
+  .btn-add{padding:8px 18px;background:#202454;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .btn-add:hover{background:#1a1e45;}
+
+  /* 테이블 */
+  .tbl{width:100%;border-collapse:collapse;font-size:13px;}
+  .tbl th{text-align:left;padding:10px 12px;background:#f8f9fa;border-bottom:2px solid #e5e8eb;color:#6b7684;font-weight:600;font-size:11px;}
+  .tbl td{padding:11px 12px;border-bottom:1px solid #f4f5f7;}
+  .tbl tr:hover td{background:#fafbfc;}
+  .tbl .r{text-align:right;}
+  .amt-in{color:#0ca678;font-weight:700;}
+  .amt-out{color:#f04452;font-weight:700;}
+  .route-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;}
+  .route-badge.tt{background:#fef3c7;color:#d97706;}
+  .route-badge.ta{background:#e8f0fe;color:#1a73e8;}
+  .cat-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:500;}
+  .cat-badge.purchase{background:#dbeafe;color:#2563eb;}
+  .cat-badge.logistics{background:#fef3c7;color:#d97706;}
+  .cat-badge.customs{background:#dcfce7;color:#16a34a;}
+  .cat-badge.agency{background:#f3e8ff;color:#7c3aed;}
+  .cat-badge.fee{background:#f1f5f9;color:#64748b;}
+  .cat-badge.etc{background:#fee2e2;color:#ef4444;}
+  .tbl tfoot td{background:#f8f9fa;font-weight:700;font-size:14px;}
+
+  .btn-edit{border:none;background:none;color:#3182f6;cursor:pointer;font-size:12px;padding:2px 4px;}
+  .btn-del{border:none;background:none;color:#f04452;cursor:pointer;font-size:12px;padding:2px 4px;}
+
+  /* 모달 */
+  .modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;}
+  .modal-bg.show{display:flex;}
+  .modal{background:#fff;border-radius:16px;width:460px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+  .modal-head{padding:18px 24px;border-bottom:1px solid #f4f5f7;display:flex;justify-content:space-between;align-items:center;}
+  .modal-head h3{font-size:16px;font-weight:800;color:#202454;}
+  .modal-close{background:none;border:none;cursor:pointer;padding:4px;color:#8b95a1;font-size:18px;}
+  .modal-body{padding:24px;}
+  .fg{margin-bottom:14px;}
+  .fg label{display:block;font-size:12px;font-weight:600;color:#4e5968;margin-bottom:6px;}
+  .fg input,.fg select{width:100%;padding:10px 14px;border:1px solid #e5e8eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border .15s;}
+  .fg input:focus,.fg select:focus{border-color:#202454;}
+  .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .fg-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;}
+  .btn-cancel{padding:10px 20px;border:1px solid #e5e8eb;border-radius:8px;background:#fff;color:#6b7684;font-size:13px;font-weight:600;cursor:pointer;}
+  .btn-save{padding:10px 20px;border:none;border-radius:8px;background:#202454;color:#fff;font-size:13px;font-weight:600;cursor:pointer;}
+  .auto-calc{background:#f8f9fa;color:#6b7684;cursor:default;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <div class="pg-header">
+    <h1>정산관리</h1>
+    <p>들어온 돈과 나간 돈을 기록하고 현황을 확인합니다</p>
+  </div>
+
+  <!-- 요약 바 -->
+  <div class="summary-bar">
+    <div class="sb-card">
+      <div class="sb-label">이번 달 들어온 돈</div>
+      <div class="sb-val in">+$10,050</div>
+      <div class="sb-sub">₩14,843,850 · 3건</div>
+    </div>
+    <div class="sb-card">
+      <div class="sb-label">이번 달 나간 돈</div>
+      <div class="sb-val out">-₩7,420,000</div>
+      <div class="sb-sub">매입 4,350 · 물류 1,700 · 통관 640 · 기타 730</div>
+    </div>
+    <div class="sb-card">
+      <div class="sb-label">이번 달 순이익</div>
+      <div class="sb-val net">₩7,423,850</div>
+      <div class="sb-sub">이익률 50.0%</div>
+    </div>
+  </div>
+
+  <!-- 탭 -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('in',this)">들어온 돈</button>
+    <button class="tab" onclick="switchTab('out',this)">나간 돈</button>
+  </div>
+
+  <!-- ═══ 들어온 돈 탭 ═══ -->
+  <div id="tab-in" class="tab-content active">
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="month" value="2026-03">
+        </div>
+        <button class="btn-add" onclick="openModal('in')">+ 입금 등록</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>입금일</th>
+              <th>거래처</th>
+              <th>입금 경로</th>
+              <th class="r">금액(USD)</th>
+              <th class="r">환율</th>
+              <th class="r">원화(KRW)</th>
+              <th>메모</th>
+              <th style="width:70px;">관리</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:600;">03/20</td>
+              <td>India Steel Corp</td>
+              <td><span class="route-badge tt">T/T</span></td>
+              <td class="r amt-in">+$5,500</td>
+              <td class="r" style="color:#8b95a1;">1,477</td>
+              <td class="r" style="font-weight:600;">₩8,123,500</td>
+              <td style="color:#8b95a1;font-size:12px;">전액 입금</td>
+              <td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">03/10</td>
+              <td>Dubai Imports LLC</td>
+              <td><span class="route-badge ta">T/A</span></td>
+              <td class="r amt-in">+$3,200</td>
+              <td class="r" style="color:#8b95a1;">1,477</td>
+              <td class="r" style="font-weight:600;">₩4,726,400</td>
+              <td style="color:#8b95a1;font-size:12px;">Trade Assurance 정산</td>
+              <td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">03/05</td>
+              <td>ABC Trading Co.</td>
+              <td><span class="route-badge tt">T/T</span></td>
+              <td class="r amt-in">+$1,350</td>
+              <td class="r" style="color:#8b95a1;">1,477</td>
+              <td class="r" style="font-weight:600;">₩1,993,950</td>
+              <td style="color:#8b95a1;font-size:12px;">선금 30%</td>
+              <td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="text-align:right;color:#6b7684;">합계</td>
+              <td class="r amt-in" style="font-size:15px;">+$10,050</td>
+              <td></td>
+              <td class="r" style="color:#0ca678;font-size:15px;">₩14,843,850</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 나간 돈 탭 ═══ -->
+  <div id="tab-out" class="tab-content">
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="month" value="2026-03">
+          <select>
+            <option value="">전체 항목</option>
+            <option>제품매입</option>
+            <option>물류비</option>
+            <option>통관비</option>
+            <option>대행비</option>
+            <option>수수료</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <button class="btn-add" onclick="openModal('out')">+ 지출 등록</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>날짜</th>
+              <th>거래처</th>
+              <th>항목</th>
+              <th class="r">금액(KRW)</th>
+              <th>메모</th>
+              <th style="width:70px;">관리</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:600;">03/18</td>
+              <td>검역원</td>
+              <td><span class="cat-badge fee">수수료</span></td>
+              <td class="r amt-out">-₩150,000</td>
+              <td style="color:#8b95a1;font-size:12px;">검역 수수료</td>
+              <td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">03/12</td>
+              <td>KP화학</td>
+              <td><span class="cat-badge purchase">제품매입</span></td>
+              <td class="r amt-out">-₩4,350,000</td>
+              <td style="color:#8b95a1;font-size:12px;">코트재 + 방청코팅 원재료</td>
+              <td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">03/08</td>
+              <td>관세법인 A</td>
+              <td><span class="cat-badge customs">통관비</span></td>
+              <td class="r amt-out">-₩640,000</td>
+              <td style="color:#8b95a1;font-size:12px;">두바이 통관 대행</td>
+              <td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">03/05</td>
+              <td>대행사 B</td>
+              <td><span class="cat-badge agency">대행비</span></td>
+              <td class="r amt-out">-₩580,000</td>
+              <td style="color:#8b95a1;font-size:12px;">수출 대행 수수료</td>
+              <td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">03/03</td>
+              <td>Extrans 물류</td>
+              <td><span class="cat-badge logistics">물류비</span></td>
+              <td class="r amt-out">-₩1,700,000</td>
+              <td style="color:#8b95a1;font-size:12px;">3월 해상운송비</td>
+              <td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="text-align:right;color:#6b7684;">합계</td>
+              <td class="r amt-out" style="font-size:15px;">-₩7,420,000</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ 모달: 입금 등록 ═══ -->
+<div id="modal-in" class="modal-bg" onclick="if(event.target===this)closeModal('in')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>입금 등록</h3>
+      <button class="modal-close" onclick="closeModal('in')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <label>입금일 *</label>
+        <input type="date" value="2026-03-26">
+      </div>
+      <div class="fg">
+        <label>거래처 *</label>
+        <input type="text" placeholder="바이어 회사명">
+      </div>
+      <div class="fg">
+        <label>입금 경로 *</label>
+        <select>
+          <option value="TT">T/T (송금)</option>
+          <option value="TA">Trade Assurance (알리바바)</option>
+        </select>
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label>입금액 (USD) *</label>
+          <input type="number" placeholder="0" id="inUsd" oninput="calcKrw()">
+        </div>
+        <div class="fg">
+          <label>환율</label>
+          <input type="number" value="1477" id="inRate" oninput="calcKrw()">
+        </div>
+      </div>
+      <div class="fg">
+        <label>원화 환산 (자동)</label>
+        <input type="text" id="inKrw" class="auto-calc" readonly value="₩0">
+      </div>
+      <div class="fg">
+        <label>메모</label>
+        <input type="text" placeholder="선금 30%, 전액 입금 등">
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" onclick="closeModal('in')">취소</button>
+        <button class="btn-save">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 모달: 지출 등록 ═══ -->
+<div id="modal-out" class="modal-bg" onclick="if(event.target===this)closeModal('out')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>지출 등록</h3>
+      <button class="modal-close" onclick="closeModal('out')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <label>날짜 *</label>
+        <input type="date" value="2026-03-26">
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label>거래처 *</label>
+          <input type="text" placeholder="회사명">
+        </div>
+        <div class="fg">
+          <label>항목 *</label>
+          <select>
+            <option>제품매입</option>
+            <option>물류비</option>
+            <option>통관비</option>
+            <option>대행비</option>
+            <option>수수료</option>
+            <option>기타</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label>금액 (KRW) *</label>
+        <input type="number" placeholder="0">
+      </div>
+      <div class="fg">
+        <label>메모</label>
+        <input type="text" placeholder="비고">
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" onclick="closeModal('out')">취소</button>
+        <button class="btn-save">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function openModal(type) {
+  document.getElementById('modal-' + type).classList.add('show');
+}
+function closeModal(type) {
+  document.getElementById('modal-' + type).classList.remove('show');
+}
+
+function calcKrw() {
+  const usd = parseFloat(document.getElementById('inUsd').value) || 0;
+  const rate = parseFloat(document.getElementById('inRate').value) || 0;
+  document.getElementById('inKrw').value = '₩' + (usd * rate).toLocaleString('ko-KR');
+}
+</script>
+</body>
+</html>
