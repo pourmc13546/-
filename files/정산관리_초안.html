@@ -152,6 +152,16 @@
   .tt-btn.active[data-type="in"]{border-color:#0ca678;background:#ecfdf5;color:#0ca678;}
   .tt-btn.active[data-type="out"]{border-color:#f04452;background:#fef2f2;color:#f04452;}
 
+  /* 목록 모달 인라인 입력 */
+  .tx-input{width:100%;padding:6px 8px;border:1px solid #e5e8eb;border-radius:5px;font-size:11px;font-family:inherit;outline:none;}
+  .tx-input:focus{border-color:#202454;}
+  .tx-select{width:100%;padding:6px 4px;border:1px solid #e5e8eb;border-radius:5px;font-size:11px;font-family:inherit;outline:none;background:#fff;}
+  .tx-select:focus{border-color:#202454;}
+  .tx-del{width:22px;height:22px;border:none;background:#fef2f2;color:#f04452;border-radius:6px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
+  .tx-del:hover{background:#fee2e2;}
+  .tx-row-in td{background:#f0fdf4 !important;}
+  .tx-row-out td{background:#fef7f7 !important;}
+
   @media(max-width:900px){.summary,.row-2{grid-template-columns:1fr;}.sm-grid{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
@@ -402,74 +412,164 @@
 
 </div>
 
-<!-- ═══ 통합 모달 ═══ -->
+<!-- ═══ 통합 목록 모달 ═══ -->
 <div id="modal-tx" class="modal-bg" onclick="if(event.target===this)closeTxModal()">
-  <div class="modal">
-    <div class="modal-head"><h3 id="txModalTitle">거래 등록</h3><button class="modal-close" onclick="closeTxModal()">✕</button></div>
-    <div class="modal-body">
-      <div class="fg"><label>구분 *</label>
-        <div class="type-toggle">
-          <button class="tt-btn active" data-type="in" onclick="switchTxType('in',this)">💰 입금 (들어온 돈)</button>
-          <button class="tt-btn" data-type="out" onclick="switchTxType('out',this)">💸 지출 (나간 돈)</button>
+  <div class="modal" style="width:780px;max-width:95vw;">
+    <div class="modal-head">
+      <h3>거래 등록</h3>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="txSummary" style="font-size:11px;color:#8b95a1;"></span>
+        <button class="modal-close" onclick="closeTxModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:16px 20px;">
+      <!-- 목록 테이블 -->
+      <div style="overflow-x:auto;margin-bottom:12px;">
+        <table class="tbl" id="txListTable">
+          <thead>
+            <tr>
+              <th style="width:90px;">구분</th>
+              <th style="width:100px;">날짜</th>
+              <th>거래처</th>
+              <th style="width:90px;">항목/경로</th>
+              <th style="width:90px;">주문번호</th>
+              <th class="r" style="width:100px;">금액</th>
+              <th style="width:80px;">환율</th>
+              <th>메모</th>
+              <th style="width:30px;"></th>
+            </tr>
+          </thead>
+          <tbody id="txListBody">
+            <!-- JS로 행 추가 -->
+          </tbody>
+        </table>
+      </div>
+      <!-- 행 추가 버튼 -->
+      <button onclick="addTxRow()" style="width:100%;padding:10px;border:2px dashed #d5d8dc;border-radius:8px;background:#fafbfc;color:#8b95a1;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='#202454';this.style.color='#202454';" onmouseout="this.style.borderColor='#d5d8dc';this.style.color='#8b95a1';">+ 항목 추가</button>
+      <!-- 하단 요약 + 저장 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid #f4f5f7;">
+        <div style="display:flex;gap:16px;font-size:12px;">
+          <span>입금: <strong id="txTotalIn" style="color:#0ca678;">$0</strong></span>
+          <span>지출: <strong id="txTotalOut" style="color:#f04452;">₩0</strong></span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn-cancel" onclick="closeTxModal()">취소</button>
+          <button class="btn-save" onclick="saveAllTx()">전체 저장</button>
         </div>
       </div>
-      <div class="fg-row">
-        <div class="fg"><label>날짜 *</label><input type="date" id="txDate"></div>
-        <div class="fg"><label>거래처 *</label><input type="text" id="txCompany" placeholder="회사명"></div>
-      </div>
-      <div class="fg"><label>관련 주문번호</label><input type="text" id="txOrder" placeholder="ORD-001 (선택사항)"></div>
-      <div id="txInFields">
-        <div class="fg"><label>입금 경로 *</label><select id="txRoute"><option value="TT">T/T (송금)</option><option value="TA">Trade Assurance (알리바바)</option></select></div>
-        <div class="fg-row">
-          <div class="fg"><label>입금액 (USD) *</label><input type="number" id="txUsd" placeholder="0" oninput="calcTxKrw()"></div>
-          <div class="fg"><label>환율</label><input type="number" id="txRate" value="1477" oninput="calcTxKrw()"></div>
-        </div>
-        <div class="fg"><label>원화 환산 (자동)</label><input type="text" id="txKrw" class="auto-calc" readonly value="₩0"></div>
-      </div>
-      <div id="txOutFields" style="display:none;">
-        <div class="fg"><label>비용 항목 *</label><select id="txCategory"><option>제품매입</option><option>물류비</option><option>통관비</option><option>대행비</option><option>수수료</option><option>기타</option></select></div>
-        <div class="fg"><label>금액 (KRW) *</label><input type="number" id="txAmountKrw" placeholder="0"></div>
-      </div>
-      <div class="fg"><label>메모</label><input type="text" id="txMemo" placeholder="선금 30%, 해상운송비 등"></div>
-      <div class="modal-foot"><button class="btn-cancel" onclick="closeTxModal()">취소</button><button class="btn-save">저장</button></div>
     </div>
   </div>
 </div>
 
 <script>
-function switchTab(t,btn){
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+let txRowId = 0;
+
+function switchTab(t, btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('tab-'+t).classList.add('active');
+  document.getElementById('tab-' + t).classList.add('active');
 }
-function openTxModal(type){
-  switchTxType(type,document.querySelector('.tt-btn[data-type="'+type+'"]'));
-  document.getElementById('txDate').value=new Date().toISOString().slice(0,10);
-  document.getElementById('txCompany').value='';
-  document.getElementById('txOrder').value='';
-  document.getElementById('txUsd').value='';
-  document.getElementById('txRate').value='1477';
-  document.getElementById('txKrw').value='₩0';
-  document.getElementById('txAmountKrw').value='';
-  document.getElementById('txMemo').value='';
+
+function toggleDetail(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ── 목록 모달 ──
+function openTxModal(preType) {
+  document.getElementById('txListBody').innerHTML = '';
+  txRowId = 0;
+  addTxRow(preType || 'in');
+  updateTxSummary();
   document.getElementById('modal-tx').classList.add('show');
 }
-function closeTxModal(){document.getElementById('modal-tx').classList.remove('show');}
-function switchTxType(type,btn){
-  document.querySelectorAll('.tt-btn').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  document.getElementById('txInFields').style.display=type==='in'?'':'none';
-  document.getElementById('txOutFields').style.display=type==='out'?'':'none';
+
+function closeTxModal() {
+  document.getElementById('modal-tx').classList.remove('show');
 }
-function calcTxKrw(){
-  const u=parseFloat(document.getElementById('txUsd').value)||0;
-  const r=parseFloat(document.getElementById('txRate').value)||0;
-  document.getElementById('txKrw').value='₩'+(u*r).toLocaleString('ko-KR');
+
+function addTxRow(type) {
+  const t = type || 'in';
+  const id = ++txRowId;
+  const today = new Date().toISOString().slice(0, 10);
+  const tbody = document.getElementById('txListBody');
+
+  const tr = document.createElement('tr');
+  tr.id = 'txRow-' + id;
+  tr.className = t === 'in' ? 'tx-row-in' : 'tx-row-out';
+  tr.innerHTML =
+    '<td>' +
+      '<select class="tx-select" onchange="onTxTypeChange(' + id + ',this)">' +
+        '<option value="in"' + (t === 'in' ? ' selected' : '') + '>💰 입금</option>' +
+        '<option value="out"' + (t === 'out' ? ' selected' : '') + '>💸 지출</option>' +
+      '</select>' +
+    '</td>' +
+    '<td><input type="date" class="tx-input" value="' + today + '"></td>' +
+    '<td><input type="text" class="tx-input" placeholder="회사명"></td>' +
+    '<td id="txSub-' + id + '">' + getSubField(t, id) + '</td>' +
+    '<td><input type="text" class="tx-input" placeholder="ORD-" style="width:75px;"></td>' +
+    '<td><input type="number" class="tx-input" placeholder="0" style="text-align:right;" oninput="updateTxSummary()" id="txAmt-' + id + '"></td>' +
+    '<td id="txRateCell-' + id + '">' + (t === 'in' ? '<input type="number" class="tx-input" value="1477" style="width:60px;">' : '<span style="color:#c4c9d0;font-size:10px;">KRW</span>') + '</td>' +
+    '<td><input type="text" class="tx-input" placeholder="메모"></td>' +
+    '<td><button class="tx-del" onclick="removeTxRow(' + id + ')">✕</button></td>';
+  tbody.appendChild(tr);
+  updateTxSummary();
 }
-function toggleDetail(id){
-  const el=document.getElementById(id);
-  el.classList.toggle('open');
+
+function getSubField(type, id) {
+  if (type === 'in') {
+    return '<select class="tx-select"><option value="TT">T/T</option><option value="TA">T/A</option></select>';
+  } else {
+    return '<select class="tx-select"><option>제품매입</option><option>물류비</option><option>통관비</option><option>대행비</option><option>수수료</option><option>기타</option></select>';
+  }
+}
+
+function onTxTypeChange(id, sel) {
+  const type = sel.value;
+  const tr = document.getElementById('txRow-' + id);
+  tr.className = type === 'in' ? 'tx-row-in' : 'tx-row-out';
+  document.getElementById('txSub-' + id).innerHTML = getSubField(type, id);
+  document.getElementById('txRateCell-' + id).innerHTML = type === 'in'
+    ? '<input type="number" class="tx-input" value="1477" style="width:60px;">'
+    : '<span style="color:#c4c9d0;font-size:10px;">KRW</span>';
+  updateTxSummary();
+}
+
+function removeTxRow(id) {
+  const row = document.getElementById('txRow-' + id);
+  if (row) row.remove();
+  updateTxSummary();
+}
+
+function updateTxSummary() {
+  let totalIn = 0, totalOut = 0, cntIn = 0, cntOut = 0;
+  document.querySelectorAll('#txListBody tr').forEach(tr => {
+    const type = tr.querySelector('select').value;
+    const amt = parseFloat(tr.querySelector('[id^="txAmt-"]')?.value) || 0;
+    if (type === 'in') { totalIn += amt; cntIn++; }
+    else { totalOut += amt; cntOut++; }
+  });
+  document.getElementById('txTotalIn').textContent = '+$' + totalIn.toLocaleString();
+  document.getElementById('txTotalOut').textContent = '-₩' + totalOut.toLocaleString();
+  document.getElementById('txSummary').textContent = '입금 ' + cntIn + '건 · 지출 ' + cntOut + '건';
+}
+
+function saveAllTx() {
+  const rows = document.querySelectorAll('#txListBody tr');
+  if (rows.length === 0) { alert('항목을 추가하세요.'); return; }
+
+  let savedIn = 0, savedOut = 0;
+  rows.forEach(tr => {
+    const type = tr.querySelector('select').value;
+    const amt = parseFloat(tr.querySelector('[id^="txAmt-"]')?.value) || 0;
+    if (amt <= 0) return;
+    if (type === 'in') savedIn++;
+    else savedOut++;
+    // TODO: 실제 데이터 배열에 push + 테이블 렌더링
+  });
+
+  alert('저장 완료!\n입금 ' + savedIn + '건 → 들어온 돈에 추가\n지출 ' + savedOut + '건 → 나간 돈에 추가');
+  closeTxModal();
 }
 </script>
 </body>
