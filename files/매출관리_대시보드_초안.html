@@ -3,390 +3,478 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>해외사업부 매출관리 대시보드 (초안)</title>
+<title>해외사업부 매출 대시보드 (초안 v2)</title>
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Pretendard',sans-serif; background:#f5f6f8; color:#191f28; }
+  body { font-family:'Pretendard',sans-serif; background:#f2f4f6; color:#191f28; }
 
-  /* 헤더 */
-  .header { background:#202454; color:#fff; padding:20px 32px; display:flex; justify-content:space-between; align-items:center; }
-  .header h1 { font-size:18px; font-weight:800; }
-  .header .sub { font-size:12px; color:#a0a5c8; margin-top:2px; }
-  .header-right { display:flex; gap:12px; align-items:center; }
-  .env-label { font-size:11px; background:rgba(255,255,255,0.15); padding:4px 10px; border-radius:6px; color:#c8cbea; }
+  /* ── 헤더 ── */
+  .header { background:#202454; padding:22px 32px 16px; }
+  .header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .header h1 { font-size:20px; font-weight:800; color:#fff; }
+  .header .sub { font-size:12px; color:#a0a5c8; margin-top:3px; }
+  .header-badges { display:flex; gap:8px; }
+  .h-badge { font-size:11px; background:rgba(255,255,255,0.12); padding:5px 12px; border-radius:6px; color:#c8cbea; display:flex; align-items:center; gap:5px; }
 
-  /* 기간 탭 */
-  .period-bar { background:#fff; border-bottom:1px solid #e5e8eb; padding:12px 32px; display:flex; gap:4px; align-items:center; }
-  .period-tab { padding:8px 20px; border-radius:8px; border:1px solid #e5e8eb; background:#fff; color:#6b7684; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; }
-  .period-tab:hover { background:#f1f5f9; }
-  .period-tab.active { background:#202454; color:#fff; border-color:#202454; font-weight:700; }
-  .period-info { margin-left:auto; font-size:12px; color:#8b95a1; }
+  /* 기간 탭 (헤더 안) */
+  .period-tabs { display:flex; gap:4px; }
+  .p-tab { padding:7px 18px; border-radius:8px; border:none; background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.6); font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; }
+  .p-tab:hover { background:rgba(255,255,255,0.15); color:#fff; }
+  .p-tab.active { background:#fff; color:#202454; font-weight:700; }
+  .period-detail { margin-left:auto; font-size:12px; color:rgba(255,255,255,0.5); display:flex; align-items:center; gap:6px; }
 
-  .container { max-width:1280px; margin:0 auto; padding:24px 32px; }
+  .container { max-width:1320px; margin:0 auto; padding:24px 28px 60px; }
 
-  /* 요약 카드 */
-  .summary-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
-  .s-card { background:#fff; border:1px solid #e5e8eb; border-radius:14px; padding:18px 20px; }
-  .s-card .label { font-size:11px; font-weight:600; color:#8b95a1; text-transform:uppercase; letter-spacing:0.5px; }
-  .s-card .value { font-size:24px; font-weight:800; margin-top:6px; }
-  .s-card .value.blue { color:#202454; }
-  .s-card .value.green { color:#0ca678; }
-  .s-card .value.red { color:#f04452; }
-  .s-card .value.orange { color:#f59e0b; }
-  .s-card .diff { font-size:11px; margin-top:4px; display:flex; align-items:center; gap:4px; }
-  .s-card .diff.up { color:#0ca678; }
-  .s-card .diff.down { color:#f04452; }
-  .s-card .sub-val { font-size:12px; color:#8b95a1; margin-top:2px; }
+  /* ── 매출 현황 요약 (큰 카드) ── */
+  .main-summary { background:#fff; border-radius:16px; border:1px solid #e5e8eb; padding:28px; margin-bottom:20px; }
+  .ms-top { display:flex; align-items:baseline; gap:16px; margin-bottom:20px; }
+  .ms-title { font-size:13px; font-weight:600; color:#8b95a1; }
+  .ms-amount { font-size:36px; font-weight:800; color:#202454; }
+  .ms-amount-sub { font-size:14px; font-weight:500; color:#8b95a1; margin-left:4px; }
+  .ms-diff { font-size:12px; padding:4px 10px; border-radius:20px; font-weight:600; margin-left:8px; }
+  .ms-diff.up { background:#ecfdf5; color:#0ca678; }
+  .ms-diff.down { background:#fef2f2; color:#f04452; }
 
-  /* 2열 레이아웃 */
-  .row-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
-  .row-full { margin-bottom:24px; }
+  /* 4열 미니카드 */
+  .mini-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#e5e8eb; border-radius:12px; overflow:hidden; }
+  .mini-card { background:#fff; padding:18px 20px; }
+  .mini-card .mc-label { font-size:11px; color:#8b95a1; font-weight:500; margin-bottom:6px; }
+  .mini-card .mc-val { font-size:20px; font-weight:700; }
+  .mini-card .mc-val.navy { color:#202454; }
+  .mini-card .mc-val.green { color:#0ca678; }
+  .mini-card .mc-val.red { color:#f04452; }
+  .mini-card .mc-val.amber { color:#f59e0b; }
+  .mini-card .mc-sub { font-size:11px; color:#aeb4bc; margin-top:3px; }
 
-  /* 카드 */
-  .card { background:#fff; border:1px solid #e5e8eb; border-radius:14px; padding:20px 22px; }
-  .card-title { font-size:14px; font-weight:700; color:#333d4b; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
-  .card-title .more { font-size:12px; color:#8b95a1; cursor:pointer; }
+  /* ── 카드 공통 ── */
+  .card { background:#fff; border:1px solid #e5e8eb; border-radius:14px; padding:22px 24px; }
+  .card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .card-head h3 { font-size:14px; font-weight:700; color:#333d4b; }
+  .card-head .more { font-size:12px; color:#8b95a1; cursor:pointer; }
 
-  /* 차트 placeholder */
-  .chart-area { height:200px; background:#f8f9fa; border-radius:10px; display:flex; align-items:flex-end; padding:16px 12px; gap:6px; }
-  .chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
-  .chart-bar { width:100%; border-radius:6px 6px 0 0; transition:height .3s; min-height:4px; }
-  .chart-bar.rev { background:linear-gradient(180deg,#3182f6,#2563eb); }
-  .chart-bar.cost { background:linear-gradient(180deg,#f04452,#dc2626); }
-  .chart-bar.profit { background:linear-gradient(180deg,#0ca678,#059669); }
-  .chart-label { font-size:10px; color:#8b95a1; }
+  /* ── 레이아웃 ── */
+  .row { display:grid; gap:16px; margin-bottom:20px; }
+  .row-2 { grid-template-columns:1fr 1fr; }
+  .row-3 { grid-template-columns:1fr 1fr 1fr; }
+  .row-7-5 { grid-template-columns:7fr 5fr; }
+  .row-1 { grid-template-columns:1fr; }
 
-  /* 거래처 비중 */
-  .pie-placeholder { display:flex; align-items:center; gap:24px; }
-  .pie-circle { width:140px; height:140px; border-radius:50%; background:conic-gradient(#3182f6 0% 40%,#0ca678 40% 65%,#f59e0b 65% 85%,#8b95a1 85% 100%); flex-shrink:0; }
-  .pie-legend { flex:1; }
-  .pie-item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid #f4f5f7; font-size:13px; }
-  .pie-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-  .pie-pct { margin-left:auto; font-weight:700; color:#333d4b; }
-
-  /* 제품 분류별 */
-  .product-bars { display:flex; flex-direction:column; gap:10px; }
-  .prod-row { display:flex; align-items:center; gap:10px; font-size:13px; }
-  .prod-name { width:100px; text-align:right; color:#6b7684; font-weight:500; flex-shrink:0; }
-  .prod-bar-bg { flex:1; height:22px; background:#f1f5f9; border-radius:6px; overflow:hidden; }
-  .prod-bar-fill { height:100%; border-radius:6px; display:flex; align-items:center; padding-left:8px; font-size:11px; color:#fff; font-weight:600; }
-  .prod-val { width:80px; font-weight:600; color:#333d4b; text-align:right; }
-
-  /* 테이블 */
+  /* ── 입금 내역 테이블 ── */
   .tbl { width:100%; border-collapse:collapse; font-size:13px; }
-  .tbl th { text-align:left; padding:10px 10px; background:#f8f9fa; border-bottom:2px solid #e5e8eb; color:#6b7684; font-weight:600; font-size:11px; text-transform:uppercase; }
-  .tbl td { padding:10px 10px; border-bottom:1px solid #f4f5f7; }
+  .tbl th { text-align:left; padding:10px 12px; background:#f8f9fa; border-bottom:2px solid #e5e8eb; color:#6b7684; font-weight:600; font-size:11px; }
+  .tbl td { padding:11px 12px; border-bottom:1px solid #f4f5f7; }
   .tbl tr:hover td { background:#fafbfc; }
+  .tbl .right { text-align:right; }
   .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
-  .badge.done { background:#dcfce7; color:#16a34a; }
-  .badge.partial { background:#dbeafe; color:#2563eb; }
-  .badge.waiting { background:#fef3c7; color:#d97706; }
-  .amt-plus { color:#0ca678; font-weight:600; }
-  .amt-minus { color:#f04452; font-weight:600; }
+  .badge.ta { background:#e8f0fe; color:#1a73e8; }
+  .badge.tt { background:#fef3c7; color:#d97706; }
+  .amt-in { color:#0ca678; font-weight:700; }
 
-  /* 미수금 */
-  .recv-card { display:flex; align-items:center; gap:16px; padding:12px 0; border-bottom:1px solid #f4f5f7; }
-  .recv-card:last-child { border-bottom:none; }
-  .recv-avatar { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#fff; flex-shrink:0; }
+  /* ── 일별 매출 막대 차트 ── */
+  .day-chart { display:flex; align-items:flex-end; gap:3px; height:140px; padding:0 4px; }
+  .day-col { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .day-bar { width:100%; max-width:28px; border-radius:4px 4px 0 0; background:linear-gradient(180deg,#3182f6,#2563eb); transition:height .3s; cursor:pointer; position:relative; }
+  .day-bar:hover { opacity:0.85; }
+  .day-bar.empty { background:#edf0f4; }
+  .day-lbl { font-size:9px; color:#aeb4bc; margin-top:5px; }
+  .day-bar.today { background:linear-gradient(180deg,#202454,#1a1e45); }
+
+  /* ── 비용 구조 바 ── */
+  .cost-stack { display:flex; height:28px; border-radius:8px; overflow:hidden; margin-bottom:14px; }
+  .cost-seg { height:100%; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; font-weight:600; }
+  .cost-legend { display:flex; flex-wrap:wrap; gap:12px; }
+  .cost-item { display:flex; align-items:center; gap:6px; font-size:12px; color:#6b7684; }
+  .cost-dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+  .cost-val { font-weight:600; color:#333d4b; margin-left:2px; }
+
+  /* ── 거래처별 ── */
+  .buyer-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f4f5f7; }
+  .buyer-row:last-child { border-bottom:none; }
+  .buyer-avatar { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#fff; flex-shrink:0; }
+  .buyer-info { flex:1; }
+  .buyer-name { font-size:13px; font-weight:600; color:#333d4b; }
+  .buyer-country { font-size:11px; color:#8b95a1; }
+  .buyer-bar { flex:2; height:18px; background:#f1f5f9; border-radius:6px; overflow:hidden; }
+  .buyer-fill { height:100%; border-radius:6px; }
+  .buyer-amt { width:80px; text-align:right; font-size:13px; font-weight:700; color:#202454; }
+
+  /* ── 미수금 ── */
+  .recv-item { display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid #f4f5f7; }
+  .recv-item:last-child { border-bottom:none; }
+  .recv-icon { width:36px; height:36px; border-radius:10px; background:#fef3c7; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
   .recv-info { flex:1; }
   .recv-name { font-size:13px; font-weight:600; }
-  .recv-sub { font-size:11px; color:#8b95a1; margin-top:2px; }
-  .recv-amt { font-size:15px; font-weight:700; color:#f59e0b; }
+  .recv-sub { font-size:11px; color:#8b95a1; margin-top:1px; }
+  .recv-amt { font-size:16px; font-weight:700; color:#f59e0b; }
+  .recv-amt.done { color:#0ca678; font-size:12px; }
 
-  /* 등록 버튼 */
-  .fab { position:fixed; bottom:32px; right:32px; width:56px; height:56px; border-radius:16px; background:#202454; color:#fff; border:none; font-size:28px; cursor:pointer; box-shadow:0 4px 20px rgba(32,36,84,0.3); display:flex; align-items:center; justify-content:center; transition:transform .15s; }
-  .fab:hover { transform:scale(1.08); }
+  /* ── 제품 TOP ── */
+  .prod-item { display:flex; align-items:center; gap:10px; padding:8px 0; }
+  .prod-rank { width:22px; height:22px; border-radius:6px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#6b7684; flex-shrink:0; }
+  .prod-rank.gold { background:#fef3c7; color:#d97706; }
+  .prod-rank.silver { background:#f1f5f9; color:#6b7684; }
+  .prod-rank.bronze { background:#fee2e2; color:#ef4444; }
+  .prod-info { flex:1; }
+  .prod-name { font-size:13px; font-weight:600; color:#333d4b; }
+  .prod-spec { font-size:11px; color:#8b95a1; }
+  .prod-amt { font-size:13px; font-weight:700; color:#202454; }
 
-  /* 반응형 */
-  @media(max-width:900px) {
-    .summary-grid { grid-template-columns:repeat(2,1fr); }
-    .row-2 { grid-template-columns:1fr; }
+  /* ── 빈 상태 ── */
+  .empty-state { text-align:center; padding:48px 20px; color:#c4c9d0; }
+  .empty-state .icon { font-size:40px; margin-bottom:12px; }
+  .empty-state .msg { font-size:14px; font-weight:500; }
+  .empty-state .hint { font-size:12px; margin-top:6px; color:#d5d8dc; }
+
+  /* ── FAB ── */
+  .fab { position:fixed; bottom:28px; right:28px; height:48px; padding:0 24px; border-radius:14px; background:#202454; color:#fff; border:none; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 4px 20px rgba(32,36,84,0.3); display:flex; align-items:center; gap:8px; transition:all .15s; }
+  .fab:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(32,36,84,0.4); }
+  .fab svg { width:18px; height:18px; }
+
+  @media(max-width:1000px) {
+    .row-2, .row-7-5 { grid-template-columns:1fr; }
+    .row-3 { grid-template-columns:1fr 1fr; }
+    .mini-grid { grid-template-columns:repeat(2,1fr); }
   }
 </style>
 </head>
 <body>
 
-<!-- 헤더 -->
+<!-- ═══ 헤더 ═══ -->
 <div class="header">
-  <div>
-    <h1>해외사업부 매출관리</h1>
-    <div class="sub">매출·비용·순이익 통합 대시보드</div>
+  <div class="header-top">
+    <div>
+      <h1>매출 현황</h1>
+      <div class="sub">해외사업부 · 매출·비용·순이익 통합 대시보드</div>
+    </div>
+    <div class="header-badges">
+      <div class="h-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        2026.03.26 기준
+      </div>
+      <div class="h-badge">💱 $1 = ₩1,477</div>
+      <div class="h-badge">👤 김채원</div>
+    </div>
   </div>
-  <div class="header-right">
-    <span class="env-label">환율 $1 = ₩1,477</span>
-    <span class="env-label">김채원</span>
+  <div style="display:flex; align-items:center;">
+    <div class="period-tabs">
+      <button class="p-tab" onclick="switchPeriod(this,'day')">일</button>
+      <button class="p-tab" onclick="switchPeriod(this,'week')">주</button>
+      <button class="p-tab active" onclick="switchPeriod(this,'month')">월</button>
+      <button class="p-tab" onclick="switchPeriod(this,'year')">년</button>
+    </div>
+    <div class="period-detail">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      2026년 3월 1일 ~ 3월 31일
+    </div>
   </div>
-</div>
-
-<!-- 기간 탭 -->
-<div class="period-bar">
-  <button class="period-tab" onclick="switchPeriod(this)">일</button>
-  <button class="period-tab" onclick="switchPeriod(this)">주</button>
-  <button class="period-tab active" onclick="switchPeriod(this)">월</button>
-  <button class="period-tab" onclick="switchPeriod(this)">년</button>
-  <span class="period-info">2026년 3월 기준</span>
 </div>
 
 <div class="container">
 
-  <!-- ① 요약 카드 5개 -->
-  <div class="summary-grid">
-    <div class="s-card">
-      <div class="label">매출 (USD)</div>
-      <div class="value blue">$10,700</div>
-      <div class="sub-val">₩15,803,900</div>
-      <div class="diff up">▲ 전월 대비 +22.5%</div>
-    </div>
-    <div class="s-card">
-      <div class="label">비용 (KRW)</div>
-      <div class="value red">₩7,420,000</div>
-      <div class="sub-val">매입 + 물류 + 통관 + 대행</div>
-      <div class="diff down">▲ 전월 대비 +8.3%</div>
-    </div>
-    <div class="s-card">
-      <div class="label">순이익</div>
-      <div class="value green">₩8,383,900</div>
-      <div class="sub-val">이익률 53.1%</div>
-      <div class="diff up">▲ 전월 대비 +35.2%</div>
-    </div>
-    <div class="s-card">
-      <div class="label">거래 건수</div>
-      <div class="value blue">4건</div>
-      <div class="sub-val">바이어 3곳</div>
-      <div class="diff up">▲ 전월 대비 +1건</div>
-    </div>
-    <div class="s-card">
-      <div class="label">미수금 (USD)</div>
-      <div class="value orange">$3,150</div>
-      <div class="sub-val">미입금 1건 / 부분입금 1건</div>
-    </div>
-  </div>
-
-  <!-- ② 매출 추이 차트 + 거래처별 비중 -->
-  <div class="row-2">
-    <div class="card">
-      <div class="card-title">
-        월별 매출·비용 추이
-        <span class="more">상세 →</span>
-      </div>
-      <div style="display:flex; gap:12px; margin-bottom:12px;">
-        <span style="font-size:11px; color:#3182f6;">● 매출</span>
-        <span style="font-size:11px; color:#f04452;">● 비용</span>
-        <span style="font-size:11px; color:#0ca678;">● 순이익</span>
-      </div>
-      <div class="chart-area">
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:45px;"></div><div class="chart-bar cost" style="height:30px;"></div><div class="chart-label">1월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:60px;"></div><div class="chart-bar cost" style="height:35px;"></div><div class="chart-label">2월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:90px;"></div><div class="chart-bar cost" style="height:42px;"></div><div class="chart-label">3월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:20px;background:#e5e8eb;"></div><div class="chart-bar cost" style="height:10px;background:#f1f5f9;"></div><div class="chart-label">4월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:4px;background:#e5e8eb;"></div><div class="chart-label">5월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:4px;background:#e5e8eb;"></div><div class="chart-label">6월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:4px;background:#e5e8eb;"></div><div class="chart-label">7월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:4px;background:#e5e8eb;"></div><div class="chart-label">8월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:4px;background:#e5e8eb;"></div><div class="chart-label">9월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:4px;background:#e5e8eb;"></div><div class="chart-label">10월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:4px;background:#e5e8eb;"></div><div class="chart-label">11월</div></div>
-        <div class="chart-bar-wrap"><div class="chart-bar rev" style="height:4px;background:#e5e8eb;"></div><div class="chart-label">12월</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">
-        거래처별 매출 비중
-        <span class="more">전체보기 →</span>
-      </div>
-      <div class="pie-placeholder">
-        <div class="pie-circle"></div>
-        <div class="pie-legend">
-          <div class="pie-item"><div class="pie-dot" style="background:#3182f6;"></div>ABC Trading (UAE)<div class="pie-pct">40%</div></div>
-          <div class="pie-item"><div class="pie-dot" style="background:#0ca678;"></div>Dubai Imports LLC<div class="pie-pct">30%</div></div>
-          <div class="pie-item"><div class="pie-dot" style="background:#f59e0b;"></div>Vietnam Partner Co.<div class="pie-pct">20%</div></div>
-          <div class="pie-item"><div class="pie-dot" style="background:#8b95a1;"></div>India Steel Corp<div class="pie-pct">10%</div></div>
+  <!-- ═══ ① 매출 현황 요약 ═══ -->
+  <div class="main-summary">
+    <div class="ms-top">
+      <div>
+        <div class="ms-title">이번 달 총 매출</div>
+        <div style="display:flex; align-items:baseline; gap:6px; margin-top:4px;">
+          <span class="ms-amount">$10,700</span>
+          <span class="ms-amount-sub">(₩15,803,900)</span>
+          <span class="ms-diff up">▲ +22.5%</span>
         </div>
+      </div>
+    </div>
+    <div class="mini-grid">
+      <div class="mini-card">
+        <div class="mc-label">총 비용</div>
+        <div class="mc-val red">₩7,420,000</div>
+        <div class="mc-sub">매입 + 물류 + 통관 + 대행 + 수수료</div>
+      </div>
+      <div class="mini-card">
+        <div class="mc-label">순이익</div>
+        <div class="mc-val green">₩8,383,900</div>
+        <div class="mc-sub">이익률 53.1%</div>
+      </div>
+      <div class="mini-card">
+        <div class="mc-label">거래 건수</div>
+        <div class="mc-val navy">4건</div>
+        <div class="mc-sub">바이어 3곳 · 4개국</div>
+      </div>
+      <div class="mini-card">
+        <div class="mc-label">미수금</div>
+        <div class="mc-val amber">$6,750</div>
+        <div class="mc-sub">미입금 1건 · 부분입금 1건</div>
       </div>
     </div>
   </div>
 
-  <!-- ③ 제품 분류별 매출 + 미수금 현황 -->
-  <div class="row-2">
+  <!-- ═══ ② 일별 매출 추이 + 비용 구조 ═══ -->
+  <div class="row row-7-5">
     <div class="card">
-      <div class="card-title">제품 분류별 매출</div>
-      <div class="product-bars">
-        <div class="prod-row">
-          <div class="prod-name">수용성 도료</div>
-          <div class="prod-bar-bg"><div class="prod-bar-fill" style="width:65%;background:#3182f6;">65%</div></div>
-          <div class="prod-val">$6,955</div>
-        </div>
-        <div class="prod-row">
-          <div class="prod-name">특수기능성</div>
-          <div class="prod-bar-bg"><div class="prod-bar-fill" style="width:20%;background:#0ca678;">20%</div></div>
-          <div class="prod-val">$2,140</div>
-        </div>
-        <div class="prod-row">
-          <div class="prod-name">보강시트</div>
-          <div class="prod-bar-bg"><div class="prod-bar-fill" style="width:10%;background:#f59e0b;">10%</div></div>
-          <div class="prod-val">$1,070</div>
-        </div>
-        <div class="prod-row">
-          <div class="prod-name">유성 도료</div>
-          <div class="prod-bar-bg"><div class="prod-bar-fill" style="width:5%;background:#8b95a1;">5%</div></div>
-          <div class="prod-val">$535</div>
-        </div>
+      <div class="card-head">
+        <h3>일별 매출 추이</h3>
+        <span class="more">3월 · 단위: USD</span>
+      </div>
+      <div class="day-chart">
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">1</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">2</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">3</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">4</div></div>
+        <div class="day-col"><div class="day-bar" style="height:62px;" title="$4,500"></div><div class="day-lbl">5</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">6</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">7</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">8</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">9</div></div>
+        <div class="day-col"><div class="day-bar" style="height:44px;" title="$3,200"></div><div class="day-lbl">10</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">11</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">12</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">13</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">14</div></div>
+        <div class="day-col"><div class="day-bar" style="height:50px;" title="$3,600"></div><div class="day-lbl">15</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">16</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">17</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">18</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">19</div></div>
+        <div class="day-col"><div class="day-bar" style="height:76px;" title="$5,500"></div><div class="day-lbl">20</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">21</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">22</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">23</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">24</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">25</div></div>
+        <div class="day-col"><div class="day-bar today" style="height:4px;"></div><div class="day-lbl" style="color:#202454; font-weight:600;">26</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">27</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">28</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">29</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">30</div></div>
+        <div class="day-col"><div class="day-bar empty" style="height:4px;"></div><div class="day-lbl">31</div></div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">미수금 현황<span class="more">총 $3,150</span></div>
-      <div class="recv-card">
-        <div class="recv-avatar" style="background:#3182f6;">A</div>
-        <div class="recv-info">
-          <div class="recv-name">ABC Trading Co.</div>
-          <div class="recv-sub">INV-2026-001 · T/T 70% 잔금 · 마감 4/15</div>
-        </div>
-        <div class="recv-amt">$3,150</div>
+      <div class="card-head">
+        <h3>비용 구조</h3>
+        <span class="more">총 ₩7,420,000</span>
       </div>
-      <div class="recv-card">
-        <div class="recv-avatar" style="background:#0ca678;">D</div>
-        <div class="recv-info">
-          <div class="recv-name">Dubai Imports LLC</div>
-          <div class="recv-sub">INV-2026-002 · Trade Assurance · 정산 대기</div>
-        </div>
-        <div class="recv-amt" style="color:#0ca678;">입금 완료</div>
+      <div class="cost-stack">
+        <div class="cost-seg" style="width:58.6%;background:#3182f6;">매입</div>
+        <div class="cost-seg" style="width:22.9%;background:#f59e0b;">물류</div>
+        <div class="cost-seg" style="width:8.6%;background:#0ca678;">통관</div>
+        <div class="cost-seg" style="width:7.8%;background:#8b5cf6;"></div>
+        <div class="cost-seg" style="width:2.1%;background:#8b95a1;"></div>
       </div>
-      <div class="recv-card">
-        <div class="recv-avatar" style="background:#f59e0b;">V</div>
-        <div class="recv-info">
-          <div class="recv-name">Vietnam Partner Co.</div>
-          <div class="recv-sub">INV-2026-003 · L/C · 네고 진행중</div>
-        </div>
-        <div class="recv-amt">$3,600</div>
+      <div class="cost-legend">
+        <div class="cost-item"><div class="cost-dot" style="background:#3182f6;"></div>제품 매입<span class="cost-val">₩4,350,000</span></div>
+        <div class="cost-item"><div class="cost-dot" style="background:#f59e0b;"></div>물류비<span class="cost-val">₩1,700,000</span></div>
+        <div class="cost-item"><div class="cost-dot" style="background:#0ca678;"></div>통관비<span class="cost-val">₩640,000</span></div>
+        <div class="cost-item"><div class="cost-dot" style="background:#8b5cf6;"></div>대행비<span class="cost-val">₩580,000</span></div>
+        <div class="cost-item"><div class="cost-dot" style="background:#8b95a1;"></div>수수료<span class="cost-val">₩150,000</span></div>
       </div>
-    </div>
-  </div>
-
-  <!-- ④ 비용 구조 -->
-  <div class="row-full">
-    <div class="card">
-      <div class="card-title">이번 달 비용 구조</div>
-      <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:12px; text-align:center;">
-        <div>
-          <div style="font-size:11px; color:#8b95a1; margin-bottom:6px;">제품 매입</div>
-          <div style="font-size:18px; font-weight:700; color:#333d4b;">₩4,350,000</div>
-          <div style="font-size:11px; color:#8b95a1;">58.6%</div>
-          <div style="height:6px; background:#f1f5f9; border-radius:3px; margin-top:8px;"><div style="height:100%; width:58.6%; background:#3182f6; border-radius:3px;"></div></div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #f4f5f7;">
+        <div class="card-head" style="margin-bottom:12px;"><h3>미수금 현황</h3></div>
+        <div class="recv-item">
+          <div class="recv-icon">⏳</div>
+          <div class="recv-info">
+            <div class="recv-name">ABC Trading Co.</div>
+            <div class="recv-sub">INV-001 · T/T 잔금 70% · 마감 4/15</div>
+          </div>
+          <div class="recv-amt">$3,150</div>
         </div>
-        <div>
-          <div style="font-size:11px; color:#8b95a1; margin-bottom:6px;">물류비</div>
-          <div style="font-size:18px; font-weight:700; color:#333d4b;">₩1,700,000</div>
-          <div style="font-size:11px; color:#8b95a1;">22.9%</div>
-          <div style="height:6px; background:#f1f5f9; border-radius:3px; margin-top:8px;"><div style="height:100%; width:22.9%; background:#f59e0b; border-radius:3px;"></div></div>
-        </div>
-        <div>
-          <div style="font-size:11px; color:#8b95a1; margin-bottom:6px;">통관비</div>
-          <div style="font-size:18px; font-weight:700; color:#333d4b;">₩640,000</div>
-          <div style="font-size:11px; color:#8b95a1;">8.6%</div>
-          <div style="height:6px; background:#f1f5f9; border-radius:3px; margin-top:8px;"><div style="height:100%; width:8.6%; background:#0ca678; border-radius:3px;"></div></div>
-        </div>
-        <div>
-          <div style="font-size:11px; color:#8b95a1; margin-bottom:6px;">대행비</div>
-          <div style="font-size:18px; font-weight:700; color:#333d4b;">₩580,000</div>
-          <div style="font-size:11px; color:#8b95a1;">7.8%</div>
-          <div style="height:6px; background:#f1f5f9; border-radius:3px; margin-top:8px;"><div style="height:100%; width:7.8%; background:#8b5cf6; border-radius:3px;"></div></div>
-        </div>
-        <div>
-          <div style="font-size:11px; color:#8b95a1; margin-bottom:6px;">수수료/기타</div>
-          <div style="font-size:18px; font-weight:700; color:#333d4b;">₩150,000</div>
-          <div style="font-size:11px; color:#8b95a1;">2.0%</div>
-          <div style="height:6px; background:#f1f5f9; border-radius:3px; margin-top:8px;"><div style="height:100%; width:2%; background:#8b95a1; border-radius:3px;"></div></div>
+        <div class="recv-item">
+          <div class="recv-icon">⏳</div>
+          <div class="recv-info">
+            <div class="recv-name">Vietnam Partner Co.</div>
+            <div class="recv-sub">INV-003 · T/T 전액 미입금</div>
+          </div>
+          <div class="recv-amt">$3,600</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ⑤ 최근 거래 내역 -->
-  <div class="row-full">
+  <!-- ═══ ③ 거래처별 매출 + 제품 TOP ═══ -->
+  <div class="row row-2">
     <div class="card">
-      <div class="card-title">
-        최근 거래 내역
-        <span class="more">+ 매출 등록</span>
+      <div class="card-head"><h3>거래처별 매출</h3></div>
+      <div class="buyer-row">
+        <div class="buyer-avatar" style="background:#3182f6;">A</div>
+        <div class="buyer-info"><div class="buyer-name">ABC Trading Co.</div><div class="buyer-country">🇦🇪 UAE</div></div>
+        <div class="buyer-bar"><div class="buyer-fill" style="width:42%;background:linear-gradient(90deg,#3182f6,#60a5fa);"></div></div>
+        <div class="buyer-amt">$4,500</div>
+      </div>
+      <div class="buyer-row">
+        <div class="buyer-avatar" style="background:#0ca678;">D</div>
+        <div class="buyer-info"><div class="buyer-name">Dubai Imports LLC</div><div class="buyer-country">🇦🇪 UAE</div></div>
+        <div class="buyer-bar"><div class="buyer-fill" style="width:30%;background:linear-gradient(90deg,#0ca678,#34d399);"></div></div>
+        <div class="buyer-amt">$3,200</div>
+      </div>
+      <div class="buyer-row">
+        <div class="buyer-avatar" style="background:#f59e0b;">V</div>
+        <div class="buyer-info"><div class="buyer-name">Vietnam Partner Co.</div><div class="buyer-country">🇻🇳 베트남</div></div>
+        <div class="buyer-bar"><div class="buyer-fill" style="width:34%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div>
+        <div class="buyer-amt">$3,600</div>
+      </div>
+      <div class="buyer-row">
+        <div class="buyer-avatar" style="background:#8b5cf6;">I</div>
+        <div class="buyer-info"><div class="buyer-name">India Steel Corp</div><div class="buyer-country">🇮🇳 인도</div></div>
+        <div class="buyer-bar"><div class="buyer-fill" style="width:51%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);"></div></div>
+        <div class="buyer-amt">$5,500</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>제품별 매출 TOP</h3></div>
+      <div class="prod-item">
+        <div class="prod-rank gold">1</div>
+        <div class="prod-info"><div class="prod-name">방청코팅 20kg</div><div class="prod-spec">유성 도료 · 20kg/통 · 30통</div></div>
+        <div class="prod-amt">$5,500</div>
+      </div>
+      <div class="prod-item">
+        <div class="prod-rank silver">2</div>
+        <div class="prod-info"><div class="prod-name">POUR 코트재I(회색)</div><div class="prod-spec">수용성 도료 · 20kg/통 · 50통</div></div>
+        <div class="prod-amt">$4,500</div>
+      </div>
+      <div class="prod-item">
+        <div class="prod-rank bronze">3</div>
+        <div class="prod-info"><div class="prod-name">프라이머 5L</div><div class="prod-spec">수용성 도료 · 5L/통 · 200통</div></div>
+        <div class="prod-amt">$3,600</div>
+      </div>
+      <div class="prod-item">
+        <div class="prod-rank">4</div>
+        <div class="prod-info"><div class="prod-name">발수코팅제 10L</div><div class="prod-spec">특수기능성 · 10L/통 · 100통</div></div>
+        <div class="prod-amt">$3,200</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ④ 입금 내역 (매출 = 입금) ═══ -->
+  <div class="row row-1">
+    <div class="card">
+      <div class="card-head">
+        <h3>입금 내역 (매출 기록)</h3>
+        <span class="more" style="color:#202454; font-weight:600; cursor:pointer;">+ 입금 등록</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>입금일</th>
+              <th>구분</th>
+              <th>거래처</th>
+              <th>국가</th>
+              <th>관련 인보이스</th>
+              <th>내용</th>
+              <th class="right">입금액(USD)</th>
+              <th class="right">환율</th>
+              <th class="right">원화(KRW)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:600;">03/20</td>
+              <td><span class="badge tt">T/T</span></td>
+              <td>India Steel Corp</td>
+              <td>🇮🇳</td>
+              <td style="color:#3182f6;">INV-004</td>
+              <td style="color:#8b95a1;">전액 입금</td>
+              <td class="right amt-in">+$5,500</td>
+              <td class="right" style="color:#8b95a1;">1,477</td>
+              <td class="right" style="font-weight:600;">₩8,123,500</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">03/10</td>
+              <td><span class="badge ta">T/A</span></td>
+              <td>Dubai Imports LLC</td>
+              <td>🇦🇪</td>
+              <td style="color:#3182f6;">INV-002</td>
+              <td style="color:#8b95a1;">Trade Assurance 정산</td>
+              <td class="right amt-in">+$3,200</td>
+              <td class="right" style="color:#8b95a1;">1,477</td>
+              <td class="right" style="font-weight:600;">₩4,726,400</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600;">03/05</td>
+              <td><span class="badge tt">T/T</span></td>
+              <td>ABC Trading Co.</td>
+              <td>🇦🇪</td>
+              <td style="color:#3182f6;">INV-001</td>
+              <td style="color:#8b95a1;">선금 30%</td>
+              <td class="right amt-in">+$1,350</td>
+              <td class="right" style="color:#8b95a1;">1,477</td>
+              <td class="right" style="font-weight:600;">₩1,993,950</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr style="background:#f8f9fa; font-weight:700;">
+              <td colspan="6" style="text-align:right; color:#6b7684;">이번 달 총 입금</td>
+              <td class="right" style="color:#0ca678; font-size:15px;">$10,050</td>
+              <td></td>
+              <td class="right" style="color:#0ca678; font-size:15px;">₩14,843,850</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ⑤ 비용 내역 ═══ -->
+  <div class="row row-1">
+    <div class="card">
+      <div class="card-head">
+        <h3>비용 내역</h3>
+        <span class="more" style="color:#202454; font-weight:600; cursor:pointer;">+ 비용 등록</span>
       </div>
       <div style="overflow-x:auto;">
         <table class="tbl">
           <thead>
             <tr>
               <th>날짜</th>
-              <th>인보이스</th>
+              <th>항목</th>
               <th>거래처</th>
-              <th>국가</th>
-              <th>제품</th>
-              <th>규격</th>
-              <th style="text-align:right;">수량</th>
-              <th style="text-align:right;">단가(USD/kg)</th>
-              <th style="text-align:right;">매출(USD)</th>
-              <th style="text-align:right;">비용(KRW)</th>
-              <th style="text-align:right;">순이익</th>
-              <th>결제</th>
+              <th>관련 인보이스</th>
+              <th>내용</th>
+              <th class="right">금액(KRW)</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>03/20</td>
-              <td style="color:#3182f6; font-weight:500;">INV-004</td>
-              <td>India Steel Corp</td>
-              <td>🇮🇳 인도</td>
-              <td>방청코팅 20kg</td>
-              <td>20kg/통</td>
-              <td style="text-align:right;">30통</td>
-              <td style="text-align:right;">$9.17</td>
-              <td style="text-align:right;" class="amt-plus">$5,500</td>
-              <td style="text-align:right;" class="amt-minus">₩3,420,000</td>
-              <td style="text-align:right; color:#0ca678; font-weight:600;">₩4,703,500</td>
-              <td><span class="badge done">완료</span></td>
+              <td>03/18</td>
+              <td><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500;background:#f1f5f9;color:#64748b;">수수료</span></td>
+              <td>검역원</td>
+              <td style="color:#3182f6;">INV-004</td>
+              <td style="color:#8b95a1;">검역 수수료</td>
+              <td class="right" style="color:#f04452; font-weight:600;">-₩150,000</td>
             </tr>
             <tr>
-              <td>03/15</td>
-              <td style="color:#3182f6; font-weight:500;">INV-003</td>
-              <td>Vietnam Partner Co.</td>
-              <td>🇻🇳 베트남</td>
-              <td>프라이머 5L</td>
-              <td>5L/통</td>
-              <td style="text-align:right;">200통</td>
-              <td style="text-align:right;">$3.60</td>
-              <td style="text-align:right;" class="amt-plus">$3,600</td>
-              <td style="text-align:right;" class="amt-minus">₩2,100,000</td>
-              <td style="text-align:right; color:#0ca678; font-weight:600;">₩3,217,200</td>
-              <td><span class="badge waiting">미입금</span></td>
+              <td>03/12</td>
+              <td><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500;background:#dbeafe;color:#2563eb;">제품매입</span></td>
+              <td>KP화학</td>
+              <td style="color:#3182f6;">INV-001, 004</td>
+              <td style="color:#8b95a1;">코트재 + 방청코팅 원재료</td>
+              <td class="right" style="color:#f04452; font-weight:600;">-₩4,350,000</td>
             </tr>
             <tr>
-              <td>03/10</td>
-              <td style="color:#3182f6; font-weight:500;">INV-002</td>
-              <td>Dubai Imports LLC</td>
-              <td>🇦🇪 UAE</td>
-              <td>발수코팅제 10L</td>
-              <td>10L/통</td>
-              <td style="text-align:right;">100통</td>
-              <td style="text-align:right;">$3.20</td>
-              <td style="text-align:right;" class="amt-plus">$3,200</td>
-              <td style="text-align:right;" class="amt-minus">₩1,850,000</td>
-              <td style="text-align:right; color:#0ca678; font-weight:600;">₩2,876,400</td>
-              <td><span class="badge partial">부분입금</span></td>
+              <td>03/08</td>
+              <td><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500;background:#dcfce7;color:#16a34a;">통관비</span></td>
+              <td>관세법인 A</td>
+              <td style="color:#3182f6;">INV-002</td>
+              <td style="color:#8b95a1;">두바이 통관 대행</td>
+              <td class="right" style="color:#f04452; font-weight:600;">-₩640,000</td>
             </tr>
             <tr>
-              <td>03/05</td>
-              <td style="color:#3182f6; font-weight:500;">INV-001</td>
-              <td>ABC Trading Co.</td>
-              <td>🇦🇪 UAE</td>
-              <td>코트재I(회색) 20kg</td>
-              <td>20kg/통</td>
-              <td style="text-align:right;">50통</td>
-              <td style="text-align:right;">$4.50</td>
-              <td style="text-align:right;" class="amt-plus">$4,500</td>
-              <td style="text-align:right;" class="amt-minus">₩2,250,000</td>
-              <td style="text-align:right; color:#0ca678; font-weight:600;">₩4,396,500</td>
-              <td><span class="badge done">완료</span></td>
+              <td>03/03</td>
+              <td><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500;background:#fef3c7;color:#d97706;">물류비</span></td>
+              <td>Extrans 물류</td>
+              <td style="color:#3182f6;">INV-001, 002</td>
+              <td style="color:#8b95a1;">3월 해상운송비</td>
+              <td class="right" style="color:#f04452; font-weight:600;">-₩1,700,000</td>
             </tr>
           </tbody>
+          <tfoot>
+            <tr style="background:#f8f9fa; font-weight:700;">
+              <td colspan="5" style="text-align:right; color:#6b7684;">이번 달 총 비용</td>
+              <td class="right" style="color:#f04452; font-size:15px;">-₩7,420,000</td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
@@ -394,12 +482,15 @@
 
 </div>
 
-<!-- 매출 등록 FAB -->
-<button class="fab" title="매출 등록">+</button>
+<!-- FAB -->
+<button class="fab">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+  입금 등록
+</button>
 
 <script>
-function switchPeriod(btn) {
-  document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+function switchPeriod(btn, period) {
+  document.querySelectorAll('.p-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 }
 </script>
