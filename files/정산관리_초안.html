@@ -139,6 +139,13 @@
   .btn-save{padding:10px 20px;border:none;border-radius:8px;background:#202454;color:#fff;font-size:13px;font-weight:600;cursor:pointer;}
   .auto-calc{background:#f8f9fa;color:#6b7684;cursor:default;}
 
+  /* 타입 토글 */
+  .type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .tt-btn{padding:12px;border:2px solid #e5e8eb;border-radius:10px;background:#fff;color:#6b7684;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center;}
+  .tt-btn:hover{border-color:#c4c9d0;}
+  .tt-btn.active[data-type="in"]{border-color:#0ca678;background:#ecfdf5;color:#0ca678;}
+  .tt-btn.active[data-type="out"]{border-color:#f04452;background:#fef2f2;color:#f04452;}
+
   @media(max-width:900px){
     .summary{grid-template-columns:1fr;}
     .row-2{grid-template-columns:1fr;}
@@ -243,7 +250,7 @@
       <h2>들어온 돈 <span class="cnt">3</span></h2>
       <div class="actions">
         <button class="btn-outline">📥 CSV</button>
-        <button class="btn-primary" onclick="openModal('in')">+ 입금 등록</button>
+        <button class="btn-primary" onclick="openTxModal('in')">+ 입금 등록</button>
       </div>
     </div>
     <div class="card">
@@ -311,7 +318,7 @@
       <h2>나간 돈 <span class="cnt">5</span></h2>
       <div class="actions">
         <button class="btn-outline">📥 CSV</button>
-        <button class="btn-primary" onclick="openModal('out')">+ 지출 등록</button>
+        <button class="btn-primary" onclick="openTxModal('out')">+ 지출 등록</button>
       </div>
     </div>
     <div class="card">
@@ -447,59 +454,121 @@
 
 </div>
 
-<!-- ═══ 모달: 입금 등록 ═══ -->
-<div id="modal-in" class="modal-bg" onclick="if(event.target===this)closeModal('in')">
+<!-- ═══ 통합 모달: 거래 등록 ═══ -->
+<div id="modal-tx" class="modal-bg" onclick="if(event.target===this)closeTxModal()">
   <div class="modal">
-    <div class="modal-head"><h3>입금 등록</h3><button class="modal-close" onclick="closeModal('in')">✕</button></div>
+    <div class="modal-head"><h3 id="txModalTitle">거래 등록</h3><button class="modal-close" onclick="closeTxModal()">✕</button></div>
     <div class="modal-body">
-      <div class="fg"><label>입금일 *</label><input type="date" value="2026-03-26"></div>
-      <div class="fg"><label>거래처 *</label><input type="text" placeholder="바이어 회사명"></div>
-      <div class="fg"><label>입금 경로 *</label>
-        <select><option value="TT">T/T (송금)</option><option value="TA">Trade Assurance (알리바바)</option></select>
-      </div>
-      <div class="fg-row">
-        <div class="fg"><label>입금액 (USD) *</label><input type="number" placeholder="0" id="inUsd" oninput="calcKrw()"></div>
-        <div class="fg"><label>환율</label><input type="number" value="1477" id="inRate" oninput="calcKrw()"></div>
-      </div>
-      <div class="fg"><label>원화 환산 (자동)</label><input type="text" id="inKrw" class="auto-calc" readonly value="₩0"></div>
-      <div class="fg"><label>메모</label><input type="text" placeholder="선금 30%, 전액 입금 등"></div>
-      <div class="modal-foot">
-        <button class="btn-cancel" onclick="closeModal('in')">취소</button>
-        <button class="btn-save">저장</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ 모달: 지출 등록 ═══ -->
-<div id="modal-out" class="modal-bg" onclick="if(event.target===this)closeModal('out')">
-  <div class="modal">
-    <div class="modal-head"><h3>지출 등록</h3><button class="modal-close" onclick="closeModal('out')">✕</button></div>
-    <div class="modal-body">
-      <div class="fg"><label>날짜 *</label><input type="date" value="2026-03-26"></div>
-      <div class="fg-row">
-        <div class="fg"><label>거래처 *</label><input type="text" placeholder="회사명"></div>
-        <div class="fg"><label>항목 *</label>
-          <select><option>제품매입</option><option>물류비</option><option>통관비</option><option>대행비</option><option>수수료</option><option>기타</option></select>
+      <!-- 구분 선택 -->
+      <div class="fg">
+        <label>구분 *</label>
+        <div class="type-toggle">
+          <button class="tt-btn active" data-type="in" onclick="switchTxType('in',this)">💰 입금 (들어온 돈)</button>
+          <button class="tt-btn" data-type="out" onclick="switchTxType('out',this)">💸 지출 (나간 돈)</button>
         </div>
       </div>
-      <div class="fg"><label>금액 (KRW) *</label><input type="number" placeholder="0"></div>
-      <div class="fg"><label>메모</label><input type="text" placeholder="비고"></div>
+
+      <!-- 공통 필드 -->
+      <div class="fg-row">
+        <div class="fg"><label>날짜 *</label><input type="date" id="txDate" value="2026-03-26"></div>
+        <div class="fg"><label>거래처 *</label><input type="text" id="txCompany" placeholder="회사명"></div>
+      </div>
+
+      <!-- 입금 전용 필드 -->
+      <div id="txInFields">
+        <div class="fg">
+          <label>입금 경로 *</label>
+          <select id="txRoute">
+            <option value="TT">T/T (송금)</option>
+            <option value="TA">Trade Assurance (알리바바)</option>
+          </select>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>입금액 (USD) *</label><input type="number" id="txUsd" placeholder="0" oninput="calcTxKrw()"></div>
+          <div class="fg"><label>환율</label><input type="number" id="txRate" value="1477" oninput="calcTxKrw()"></div>
+        </div>
+        <div class="fg"><label>원화 환산 (자동)</label><input type="text" id="txKrw" class="auto-calc" readonly value="₩0"></div>
+      </div>
+
+      <!-- 지출 전용 필드 -->
+      <div id="txOutFields" style="display:none;">
+        <div class="fg">
+          <label>비용 항목 *</label>
+          <select id="txCategory">
+            <option>제품매입</option>
+            <option>물류비</option>
+            <option>통관비</option>
+            <option>대행비</option>
+            <option>수수료</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <div class="fg"><label>금액 (KRW) *</label><input type="number" id="txAmountKrw" placeholder="0"></div>
+      </div>
+
+      <!-- 공통 메모 -->
+      <div class="fg"><label>메모</label><input type="text" id="txMemo" placeholder="선금 30%, 해상운송비 등"></div>
       <div class="modal-foot">
-        <button class="btn-cancel" onclick="closeModal('out')">취소</button>
-        <button class="btn-save">저장</button>
+        <button class="btn-cancel" onclick="closeTxModal()">취소</button>
+        <button class="btn-save" onclick="saveTx()">저장</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-function openModal(type){document.getElementById('modal-'+type).classList.add('show');}
-function closeModal(type){document.getElementById('modal-'+type).classList.remove('show');}
-function calcKrw(){
-  const u=parseFloat(document.getElementById('inUsd').value)||0;
-  const r=parseFloat(document.getElementById('inRate').value)||0;
-  document.getElementById('inKrw').value='₩'+(u*r).toLocaleString('ko-KR');
+let txType = 'in';
+
+function openTxModal(type) {
+  txType = type || 'in';
+  switchTxType(txType, document.querySelector('.tt-btn[data-type="'+txType+'"]'));
+  // 필드 초기화
+  document.getElementById('txDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('txCompany').value = '';
+  document.getElementById('txUsd').value = '';
+  document.getElementById('txRate').value = '1477';
+  document.getElementById('txKrw').value = '₩0';
+  document.getElementById('txAmountKrw').value = '';
+  document.getElementById('txMemo').value = '';
+  document.getElementById('txModalTitle').textContent = '거래 등록';
+  document.getElementById('modal-tx').classList.add('show');
+}
+
+function closeTxModal() {
+  document.getElementById('modal-tx').classList.remove('show');
+}
+
+function switchTxType(type, btn) {
+  txType = type;
+  document.querySelectorAll('.tt-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('txInFields').style.display = type === 'in' ? '' : 'none';
+  document.getElementById('txOutFields').style.display = type === 'out' ? '' : 'none';
+}
+
+function calcTxKrw() {
+  const u = parseFloat(document.getElementById('txUsd').value) || 0;
+  const r = parseFloat(document.getElementById('txRate').value) || 0;
+  document.getElementById('txKrw').value = '₩' + (u * r).toLocaleString('ko-KR');
+}
+
+function saveTx() {
+  const date = document.getElementById('txDate').value;
+  const company = document.getElementById('txCompany').value.trim();
+  if (!date || !company) { alert('날짜와 거래처를 입력하세요.'); return; }
+
+  if (txType === 'in') {
+    const usd = parseFloat(document.getElementById('txUsd').value) || 0;
+    if (!usd) { alert('입금액을 입력하세요.'); return; }
+    // TODO: 데이터 배열에 push + 테이블 렌더링
+    alert('입금 등록 완료: ' + company + ' +$' + usd.toLocaleString());
+  } else {
+    const amount = parseInt(document.getElementById('txAmountKrw').value) || 0;
+    if (!amount) { alert('금액을 입력하세요.'); return; }
+    const category = document.getElementById('txCategory').value;
+    alert('지출 등록 완료: ' + company + ' -₩' + amount.toLocaleString() + ' (' + category + ')');
+  }
+  closeTxModal();
 }
 let curMonth=2,curYear=2026;
 function changeMonth(d){
