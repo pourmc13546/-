@@ -217,11 +217,14 @@
   </div>
 
   <!-- ═══ 탭 ═══ -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('all',this)">전체 현황</button>
-    <button class="tab" onclick="switchTab('in',this)">들어온 돈</button>
-    <button class="tab" onclick="switchTab('out',this)">나간 돈</button>
-    <button class="tab" onclick="switchTab('order',this)">주문별 손익</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div class="tabs" style="margin-bottom:0;">
+      <button class="tab active" onclick="switchTab('all',this)">전체 현황</button>
+      <button class="tab" onclick="switchTab('in',this)">들어온 돈</button>
+      <button class="tab" onclick="switchTab('out',this)">나간 돈</button>
+      <button class="tab" onclick="switchTab('order',this)">주문별 손익</button>
+    </div>
+    <button class="btn-primary btn-sm" onclick="openTxModal()" style="padding:8px 20px;font-size:13px;">+ 거래 등록</button>
   </div>
 
   <!-- ═══ 탭1: 전체 현황 ═══ -->
@@ -230,7 +233,7 @@
     <div style="margin-bottom:20px;">
       <div class="sec-head">
         <h3>들어온 돈 <span class="cnt-badge">3</span></h3>
-        <div class="sec-actions"><button class="btn-sm btn-primary" onclick="openTxModal('in')">+ 입금 등록</button></div>
+        <div class="sec-actions"><button class="btn-sm btn-primary" onclick="openTxModal()">+ 거래 등록</button></div>
       </div>
       <div class="card"><table class="tbl">
         <thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>메모</th><th>입금상태</th></tr></thead>
@@ -246,7 +249,7 @@
     <div style="margin-bottom:20px;">
       <div class="sec-head">
         <h3>나간 돈 <span class="cnt-badge">5</span></h3>
-        <div class="sec-actions"><button class="btn-sm btn-primary" onclick="openTxModal('out')">+ 지출 등록</button></div>
+        <div class="sec-actions"><button class="btn-sm btn-primary" onclick="openTxModal()">+ 거래 등록</button></div>
       </div>
       <div class="card"><table class="tbl">
         <thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th></tr></thead>
@@ -283,7 +286,7 @@
 
   <!-- ═══ 탭2: 들어온 돈 (개별) ═══ -->
   <div id="tab-in" class="tab-content">
-    <div class="sec-head"><h3>들어온 돈 상세</h3><div class="sec-actions"><button class="btn-sm btn-outline">📥 CSV</button><button class="btn-sm btn-primary" onclick="openTxModal('in')">+ 입금 등록</button></div></div>
+    <div class="sec-head"><h3>들어온 돈 상세</h3><div class="sec-actions"><button class="btn-sm btn-outline">📥 CSV</button><button class="btn-sm btn-primary" onclick="openTxModal()">+ 거래 등록</button></div></div>
     <div class="card"><table class="tbl">
       <thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th>내용</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>상태</th><th></th></tr></thead>
       <tbody>
@@ -297,7 +300,7 @@
 
   <!-- ═══ 탭3: 나간 돈 (개별) ═══ -->
   <div id="tab-out" class="tab-content">
-    <div class="sec-head"><h3>나간 돈 상세</h3><div class="sec-actions"><button class="btn-sm btn-outline">📥 CSV</button><button class="btn-sm btn-primary" onclick="openTxModal('out')">+ 지출 등록</button></div></div>
+    <div class="sec-head"><h3>나간 돈 상세</h3><div class="sec-actions"><button class="btn-sm btn-outline">📥 CSV</button><button class="btn-sm btn-primary" onclick="openTxModal()">+ 거래 등록</button></div></div>
     <div class="card"><table class="tbl">
       <thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th><th></th></tr></thead>
       <tbody>
