@@ -9,8 +9,6 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Pretendard',sans-serif;background:#f2f4f6;color:#191f28;font-size:13px;}
   .page{max-width:1240px;margin:0 auto;padding:24px 24px 80px;}
-
-  /* 헤더 */
   .pg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
   .pg-header h1{font-size:20px;font-weight:800;color:#202454;}
   .pg-header p{font-size:12px;color:#8b95a1;margin-top:3px;}
@@ -18,205 +16,120 @@
   .month-nav button{width:30px;height:30px;border-radius:8px;border:1px solid #e5e8eb;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7684;font-size:14px;}
   .month-nav button:hover{background:#f1f5f9;}
   .month-label{font-size:14px;font-weight:700;color:#333d4b;min-width:110px;text-align:center;}
-
-  /* 요약 */
   .summary{display:grid;grid-template-columns:5fr 3fr;gap:14px;margin-bottom:20px;}
   .sum-main{background:linear-gradient(135deg,#202454,#2a2f6e);border-radius:14px;padding:22px 26px;color:#fff;}
-  .sm-label{font-size:11px;color:rgba(255,255,255,.55);}
-  .sm-row{display:flex;align-items:baseline;gap:10px;margin-top:4px;}
-  .sm-big{font-size:28px;font-weight:800;}
-  .sm-sub-val{font-size:13px;color:rgba(255,255,255,.45);}
+  .sm-label{font-size:11px;color:rgba(255,255,255,.55);}.sm-row{display:flex;align-items:baseline;gap:10px;margin-top:4px;}
+  .sm-big{font-size:28px;font-weight:800;}.sm-sub-val{font-size:13px;color:rgba(255,255,255,.45);}
   .sm-divider{height:1px;background:rgba(255,255,255,.1);margin:14px 0;}
   .sm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-  .sg-label{font-size:10px;color:rgba(255,255,255,.45);}
-  .sg-val{font-size:16px;font-weight:700;margin-top:2px;}
-  .sg-hint{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px;}
+  .sg-label{font-size:10px;color:rgba(255,255,255,.45);}.sg-val{font-size:16px;font-weight:700;margin-top:2px;}.sg-hint{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px;}
   .sum-side{display:flex;flex-direction:column;gap:10px;}
   .sum-mini{background:#fff;border:1px solid #e5e8eb;border-radius:12px;padding:14px 16px;flex:1;display:flex;align-items:center;gap:12px;}
   .smi-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
   .smi-icon.g{background:#ecfdf5;}.smi-icon.a{background:#fffbeb;}.smi-icon.r{background:#fef2f2;}
-  .smi-info{flex:1;}
-  .smi-label{font-size:10px;color:#8b95a1;}
-  .smi-val{font-size:16px;font-weight:700;margin-top:1px;}
+  .smi-info{flex:1;}.smi-label{font-size:10px;color:#8b95a1;}.smi-val{font-size:16px;font-weight:700;margin-top:1px;}
   .smi-val.g{color:#0ca678;}.smi-val.a{color:#f59e0b;}.smi-val.r{color:#f04452;}
-
-  /* 비용바 */
   .cost-section{background:#fff;border:1px solid #e5e8eb;border-radius:12px;padding:14px 18px;margin-bottom:20px;}
   .cost-title{font-size:12px;font-weight:700;color:#333d4b;margin-bottom:10px;}
   .cost-stack{display:flex;height:20px;border-radius:6px;overflow:hidden;margin-bottom:8px;}
-  .cost-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:600;}
+  .cost-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:600;min-width:2px;}
   .cost-legend{display:flex;flex-wrap:wrap;gap:14px;}
-  .cl-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#6b7684;}
-  .cl-dot{width:7px;height:7px;border-radius:2px;}
-  .cl-val{font-weight:700;color:#333d4b;}
-
-  /* 탭 */
-  .tabs{display:flex;gap:3px;margin-bottom:16px;}
-  .tab{padding:8px 20px;border-radius:8px;border:1px solid #e5e8eb;background:#fff;color:#6b7684;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
-  .tab:hover{background:#f1f5f9;}
-  .tab.active{background:#202454;color:#fff;border-color:#202454;}
+  .cl-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#6b7684;}.cl-dot{width:7px;height:7px;border-radius:2px;}.cl-val{font-weight:700;color:#333d4b;}
+  .tabs{display:flex;gap:3px;}.tab{padding:8px 20px;border-radius:8px;border:1px solid #e5e8eb;background:#fff;color:#6b7684;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .tab:hover{background:#f1f5f9;}.tab.active{background:#202454;color:#fff;border-color:#202454;}
   .tab-content{display:none;}.tab-content.active{display:block;}
-
-  /* 섹션헤드 */
   .sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
   .sec-head h3{font-size:14px;font-weight:700;color:#333d4b;display:flex;align-items:center;gap:6px;}
   .cnt-badge{font-size:11px;font-weight:600;color:#fff;background:#202454;border-radius:10px;padding:1px 7px;}
-  .sec-actions{display:flex;gap:6px;}
   .btn-sm{padding:6px 12px;border-radius:7px;font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;}
   .btn-outline{border:1px solid #e5e8eb;background:#fff;color:#6b7684;}.btn-outline:hover{background:#f1f5f9;}
   .btn-primary{border:none;background:#202454;color:#fff;font-weight:600;}.btn-primary:hover{background:#1a1e45;}
-
-  /* 카드 */
   .card{background:#fff;border:1px solid #e5e8eb;border-radius:12px;overflow:hidden;}
-
-  /* 테이블 */
-  .tbl{width:100%;border-collapse:collapse;}
-  .tbl th{text-align:left;padding:9px 12px;background:#f8f9fa;border-bottom:2px solid #e5e8eb;color:#6b7684;font-weight:600;font-size:10px;text-transform:uppercase;}
-  .tbl td{padding:9px 12px;border-bottom:1px solid #f4f5f7;}
-  .tbl tr:hover td{background:#fafbfc;}
-  .tbl .r{text-align:right;}
+  .tbl{width:100%;border-collapse:collapse;}.tbl th{text-align:left;padding:9px 12px;background:#f8f9fa;border-bottom:2px solid #e5e8eb;color:#6b7684;font-weight:600;font-size:10px;}
+  .tbl td{padding:9px 12px;border-bottom:1px solid #f4f5f7;}.tbl tr:hover td{background:#fafbfc;}.tbl .r{text-align:right;}
   .tbl tfoot td{background:#f8f9fa;font-weight:700;border-bottom:none;}
-  .amt-in{color:#0ca678;font-weight:700;}
-  .amt-out{color:#f04452;font-weight:700;}
+  .amt-in{color:#0ca678;font-weight:700;}.amt-out{color:#f04452;font-weight:700;}
   .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
   .badge.tt{background:#fef3c7;color:#d97706;}.badge.ta{background:#e8f0fe;color:#1a73e8;}
   .badge.done{background:#dcfce7;color:#16a34a;}.badge.wait{background:#fef3c7;color:#d97706;}.badge.partial{background:#dbeafe;color:#2563eb;}
   .cat{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500;}
-  .cat.c1{background:#dbeafe;color:#2563eb;}.cat.c2{background:#fef3c7;color:#d97706;}.cat.c3{background:#dcfce7;color:#16a34a;}.cat.c4{background:#f3e8ff;color:#7c3aed;}.cat.c5{background:#f1f5f9;color:#64748b;}
+  .cat.c1{background:#dbeafe;color:#2563eb;}.cat.c2{background:#fef3c7;color:#d97706;}.cat.c3{background:#dcfce7;color:#16a34a;}.cat.c4{background:#f3e8ff;color:#7c3aed;}.cat.c5{background:#f1f5f9;color:#64748b;}.cat.c6{background:#fee2e2;color:#ef4444;}
   .link{color:#3182f6;cursor:pointer;font-weight:500;}
   .btn-edit{border:none;background:none;color:#3182f6;cursor:pointer;font-size:11px;padding:1px 4px;}
   .btn-del{border:none;background:none;color:#f04452;cursor:pointer;font-size:11px;padding:1px 4px;}
   .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
-
-  /* 주문별 손익 카드 */
   .order-card{background:#fff;border:1px solid #e5e8eb;border-radius:12px;padding:18px 20px;margin-bottom:12px;cursor:pointer;transition:all .15s;}
   .order-card:hover{border-color:#c4c9d0;box-shadow:0 2px 8px rgba(0,0,0,.04);}
-  .oc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-  .oc-id{font-size:12px;font-weight:700;color:#202454;}
-  .oc-buyer{font-size:13px;font-weight:600;color:#333d4b;}
-  .oc-product{font-size:11px;color:#8b95a1;margin-top:2px;}
+  .oc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .oc-id{font-size:12px;font-weight:700;color:#202454;}.oc-buyer{font-size:13px;font-weight:600;color:#333d4b;}.oc-product{font-size:11px;color:#8b95a1;margin-top:2px;}
   .oc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid #f4f5f7;}
-  .oc-item .oc-label{font-size:10px;color:#8b95a1;}
-  .oc-item .oc-val{font-size:14px;font-weight:700;margin-top:2px;}
+  .oc-item .oc-label{font-size:10px;color:#8b95a1;}.oc-item .oc-val{font-size:14px;font-weight:700;margin-top:2px;}
   .oc-progress{height:6px;background:#f1f5f9;border-radius:3px;margin-top:10px;overflow:hidden;}
-  .oc-progress-fill{height:100%;border-radius:3px;transition:width .3s;}
-  .oc-progress-label{display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:#8b95a1;}
-
-  /* 주문 상세 (펼침) */
+  .oc-progress-fill{height:100%;border-radius:3px;}.oc-progress-label{display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:#8b95a1;}
   .oc-detail{display:none;margin-top:14px;padding-top:14px;border-top:1px dashed #e5e8eb;}
-  .oc-detail.open{display:block;}
-  .oc-detail-title{font-size:11px;font-weight:700;color:#6b7684;margin-bottom:6px;}
-  .oc-detail-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid #f8f9fa;}
-  .oc-detail-row:last-child{border-bottom:none;}
-
-  /* 거래처별 */
-  .buyer-list{padding:14px 18px;}
-  .buyer-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f4f5f7;}
-  .buyer-row:last-child{border-bottom:none;}
+  .oc-detail.open{display:block;}.oc-detail-title{font-size:11px;font-weight:700;color:#6b7684;margin-bottom:6px;}
+  .oc-detail-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid #f8f9fa;}.oc-detail-row:last-child{border-bottom:none;}
+  .buyer-list{padding:14px 18px;}.buyer-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f4f5f7;}.buyer-row:last-child{border-bottom:none;}
   .buyer-av{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
-  .buyer-name{flex:1;font-size:12px;font-weight:600;color:#333d4b;}
-  .buyer-bar-bg{flex:2;height:14px;background:#f1f5f9;border-radius:5px;overflow:hidden;}
-  .buyer-bar-fill{height:100%;border-radius:5px;}
-  .buyer-amt{width:70px;text-align:right;font-size:12px;font-weight:700;color:#202454;}
-
-  /* 미수금 */
-  .recv-list{padding:14px 18px;}
-  .recv-item{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f4f5f7;}
-  .recv-item:last-child{border-bottom:none;}
+  .buyer-name{flex:1;font-size:12px;font-weight:600;color:#333d4b;}.buyer-bar-bg{flex:2;height:14px;background:#f1f5f9;border-radius:5px;overflow:hidden;}
+  .buyer-bar-fill{height:100%;border-radius:5px;}.buyer-amt{width:70px;text-align:right;font-size:12px;font-weight:700;color:#202454;}
+  .recv-list{padding:14px 18px;}.recv-item{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f4f5f7;}.recv-item:last-child{border-bottom:none;}
   .recv-av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
-  .recv-info{flex:1;}
-  .recv-name{font-size:12px;font-weight:600;}.recv-sub{font-size:10px;color:#8b95a1;margin-top:1px;}
-  .recv-amt{font-size:14px;font-weight:700;}
-  .recv-amt.pending{color:#f59e0b;}.recv-amt.done{color:#0ca678;font-size:11px;}
-
-  /* 모달 */
+  .recv-info{flex:1;}.recv-name{font-size:12px;font-weight:600;}.recv-sub{font-size:10px;color:#8b95a1;margin-top:1px;}
+  .recv-amt{font-size:14px;font-weight:700;}.recv-amt.pending{color:#f59e0b;}.recv-amt.done{color:#0ca678;font-size:11px;}
+  .empty-msg{text-align:center;padding:30px;color:#c4c9d0;font-size:12px;}
   .modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;}
-  .modal-bg.show{display:flex;}
-  .modal{background:#fff;border-radius:14px;width:460px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+  .modal-bg.show{display:flex;}.modal{background:#fff;border-radius:14px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
   .modal-head{padding:16px 22px;border-bottom:1px solid #f4f5f7;display:flex;justify-content:space-between;align-items:center;}
-  .modal-head h3{font-size:15px;font-weight:800;color:#202454;}
-  .modal-close{background:none;border:none;cursor:pointer;padding:4px;color:#8b95a1;font-size:16px;}
-  .modal-body{padding:20px 22px;}
-  .fg{margin-bottom:12px;}
-  .fg label{display:block;font-size:11px;font-weight:600;color:#4e5968;margin-bottom:5px;}
-  .fg input,.fg select{width:100%;padding:9px 12px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;font-family:inherit;outline:none;transition:border .15s;}
-  .fg input:focus,.fg select:focus{border-color:#202454;}
-  .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .modal-foot{display:flex;gap:6px;justify-content:flex-end;margin-top:4px;}
+  .modal-head h3{font-size:15px;font-weight:800;color:#202454;}.modal-close{background:none;border:none;cursor:pointer;padding:4px;color:#8b95a1;font-size:16px;}
+  .modal-body{padding:16px 20px;}
+  .tx-input{width:100%;padding:6px 8px;border:1px solid #e5e8eb;border-radius:5px;font-size:11px;font-family:inherit;outline:none;}.tx-input:focus{border-color:#202454;}
+  .tx-select{width:100%;padding:6px 4px;border:1px solid #e5e8eb;border-radius:5px;font-size:11px;font-family:inherit;outline:none;background:#fff;}.tx-select:focus{border-color:#202454;}
+  .tx-del{width:22px;height:22px;border:none;background:#fef2f2;color:#f04452;border-radius:6px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}.tx-del:hover{background:#fee2e2;}
+  .tx-row-in td{background:#f0fdf4 !important;}.tx-row-out td{background:#fef7f7 !important;}
   .btn-cancel{padding:9px 18px;border:1px solid #e5e8eb;border-radius:7px;background:#fff;color:#6b7684;font-size:12px;font-weight:600;cursor:pointer;}
   .btn-save{padding:9px 18px;border:none;border-radius:7px;background:#202454;color:#fff;font-size:12px;font-weight:600;cursor:pointer;}
-  .auto-calc{background:#f8f9fa;color:#6b7684;cursor:default;}
-  .type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
-  .tt-btn{padding:10px;border:2px solid #e5e8eb;border-radius:8px;background:#fff;color:#6b7684;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center;}
-  .tt-btn:hover{border-color:#c4c9d0;}
-  .tt-btn.active[data-type="in"]{border-color:#0ca678;background:#ecfdf5;color:#0ca678;}
-  .tt-btn.active[data-type="out"]{border-color:#f04452;background:#fef2f2;color:#f04452;}
-
-  /* 목록 모달 인라인 입력 */
-  .tx-input{width:100%;padding:6px 8px;border:1px solid #e5e8eb;border-radius:5px;font-size:11px;font-family:inherit;outline:none;}
-  .tx-input:focus{border-color:#202454;}
-  .tx-select{width:100%;padding:6px 4px;border:1px solid #e5e8eb;border-radius:5px;font-size:11px;font-family:inherit;outline:none;background:#fff;}
-  .tx-select:focus{border-color:#202454;}
-  .tx-del{width:22px;height:22px;border:none;background:#fef2f2;color:#f04452;border-radius:6px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
-  .tx-del:hover{background:#fee2e2;}
-  .tx-row-in td{background:#f0fdf4 !important;}
-  .tx-row-out td{background:#fef7f7 !important;}
-
   @media(max-width:900px){.summary,.row-2{grid-template-columns:1fr;}.sm-grid{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
 <div class="page">
-
-  <!-- 헤더 -->
   <div class="pg-header">
     <div><h1>정산관리</h1><p>들어온 돈 · 나간 돈 · 주문별 손익 추적</p></div>
     <div class="month-nav">
-      <button>◀</button>
-      <span class="month-label">2026년 3월</span>
-      <button>▶</button>
+      <button onclick="changeMonth(-1)">◀</button>
+      <span class="month-label" id="monthLabel"></span>
+      <button onclick="changeMonth(1)">▶</button>
     </div>
   </div>
 
-  <!-- ═══ ① 요약 ═══ -->
+  <!-- 요약 -->
   <div class="summary">
     <div class="sum-main">
       <div class="sm-label">이번 달 순이익</div>
-      <div class="sm-row"><span class="sm-big">₩7,423,850</span><span class="sm-sub-val">이익률 50.0%</span></div>
+      <div class="sm-row"><span class="sm-big" id="smProfit">₩0</span><span class="sm-sub-val" id="smRate"></span></div>
       <div class="sm-divider"></div>
       <div class="sm-grid">
-        <div><div class="sg-label">들어온 돈</div><div class="sg-val">$10,050</div><div class="sg-hint">₩14,843,850 · 3건</div></div>
-        <div><div class="sg-label">나간 돈</div><div class="sg-val" style="color:#fca5a5;">₩7,420,000</div><div class="sg-hint">5건</div></div>
-        <div><div class="sg-label">전월 대비</div><div class="sg-val" style="color:#6ee7b7;">▲ +22.5%</div><div class="sg-hint">2월: ₩5,280,000</div></div>
+        <div><div class="sg-label">들어온 돈</div><div class="sg-val" id="smInUsd">$0</div><div class="sg-hint" id="smInKrw"></div></div>
+        <div><div class="sg-label">나간 돈</div><div class="sg-val" id="smOut" style="color:#fca5a5;">₩0</div><div class="sg-hint" id="smOutCnt"></div></div>
+        <div><div class="sg-label">전월 대비</div><div class="sg-val" id="smDiff">-</div><div class="sg-hint" id="smDiffHint"></div></div>
       </div>
     </div>
     <div class="sum-side">
-      <div class="sum-mini"><div class="smi-icon g">💰</div><div class="smi-info"><div class="smi-label">입금 완료</div><div class="smi-val g">$8,700</div></div></div>
-      <div class="sum-mini"><div class="smi-icon a">⏳</div><div class="smi-info"><div class="smi-label">미수금</div><div class="smi-val a">$6,750</div></div></div>
-      <div class="sum-mini"><div class="smi-icon r">📦</div><div class="smi-info"><div class="smi-label">최대 비용</div><div class="smi-val r">제품매입 58.6%</div></div></div>
+      <div class="sum-mini"><div class="smi-icon g">💰</div><div class="smi-info"><div class="smi-label">입금 완료</div><div class="smi-val g" id="smPaid">$0</div></div></div>
+      <div class="sum-mini"><div class="smi-icon a">⏳</div><div class="smi-info"><div class="smi-label">미수금</div><div class="smi-val a" id="smRecv">$0</div></div></div>
+      <div class="sum-mini"><div class="smi-icon r">📦</div><div class="smi-info"><div class="smi-label">최대 비용</div><div class="smi-val r" id="smTopCost">-</div></div></div>
     </div>
   </div>
 
-  <!-- ═══ ② 비용 비중 ═══ -->
+  <!-- 비용 비중 -->
   <div class="cost-section">
     <div class="cost-title">비용 구성</div>
-    <div class="cost-stack">
-      <div class="cost-seg" style="width:58.6%;background:#3182f6;">매입</div>
-      <div class="cost-seg" style="width:22.9%;background:#f59e0b;">물류</div>
-      <div class="cost-seg" style="width:8.6%;background:#0ca678;">통관</div>
-      <div class="cost-seg" style="width:7.8%;background:#8b5cf6;"></div>
-      <div class="cost-seg" style="width:2.1%;background:#8b95a1;"></div>
-    </div>
-    <div class="cost-legend">
-      <div class="cl-item"><div class="cl-dot" style="background:#3182f6;"></div>제품매입 <span class="cl-val">₩4,350,000</span></div>
-      <div class="cl-item"><div class="cl-dot" style="background:#f59e0b;"></div>물류비 <span class="cl-val">₩1,700,000</span></div>
-      <div class="cl-item"><div class="cl-dot" style="background:#0ca678;"></div>통관비 <span class="cl-val">₩640,000</span></div>
-      <div class="cl-item"><div class="cl-dot" style="background:#8b5cf6;"></div>대행비 <span class="cl-val">₩580,000</span></div>
-      <div class="cl-item"><div class="cl-dot" style="background:#8b95a1;"></div>수수료 <span class="cl-val">₩150,000</span></div>
-    </div>
+    <div class="cost-stack" id="costBar"></div>
+    <div class="cost-legend" id="costLegend"></div>
   </div>
 
-  <!-- ═══ 탭 ═══ -->
+  <!-- 탭 -->
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
     <div class="tabs" style="margin-bottom:0;">
       <button class="tab active" onclick="switchTab('all',this)">전체 현황</button>
@@ -227,351 +140,340 @@
     <button class="btn-primary btn-sm" onclick="openTxModal()" style="padding:8px 20px;font-size:13px;">+ 거래 등록</button>
   </div>
 
-  <!-- ═══ 탭1: 전체 현황 ═══ -->
+  <!-- 탭1: 전체 -->
   <div id="tab-all" class="tab-content active">
-    <!-- 들어온 돈 -->
-    <div style="margin-bottom:20px;">
-      <div class="sec-head">
-        <h3>들어온 돈 <span class="cnt-badge">3</span></h3>
-      </div>
-      <div class="card"><table class="tbl">
-        <thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>메모</th><th>입금상태</th></tr></thead>
-        <tbody>
-          <tr><td style="font-weight:600;">03/20</td><td>India Steel Corp</td><td><span class="badge tt">T/T</span></td><td class="link">ORD-003</td><td class="r amt-in">+$5,500</td><td class="r" style="color:#8b95a1;">1,477</td><td class="r" style="font-weight:600;">₩8,123,500</td><td style="color:#8b95a1;">전액</td><td><span class="badge done">완료</span></td></tr>
-          <tr><td style="font-weight:600;">03/10</td><td>Dubai Imports LLC</td><td><span class="badge ta">T/A</span></td><td class="link">ORD-002</td><td class="r amt-in">+$3,200</td><td class="r" style="color:#8b95a1;">1,477</td><td class="r" style="font-weight:600;">₩4,726,400</td><td style="color:#8b95a1;">T/A 정산</td><td><span class="badge done">완료</span></td></tr>
-          <tr><td style="font-weight:600;">03/05</td><td>ABC Trading Co.</td><td><span class="badge tt">T/T</span></td><td class="link">ORD-001</td><td class="r amt-in">+$1,350</td><td class="r" style="color:#8b95a1;">1,477</td><td class="r" style="font-weight:600;">₩1,993,950</td><td style="color:#8b95a1;">선금 30%</td><td><span class="badge partial">부분</span></td></tr>
-        </tbody>
-        <tfoot><tr><td colspan="4" class="r" style="color:#6b7684;">합계</td><td class="r amt-in">+$10,050</td><td></td><td class="r" style="color:#0ca678;">₩14,843,850</td><td colspan="2"></td></tr></tfoot>
-      </table></div>
-    </div>
-    <!-- 나간 돈 -->
-    <div style="margin-bottom:20px;">
-      <div class="sec-head">
-        <h3>나간 돈 <span class="cnt-badge">5</span></h3>
-      </div>
-      <div class="card"><table class="tbl">
-        <thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th></tr></thead>
-        <tbody>
-          <tr><td>03/18</td><td>검역원</td><td><span class="cat c5">수수료</span></td><td class="link">ORD-003</td><td class="r amt-out">-₩150,000</td><td style="color:#8b95a1;">검역 수수료</td></tr>
-          <tr><td>03/15</td><td>Extrans 물류</td><td><span class="cat c2">물류비</span></td><td class="link">ORD-001,002</td><td class="r amt-out">-₩1,700,000</td><td style="color:#8b95a1;">3월 해상운송</td></tr>
-          <tr><td>03/12</td><td>KP화학</td><td><span class="cat c1">제품매입</span></td><td class="link">ORD-001,003</td><td class="r amt-out">-₩4,350,000</td><td style="color:#8b95a1;">코트재+방청코팅</td></tr>
-          <tr><td>03/08</td><td>관세법인 A</td><td><span class="cat c3">통관비</span></td><td class="link">ORD-002</td><td class="r amt-out">-₩640,000</td><td style="color:#8b95a1;">두바이 통관</td></tr>
-          <tr><td>03/05</td><td>대행사 B</td><td><span class="cat c4">대행비</span></td><td class="link">ORD-001</td><td class="r amt-out">-₩580,000</td><td style="color:#8b95a1;">수출 대행</td></tr>
-        </tbody>
-        <tfoot><tr><td colspan="4" class="r" style="color:#6b7684;">합계</td><td class="r amt-out">-₩7,420,000</td><td></td></tr></tfoot>
-      </table></div>
-    </div>
-    <!-- 거래처별 + 미수금 -->
+    <div style="margin-bottom:20px;"><div class="sec-head"><h3>들어온 돈 <span class="cnt-badge" id="cntIn">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>메모</th><th>상태</th><th></th></tr></thead><tbody id="tblInAll"></tbody><tfoot id="tfootInAll"></tfoot></table></div></div></div>
+    <div style="margin-bottom:20px;"><div class="sec-head"><h3>나간 돈 <span class="cnt-badge" id="cntOut">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th><th></th></tr></thead><tbody id="tblOutAll"></tbody><tfoot id="tfootOutAll"></tfoot></table></div></div></div>
     <div class="row-2">
-      <div><div class="sec-head"><h3>거래처별 매출</h3></div>
-        <div class="card"><div class="buyer-list">
-          <div class="buyer-row"><div class="buyer-av" style="background:#8b5cf6;">I</div><div class="buyer-name">India Steel Corp</div><div class="buyer-bar-bg"><div class="buyer-bar-fill" style="width:55%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);"></div></div><div class="buyer-amt">$5,500</div></div>
-          <div class="buyer-row"><div class="buyer-av" style="background:#3182f6;">A</div><div class="buyer-name">ABC Trading Co.</div><div class="buyer-bar-bg"><div class="buyer-bar-fill" style="width:45%;background:linear-gradient(90deg,#3182f6,#60a5fa);"></div></div><div class="buyer-amt">$4,500</div></div>
-          <div class="buyer-row"><div class="buyer-av" style="background:#f59e0b;">V</div><div class="buyer-name">Vietnam Partner</div><div class="buyer-bar-bg"><div class="buyer-bar-fill" style="width:36%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div><div class="buyer-amt">$3,600</div></div>
-          <div class="buyer-row"><div class="buyer-av" style="background:#0ca678;">D</div><div class="buyer-name">Dubai Imports</div><div class="buyer-bar-bg"><div class="buyer-bar-fill" style="width:32%;background:linear-gradient(90deg,#0ca678,#34d399);"></div></div><div class="buyer-amt">$3,200</div></div>
-        </div></div>
-      </div>
-      <div><div class="sec-head"><h3>미수금 현황 <span style="font-size:12px;font-weight:600;color:#f59e0b;margin-left:4px;">$6,750</span></h3></div>
-        <div class="card"><div class="recv-list">
-          <div class="recv-item"><div class="recv-av" style="background:#fef3c7;">⏳</div><div class="recv-info"><div class="recv-name">Vietnam Partner Co.</div><div class="recv-sub">ORD-004 · T/T · 전액 미입금 · 마감 4/20</div></div><div class="recv-amt pending">$3,600</div></div>
-          <div class="recv-item"><div class="recv-av" style="background:#fef3c7;">⏳</div><div class="recv-info"><div class="recv-name">ABC Trading Co.</div><div class="recv-sub">ORD-001 · T/T 잔금 70% · 마감 4/15</div></div><div class="recv-amt pending">$3,150</div></div>
-          <div class="recv-item"><div class="recv-av" style="background:#ecfdf5;">✅</div><div class="recv-info"><div class="recv-name">Dubai Imports LLC</div><div class="recv-sub">ORD-002 · Trade Assurance · 3/10 정산</div></div><div class="recv-amt done">입금 완료</div></div>
-          <div class="recv-item"><div class="recv-av" style="background:#ecfdf5;">✅</div><div class="recv-info"><div class="recv-name">India Steel Corp</div><div class="recv-sub">ORD-003 · T/T · 3/20 전액 입금</div></div><div class="recv-amt done">입금 완료</div></div>
-        </div></div>
-      </div>
+      <div><div class="sec-head"><h3>거래처별 매출</h3></div><div class="card"><div class="buyer-list" id="buyerList"></div></div></div>
+      <div><div class="sec-head"><h3>미수금 현황 <span style="font-size:12px;font-weight:600;color:#f59e0b;" id="recvTotal"></span></h3></div><div class="card"><div class="recv-list" id="recvList"></div></div></div>
     </div>
   </div>
 
-  <!-- ═══ 탭2: 들어온 돈 (개별) ═══ -->
+  <!-- 탭2: 들어온 돈 -->
   <div id="tab-in" class="tab-content">
-    <div class="sec-head"><h3>들어온 돈 상세</h3><div class="sec-actions"><button class="btn-sm btn-outline">📥 CSV</button></div></div>
-    <div class="card"><table class="tbl">
-      <thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th>내용</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>상태</th><th></th></tr></thead>
-      <tbody>
-        <tr><td style="font-weight:600;">03/20</td><td>India Steel Corp</td><td><span class="badge tt">T/T</span></td><td class="link">ORD-003</td><td style="color:#8b95a1;">전액 입금</td><td class="r amt-in">+$5,500</td><td class="r" style="color:#8b95a1;">1,477</td><td class="r" style="font-weight:600;">₩8,123,500</td><td><span class="badge done">완료</span></td><td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td></tr>
-        <tr><td style="font-weight:600;">03/10</td><td>Dubai Imports LLC</td><td><span class="badge ta">T/A</span></td><td class="link">ORD-002</td><td style="color:#8b95a1;">T/A 정산 (수수료 $96 차감)</td><td class="r amt-in">+$3,200</td><td class="r" style="color:#8b95a1;">1,477</td><td class="r" style="font-weight:600;">₩4,726,400</td><td><span class="badge done">완료</span></td><td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td></tr>
-        <tr><td style="font-weight:600;">03/05</td><td>ABC Trading Co.</td><td><span class="badge tt">T/T</span></td><td class="link">ORD-001</td><td style="color:#8b95a1;">선금 30% ($4,500 중)</td><td class="r amt-in">+$1,350</td><td class="r" style="color:#8b95a1;">1,477</td><td class="r" style="font-weight:600;">₩1,993,950</td><td><span class="badge partial">부분</span></td><td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td></tr>
-      </tbody>
-      <tfoot><tr><td colspan="5" class="r" style="color:#6b7684;">합계</td><td class="r amt-in" style="font-size:14px;">+$10,050</td><td></td><td class="r" style="color:#0ca678;font-size:14px;">₩14,843,850</td><td colspan="2"></td></tr></tfoot>
-    </table></div>
+    <div class="sec-head"><h3>들어온 돈 상세</h3><div style="display:flex;gap:6px;"><button class="btn-sm btn-outline" onclick="exportCsv('in')">📥 CSV</button></div></div>
+    <div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th>내용</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>상태</th><th></th></tr></thead><tbody id="tblInDetail"></tbody><tfoot id="tfootInDetail"></tfoot></table></div></div>
   </div>
 
-  <!-- ═══ 탭3: 나간 돈 (개별) ═══ -->
+  <!-- 탭3: 나간 돈 -->
   <div id="tab-out" class="tab-content">
-    <div class="sec-head"><h3>나간 돈 상세</h3><div class="sec-actions"><button class="btn-sm btn-outline">📥 CSV</button></div></div>
-    <div class="card"><table class="tbl">
-      <thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th><th></th></tr></thead>
-      <tbody>
-        <tr><td>03/18</td><td>검역원</td><td><span class="cat c5">수수료</span></td><td class="link">ORD-003</td><td class="r amt-out">-₩150,000</td><td style="color:#8b95a1;">검역 수수료</td><td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td></tr>
-        <tr><td>03/15</td><td>Extrans 물류</td><td><span class="cat c2">물류비</span></td><td class="link">ORD-001,002</td><td class="r amt-out">-₩1,700,000</td><td style="color:#8b95a1;">3월 해상운송</td><td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td></tr>
-        <tr><td>03/12</td><td>KP화학</td><td><span class="cat c1">제품매입</span></td><td class="link">ORD-001,003</td><td class="r amt-out">-₩4,350,000</td><td style="color:#8b95a1;">코트재+방청코팅</td><td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td></tr>
-        <tr><td>03/08</td><td>관세법인 A</td><td><span class="cat c3">통관비</span></td><td class="link">ORD-002</td><td class="r amt-out">-₩640,000</td><td style="color:#8b95a1;">두바이 통관</td><td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td></tr>
-        <tr><td>03/05</td><td>대행사 B</td><td><span class="cat c4">대행비</span></td><td class="link">ORD-001</td><td class="r amt-out">-₩580,000</td><td style="color:#8b95a1;">수출 대행</td><td><button class="btn-edit">수정</button><button class="btn-del">삭제</button></td></tr>
-      </tbody>
-      <tfoot><tr><td colspan="4" class="r" style="color:#6b7684;">합계</td><td class="r amt-out" style="font-size:14px;">-₩7,420,000</td><td colspan="2"></td></tr></tfoot>
-    </table></div>
+    <div class="sec-head"><h3>나간 돈 상세</h3><div style="display:flex;gap:6px;"><button class="btn-sm btn-outline" onclick="exportCsv('out')">📥 CSV</button></div></div>
+    <div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th><th></th></tr></thead><tbody id="tblOutDetail"></tbody><tfoot id="tfootOutDetail"></tfoot></table></div></div>
   </div>
 
-  <!-- ═══ 탭4: 주문별 손익 ═══ -->
+  <!-- 탭4: 주문별 손익 -->
   <div id="tab-order" class="tab-content">
     <div class="sec-head"><h3>주문별 손익 추적</h3></div>
-
-    <!-- 주문1 -->
-    <div class="order-card" onclick="toggleDetail('d1')">
-      <div class="oc-top">
-        <div><span class="oc-id">ORD-001</span> <span class="badge tt" style="margin-left:4px;">T/T 30/70</span></div>
-        <span class="badge partial">부분입금</span>
-      </div>
-      <div class="oc-buyer">ABC Trading Co. <span style="font-size:11px;color:#8b95a1;font-weight:400;">🇦🇪 UAE</span></div>
-      <div class="oc-product">POUR 코트재I(회색) · 20kg/통 × 50통 · 계약 $4,500</div>
-      <div class="oc-grid">
-        <div class="oc-item"><div class="oc-label">계약 금액</div><div class="oc-val" style="color:#202454;">$4,500</div></div>
-        <div class="oc-item"><div class="oc-label">입금액</div><div class="oc-val" style="color:#0ca678;">$1,350</div></div>
-        <div class="oc-item"><div class="oc-label">미수금</div><div class="oc-val" style="color:#f59e0b;">$3,150</div></div>
-        <div class="oc-item"><div class="oc-label">비용</div><div class="oc-val" style="color:#f04452;">₩3,530,000</div></div>
-      </div>
-      <div class="oc-progress"><div class="oc-progress-fill" style="width:30%;background:linear-gradient(90deg,#0ca678,#34d399);"></div></div>
-      <div class="oc-progress-label"><span>입금 30%</span><span>잔금 $3,150 마감 4/15</span></div>
-
-      <div class="oc-detail" id="d1">
-        <div class="oc-detail-title">입금 내역</div>
-        <div class="oc-detail-row"><span>3/05 선금 30%</span><span class="amt-in">+$1,350</span></div>
-        <div class="oc-detail-row"><span style="color:#f59e0b;">잔금 70% (마감 4/15)</span><span style="color:#f59e0b;">$3,150 대기</span></div>
-        <div class="oc-detail-title" style="margin-top:10px;">비용 내역</div>
-        <div class="oc-detail-row"><span>3/05 대행비 · 대행사 B</span><span class="amt-out">-₩580,000</span></div>
-        <div class="oc-detail-row"><span>3/12 제품매입 · KP화학 (배분)</span><span class="amt-out">-₩1,250,000</span></div>
-        <div class="oc-detail-row"><span>3/15 물류비 · Extrans (배분)</span><span class="amt-out">-₩850,000</span></div>
-        <div class="oc-detail-row"><span>3/15 물류비 · Extrans (배분)</span><span class="amt-out">-₩850,000</span></div>
-        <div class="oc-detail-title" style="margin-top:10px;">손익 계산</div>
-        <div class="oc-detail-row"><span>확정 매출 (입금분)</span><span style="font-weight:700;">₩1,993,950</span></div>
-        <div class="oc-detail-row"><span>총 비용</span><span class="amt-out">-₩3,530,000</span></div>
-        <div class="oc-detail-row" style="font-weight:700;"><span>현재 순이익</span><span style="color:#f04452;">-₩1,536,050</span></div>
-        <div class="oc-detail-row" style="color:#8b95a1;"><span>예상 순이익 (전액 입금 시)</span><span style="color:#0ca678;">+₩3,116,500</span></div>
-      </div>
-    </div>
-
-    <!-- 주문2 -->
-    <div class="order-card" onclick="toggleDetail('d2')">
-      <div class="oc-top">
-        <div><span class="oc-id">ORD-002</span> <span class="badge ta" style="margin-left:4px;">Trade Assurance</span></div>
-        <span class="badge done">입금완료</span>
-      </div>
-      <div class="oc-buyer">Dubai Imports LLC <span style="font-size:11px;color:#8b95a1;font-weight:400;">🇦🇪 UAE</span></div>
-      <div class="oc-product">POUR 발수코팅제 · 10L/통 × 100통 · 계약 $3,200</div>
-      <div class="oc-grid">
-        <div class="oc-item"><div class="oc-label">계약 금액</div><div class="oc-val" style="color:#202454;">$3,200</div></div>
-        <div class="oc-item"><div class="oc-label">입금액</div><div class="oc-val" style="color:#0ca678;">$3,200</div></div>
-        <div class="oc-item"><div class="oc-label">미수금</div><div class="oc-val" style="color:#8b95a1;">$0</div></div>
-        <div class="oc-item"><div class="oc-label">비용</div><div class="oc-val" style="color:#f04452;">₩1,490,000</div></div>
-      </div>
-      <div class="oc-progress"><div class="oc-progress-fill" style="width:100%;background:linear-gradient(90deg,#0ca678,#34d399);"></div></div>
-      <div class="oc-progress-label"><span>입금 100%</span><span style="color:#0ca678;">순이익 ₩3,236,400</span></div>
-
-      <div class="oc-detail" id="d2">
-        <div class="oc-detail-title">입금 내역</div>
-        <div class="oc-detail-row"><span>3/10 T/A 정산 (수수료 $96 차감)</span><span class="amt-in">+$3,200</span></div>
-        <div class="oc-detail-title" style="margin-top:10px;">비용 내역</div>
-        <div class="oc-detail-row"><span>3/08 통관비 · 관세법인 A</span><span class="amt-out">-₩640,000</span></div>
-        <div class="oc-detail-row"><span>3/15 물류비 · Extrans (배분)</span><span class="amt-out">-₩850,000</span></div>
-        <div class="oc-detail-title" style="margin-top:10px;">손익 계산</div>
-        <div class="oc-detail-row"><span>매출</span><span style="font-weight:700;">₩4,726,400</span></div>
-        <div class="oc-detail-row"><span>총 비용</span><span class="amt-out">-₩1,490,000</span></div>
-        <div class="oc-detail-row" style="font-weight:700;"><span>순이익</span><span style="color:#0ca678;">+₩3,236,400 (이익률 68.5%)</span></div>
-      </div>
-    </div>
-
-    <!-- 주문3 -->
-    <div class="order-card" onclick="toggleDetail('d3')">
-      <div class="oc-top">
-        <div><span class="oc-id">ORD-003</span> <span class="badge tt" style="margin-left:4px;">T/T 전액</span></div>
-        <span class="badge done">입금완료</span>
-      </div>
-      <div class="oc-buyer">India Steel Corp <span style="font-size:11px;color:#8b95a1;font-weight:400;">🇮🇳 인도</span></div>
-      <div class="oc-product">POUR 방청코팅 · 20kg/통 × 30통 · 계약 $5,500</div>
-      <div class="oc-grid">
-        <div class="oc-item"><div class="oc-label">계약 금액</div><div class="oc-val" style="color:#202454;">$5,500</div></div>
-        <div class="oc-item"><div class="oc-label">입금액</div><div class="oc-val" style="color:#0ca678;">$5,500</div></div>
-        <div class="oc-item"><div class="oc-label">미수금</div><div class="oc-val" style="color:#8b95a1;">$0</div></div>
-        <div class="oc-item"><div class="oc-label">비용</div><div class="oc-val" style="color:#f04452;">₩3,250,000</div></div>
-      </div>
-      <div class="oc-progress"><div class="oc-progress-fill" style="width:100%;background:linear-gradient(90deg,#0ca678,#34d399);"></div></div>
-      <div class="oc-progress-label"><span>입금 100%</span><span style="color:#0ca678;">순이익 ₩4,873,500</span></div>
-
-      <div class="oc-detail" id="d3">
-        <div class="oc-detail-title">입금 내역</div>
-        <div class="oc-detail-row"><span>3/20 전액 입금</span><span class="amt-in">+$5,500</span></div>
-        <div class="oc-detail-title" style="margin-top:10px;">비용 내역</div>
-        <div class="oc-detail-row"><span>3/12 제품매입 · KP화학 (배분)</span><span class="amt-out">-₩3,100,000</span></div>
-        <div class="oc-detail-row"><span>3/18 수수료 · 검역원</span><span class="amt-out">-₩150,000</span></div>
-        <div class="oc-detail-title" style="margin-top:10px;">손익 계산</div>
-        <div class="oc-detail-row"><span>매출</span><span style="font-weight:700;">₩8,123,500</span></div>
-        <div class="oc-detail-row"><span>총 비용</span><span class="amt-out">-₩3,250,000</span></div>
-        <div class="oc-detail-row" style="font-weight:700;"><span>순이익</span><span style="color:#0ca678;">+₩4,873,500 (이익률 60.0%)</span></div>
-      </div>
-    </div>
+    <div id="orderCards"></div>
   </div>
-
 </div>
 
-<!-- ═══ 통합 목록 모달 ═══ -->
+<!-- 통합 목록 모달 -->
 <div id="modal-tx" class="modal-bg" onclick="if(event.target===this)closeTxModal()">
   <div class="modal" style="width:780px;max-width:95vw;">
-    <div class="modal-head">
-      <h3>거래 등록</h3>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span id="txSummary" style="font-size:11px;color:#8b95a1;"></span>
-        <button class="modal-close" onclick="closeTxModal()">✕</button>
-      </div>
-    </div>
-    <div class="modal-body" style="padding:16px 20px;">
-      <!-- 목록 테이블 -->
-      <div style="overflow-x:auto;margin-bottom:12px;">
-        <table class="tbl" id="txListTable">
-          <thead>
-            <tr>
-              <th style="width:90px;">구분</th>
-              <th style="width:100px;">날짜</th>
-              <th>거래처</th>
-              <th style="width:90px;">항목/경로</th>
-              <th style="width:90px;">주문번호</th>
-              <th class="r" style="width:100px;">금액</th>
-              <th style="width:80px;">환율</th>
-              <th>메모</th>
-              <th style="width:30px;"></th>
-            </tr>
-          </thead>
-          <tbody id="txListBody">
-            <!-- JS로 행 추가 -->
-          </tbody>
-        </table>
-      </div>
-      <!-- 행 추가 버튼 -->
-      <button onclick="addTxRow()" style="width:100%;padding:10px;border:2px dashed #d5d8dc;border-radius:8px;background:#fafbfc;color:#8b95a1;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='#202454';this.style.color='#202454';" onmouseout="this.style.borderColor='#d5d8dc';this.style.color='#8b95a1';">+ 항목 추가</button>
-      <!-- 하단 요약 + 저장 -->
+    <div class="modal-head"><h3>거래 등록</h3><div style="display:flex;align-items:center;gap:8px;"><span id="txSummary" style="font-size:11px;color:#8b95a1;"></span><button class="modal-close" onclick="closeTxModal()">✕</button></div></div>
+    <div class="modal-body">
+      <div style="overflow-x:auto;margin-bottom:12px;"><table class="tbl" id="txListTable"><thead><tr><th style="width:90px;">구분</th><th style="width:100px;">날짜</th><th>거래처</th><th style="width:90px;">항목/경로</th><th style="width:90px;">주문번호</th><th class="r" style="width:100px;">금액</th><th style="width:80px;">환율</th><th>메모</th><th style="width:30px;"></th></tr></thead><tbody id="txListBody"></tbody></table></div>
+      <button onclick="addTxRow()" style="width:100%;padding:10px;border:2px dashed #d5d8dc;border-radius:8px;background:#fafbfc;color:#8b95a1;font-size:12px;font-weight:600;cursor:pointer;" onmouseover="this.style.borderColor='#202454';this.style.color='#202454';" onmouseout="this.style.borderColor='#d5d8dc';this.style.color='#8b95a1';">+ 항목 추가</button>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid #f4f5f7;">
-        <div style="display:flex;gap:16px;font-size:12px;">
-          <span>입금: <strong id="txTotalIn" style="color:#0ca678;">$0</strong></span>
-          <span>지출: <strong id="txTotalOut" style="color:#f04452;">₩0</strong></span>
-        </div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn-cancel" onclick="closeTxModal()">취소</button>
-          <button class="btn-save" onclick="saveAllTx()">전체 저장</button>
-        </div>
+        <div style="display:flex;gap:16px;font-size:12px;"><span>입금: <strong id="txTotalIn" style="color:#0ca678;">$0</strong></span><span>지출: <strong id="txTotalOut" style="color:#f04452;">₩0</strong></span></div>
+        <div style="display:flex;gap:6px;"><button class="btn-cancel" onclick="closeTxModal()">취소</button><button class="btn-save" onclick="saveAllTx()">전체 저장</button></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+// ═══ 데이터 ═══
+const CAT_COLORS = {제품매입:'#3182f6',물류비:'#f59e0b',통관비:'#0ca678',대행비:'#8b5cf6',수수료:'#8b95a1',기타:'#ef4444'};
+const CAT_CLS = {제품매입:'c1',물류비:'c2',통관비:'c3',대행비:'c4',수수료:'c5',기타:'c6'};
+const BUYER_COLORS = ['#3182f6','#0ca678','#f59e0b','#8b5cf6','#ef4444','#ec4899','#14b8a6','#f97316'];
+let finInData = [], finOutData = [];
+let curYear = 2026, curMonth = 2; // 0-indexed (2=March)
 let txRowId = 0;
 
-function switchTab(t, btn) {
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-' + t).classList.add('active');
+const defaultIn = [
+  {id:'IN-001',date:'2026-03-20',company:'India Steel Corp',route:'TT',orderId:'ORD-003',amountUsd:5500,rate:1477,amountKrw:8123500,memo:'전액 입금',status:'done'},
+  {id:'IN-002',date:'2026-03-10',company:'Dubai Imports LLC',route:'TA',orderId:'ORD-002',amountUsd:3200,rate:1477,amountKrw:4726400,memo:'T/A 정산',status:'done'},
+  {id:'IN-003',date:'2026-03-05',company:'ABC Trading Co.',route:'TT',orderId:'ORD-001',amountUsd:1350,rate:1477,amountKrw:1993950,memo:'선금 30%',status:'partial'},
+  {id:'IN-004',date:'2026-02-15',company:'ABC Trading Co.',route:'TT',orderId:'ORD-001',amountUsd:2000,rate:1450,amountKrw:2900000,memo:'2월 거래',status:'done'}
+];
+const defaultOut = [
+  {id:'OUT-001',date:'2026-03-18',company:'검역원',category:'수수료',orderId:'ORD-003',amountKrw:150000,memo:'검역 수수료'},
+  {id:'OUT-002',date:'2026-03-15',company:'Extrans 물류',category:'물류비',orderId:'ORD-001,002',amountKrw:1700000,memo:'3월 해상운송'},
+  {id:'OUT-003',date:'2026-03-12',company:'KP화학',category:'제품매입',orderId:'ORD-001,003',amountKrw:4350000,memo:'코트재+방청코팅'},
+  {id:'OUT-004',date:'2026-03-08',company:'관세법인 A',category:'통관비',orderId:'ORD-002',amountKrw:640000,memo:'두바이 통관'},
+  {id:'OUT-005',date:'2026-03-05',company:'대행사 B',category:'대행비',orderId:'ORD-001',amountKrw:580000,memo:'수출 대행'},
+  {id:'OUT-006',date:'2026-02-10',company:'KP화학',category:'제품매입',orderId:'',amountKrw:1800000,memo:'2월 원재료'},
+  {id:'OUT-007',date:'2026-02-05',company:'Extrans 물류',category:'물류비',orderId:'',amountKrw:720000,memo:'2월 해상운송'}
+];
+
+function loadData(){
+  try{const i=localStorage.getItem('finInData'),o=localStorage.getItem('finOutData');
+    finInData=i?JSON.parse(i):JSON.parse(JSON.stringify(defaultIn));
+    finOutData=o?JSON.parse(o):JSON.parse(JSON.stringify(defaultOut));
+  }catch(e){finInData=JSON.parse(JSON.stringify(defaultIn));finOutData=JSON.parse(JSON.stringify(defaultOut));}
+}
+function saveData(){
+  try{localStorage.setItem('finInData',JSON.stringify(finInData));localStorage.setItem('finOutData',JSON.stringify(finOutData));}catch(e){}
 }
 
-function toggleDetail(id) {
-  document.getElementById(id).classList.toggle('open');
+// ═══ 유틸 ═══
+function fmtW(n){return'₩'+Math.abs(n).toLocaleString('ko-KR');}
+function fmtD(n){return'$'+Math.abs(n).toLocaleString('ko-KR');}
+function getMonthPrefix(){return curYear+'-'+String(curMonth+1).padStart(2,'0');}
+function filterMonth(arr){const p=getMonthPrefix();return arr.filter(r=>r.date&&r.date.startsWith(p));}
+
+// ═══ 월 네비게이션 ═══
+function changeMonth(d){curMonth+=d;if(curMonth>11){curMonth=0;curYear++;}if(curMonth<0){curMonth=11;curYear--;}renderAll();}
+function updateMonthLabel(){document.getElementById('monthLabel').textContent=curYear+'년 '+(curMonth+1)+'월';}
+
+// ═══ 요약 카드 ═══
+function renderSummary(){
+  const ins=filterMonth(finInData), outs=filterMonth(finOutData);
+  const totalInUsd=ins.reduce((s,r)=>s+r.amountUsd,0);
+  const totalInKrw=ins.reduce((s,r)=>s+r.amountKrw,0);
+  const totalOut=outs.reduce((s,r)=>s+r.amountKrw,0);
+  const profit=totalInKrw-totalOut;
+  const rate=totalInKrw>0?((profit/totalInKrw)*100).toFixed(1):'0';
+  document.getElementById('smProfit').textContent=(profit>=0?'':'-')+fmtW(profit);
+  document.getElementById('smRate').textContent='이익률 '+rate+'%';
+  document.getElementById('smInUsd').textContent=fmtD(totalInUsd);
+  document.getElementById('smInKrw').textContent=fmtW(totalInKrw)+' · '+ins.length+'건';
+  document.getElementById('smOut').textContent=fmtW(totalOut);
+  document.getElementById('smOutCnt').textContent=outs.length+'건';
+  // 전월 대비
+  const pm=curMonth===0?11:curMonth-1, py=curMonth===0?curYear-1:curYear;
+  const pp=py+'-'+String(pm+1).padStart(2,'0');
+  const prevInKrw=finInData.filter(r=>r.date&&r.date.startsWith(pp)).reduce((s,r)=>s+r.amountKrw,0);
+  const prevOut=finOutData.filter(r=>r.date&&r.date.startsWith(pp)).reduce((s,r)=>s+r.amountKrw,0);
+  const prevProfit=prevInKrw-prevOut;
+  if(prevProfit!==0){const pct=((profit-prevProfit)/Math.abs(prevProfit)*100).toFixed(1);
+    document.getElementById('smDiff').textContent=(pct>=0?'▲ +':'▼ ')+pct+'%';
+    document.getElementById('smDiff').style.color=pct>=0?'#6ee7b7':'#fca5a5';
+  }else{document.getElementById('smDiff').textContent='-';}
+  document.getElementById('smDiffHint').textContent=(pm+1)+'월: '+fmtW(prevProfit);
+  // 사이드
+  const paid=ins.filter(r=>r.status==='done').reduce((s,r)=>s+r.amountUsd,0);
+  const recv=ins.filter(r=>r.status!=='done').reduce((s,r)=>s+r.amountUsd,0);
+  document.getElementById('smPaid').textContent=fmtD(paid);
+  document.getElementById('smRecv').textContent=fmtD(recv);
+  if(outs.length>0){const cats={};outs.forEach(r=>{cats[r.category]=(cats[r.category]||0)+r.amountKrw;});
+    const top=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+    document.getElementById('smTopCost').textContent=top[0]+' '+(top[1]/totalOut*100).toFixed(0)+'%';
+  }else{document.getElementById('smTopCost').textContent='-';}
 }
 
-// ── 목록 모달 ──
-function openTxModal(preType) {
-  document.getElementById('txListBody').innerHTML = '';
-  txRowId = 0;
-  addTxRow(preType || 'in');
-  updateTxSummary();
-  document.getElementById('modal-tx').classList.add('show');
+// ═══ 비용 비중 바 ═══
+function renderCostBar(){
+  const outs=filterMonth(finOutData);const total=outs.reduce((s,r)=>s+r.amountKrw,0);
+  const cats={};outs.forEach(r=>{cats[r.category]=(cats[r.category]||0)+r.amountKrw;});
+  let barH='',legH='';
+  Object.entries(cats).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
+    const pct=total>0?(v/total*100).toFixed(1):'0';const c=CAT_COLORS[k]||'#8b95a1';
+    barH+='<div class="cost-seg" style="width:'+pct+'%;background:'+c+';">'+(pct>6?k:'')+'</div>';
+    legH+='<div class="cl-item"><div class="cl-dot" style="background:'+c+';"></div>'+k+' <span class="cl-val">'+fmtW(v)+'</span></div>';
+  });
+  document.getElementById('costBar').innerHTML=barH||'<div style="flex:1;background:#f1f5f9;border-radius:6px;"></div>';
+  document.getElementById('costLegend').innerHTML=legH||'<span style="color:#c4c9d0;">비용 데이터 없음</span>';
 }
 
-function closeTxModal() {
-  document.getElementById('modal-tx').classList.remove('show');
+// ═══ 테이블 렌더링 ═══
+function renderInTable(tbodyId,tfootId,detailed){
+  const data=filterMonth(finInData).sort((a,b)=>b.date.localeCompare(a.date));
+  const tbody=document.getElementById(tbodyId);if(!tbody)return;
+  let total=0;
+  tbody.innerHTML=data.length===0?'<tr><td colspan="'+(detailed?10:10)+'" class="empty-msg">입금 내역이 없습니다</td></tr>':
+    data.map((r,i)=>{const idx=finInData.indexOf(r);total+=r.amountUsd;
+      const routeBadge=r.route==='TA'?'<span class="badge ta">T/A</span>':'<span class="badge tt">T/T</span>';
+      const stBadge=r.status==='done'?'<span class="badge done">완료</span>':r.status==='partial'?'<span class="badge partial">부분</span>':'<span class="badge wait">대기</span>';
+      return '<tr><td style="font-weight:600;">'+r.date.slice(5)+'</td><td>'+r.company+'</td><td>'+routeBadge+'</td><td class="link">'+(r.orderId||'-')+'</td>'+
+        (detailed?'<td style="color:#8b95a1;">'+r.memo+'</td>':'')+
+        '<td class="r amt-in">+'+fmtD(r.amountUsd)+'</td><td class="r" style="color:#8b95a1;">'+r.rate+'</td><td class="r" style="font-weight:600;">'+fmtW(r.amountKrw)+'</td>'+
+        (detailed?'':'<td style="color:#8b95a1;font-size:11px;">'+r.memo+'</td>')+
+        '<td>'+stBadge+'</td><td><button class="btn-edit" onclick="editIn('+idx+')">수정</button><button class="btn-del" onclick="deleteIn('+idx+')">삭제</button></td></tr>';
+    }).join('');
+  const cols=detailed?10:10;
+  document.getElementById(tfootId).innerHTML='<tr><td colspan="'+(detailed?5:4)+'" class="r" style="color:#6b7684;">합계</td><td class="r amt-in" style="font-size:14px;">+'+fmtD(total)+'</td><td></td><td class="r" style="color:#0ca678;font-size:14px;">'+fmtW(data.reduce((s,r)=>s+r.amountKrw,0))+'</td><td colspan="2"></td></tr>';
+  if(document.getElementById('cntIn'))document.getElementById('cntIn').textContent=data.length;
 }
 
-function addTxRow(type) {
-  const t = type || 'in';
-  const id = ++txRowId;
-  const today = new Date().toISOString().slice(0, 10);
-  const tbody = document.getElementById('txListBody');
-
-  const tr = document.createElement('tr');
-  tr.id = 'txRow-' + id;
-  tr.className = t === 'in' ? 'tx-row-in' : 'tx-row-out';
-  tr.innerHTML =
-    '<td>' +
-      '<select class="tx-select" onchange="onTxTypeChange(' + id + ',this)">' +
-        '<option value="in"' + (t === 'in' ? ' selected' : '') + '>💰 입금</option>' +
-        '<option value="out"' + (t === 'out' ? ' selected' : '') + '>💸 지출</option>' +
-      '</select>' +
-    '</td>' +
-    '<td><input type="date" class="tx-input" value="' + today + '"></td>' +
-    '<td><input type="text" class="tx-input" placeholder="회사명"></td>' +
-    '<td id="txSub-' + id + '">' + getSubField(t, id) + '</td>' +
-    '<td><input type="text" class="tx-input" placeholder="ORD-" style="width:75px;"></td>' +
-    '<td><input type="number" class="tx-input" placeholder="0" style="text-align:right;" oninput="updateTxSummary()" id="txAmt-' + id + '"></td>' +
-    '<td id="txRateCell-' + id + '">' + (t === 'in' ? '<input type="number" class="tx-input" value="1477" style="width:60px;">' : '<span style="color:#c4c9d0;font-size:10px;">KRW</span>') + '</td>' +
-    '<td><input type="text" class="tx-input" placeholder="메모"></td>' +
-    '<td><button class="tx-del" onclick="removeTxRow(' + id + ')">✕</button></td>';
-  tbody.appendChild(tr);
-  updateTxSummary();
+function renderOutTable(tbodyId,tfootId){
+  const data=filterMonth(finOutData).sort((a,b)=>b.date.localeCompare(a.date));
+  const tbody=document.getElementById(tbodyId);if(!tbody)return;
+  let total=0;
+  tbody.innerHTML=data.length===0?'<tr><td colspan="7" class="empty-msg">지출 내역이 없습니다</td></tr>':
+    data.map(r=>{const idx=finOutData.indexOf(r);total+=r.amountKrw;
+      return '<tr><td>'+r.date.slice(5)+'</td><td>'+r.company+'</td><td><span class="cat '+(CAT_CLS[r.category]||'c5')+'">'+r.category+'</span></td><td class="link">'+(r.orderId||'-')+'</td><td class="r amt-out">-'+fmtW(r.amountKrw)+'</td><td style="color:#8b95a1;font-size:11px;">'+r.memo+'</td><td><button class="btn-edit" onclick="editOut('+idx+')">수정</button><button class="btn-del" onclick="deleteOut('+idx+')">삭제</button></td></tr>';
+    }).join('');
+  document.getElementById(tfootId).innerHTML='<tr><td colspan="4" class="r" style="color:#6b7684;">합계</td><td class="r amt-out" style="font-size:14px;">-'+fmtW(total)+'</td><td colspan="2"></td></tr>';
+  if(document.getElementById('cntOut'))document.getElementById('cntOut').textContent=data.length;
 }
 
-function getSubField(type, id) {
-  if (type === 'in') {
-    return '<select class="tx-select"><option value="TT">T/T</option><option value="TA">T/A</option></select>';
-  } else {
-    return '<select class="tx-select"><option>제품매입</option><option>물류비</option><option>통관비</option><option>대행비</option><option>수수료</option><option>기타</option></select>';
+// ═══ 거래처별 ═══
+function renderBuyerChart(){
+  const ins=filterMonth(finInData);const map={};
+  ins.forEach(r=>{map[r.company]=(map[r.company]||0)+r.amountUsd;});
+  const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const max=sorted.length>0?sorted[0][1]:1;
+  document.getElementById('buyerList').innerHTML=sorted.length===0?'<div class="empty-msg">거래 내역 없음</div>':
+    sorted.map((e,i)=>'<div class="buyer-row"><div class="buyer-av" style="background:'+BUYER_COLORS[i%BUYER_COLORS.length]+';">'+e[0][0]+'</div><div class="buyer-name">'+e[0]+'</div><div class="buyer-bar-bg"><div class="buyer-bar-fill" style="width:'+(e[1]/max*100)+'%;background:linear-gradient(90deg,'+BUYER_COLORS[i%BUYER_COLORS.length]+','+BUYER_COLORS[i%BUYER_COLORS.length]+'80);"></div></div><div class="buyer-amt">'+fmtD(e[1])+'</div></div>').join('');
+}
+
+// ═══ 미수금 ═══
+function renderReceivables(){
+  const ins=filterMonth(finInData);
+  const pending=ins.filter(r=>r.status!=='done');
+  const done=ins.filter(r=>r.status==='done');
+  const totalRecv=pending.reduce((s,r)=>s+r.amountUsd,0);
+  document.getElementById('recvTotal').textContent=totalRecv>0?fmtD(totalRecv):'';
+  let html='';
+  pending.forEach(r=>{html+='<div class="recv-item"><div class="recv-av" style="background:#fef3c7;">⏳</div><div class="recv-info"><div class="recv-name">'+r.company+'</div><div class="recv-sub">'+(r.orderId||'-')+' · '+(r.route==='TA'?'Trade Assurance':'T/T')+' · '+r.memo+'</div></div><div class="recv-amt pending">'+fmtD(r.amountUsd)+'</div></div>';});
+  done.slice(0,3).forEach(r=>{html+='<div class="recv-item"><div class="recv-av" style="background:#ecfdf5;">✅</div><div class="recv-info"><div class="recv-name">'+r.company+'</div><div class="recv-sub">'+(r.orderId||'-')+' · '+r.date.slice(5)+' 입금</div></div><div class="recv-amt done">입금 완료</div></div>';});
+  document.getElementById('recvList').innerHTML=html||'<div class="empty-msg">미수금 없음</div>';
+}
+
+// ═══ 주문별 손익 ═══
+function renderOrderCards(){
+  const ins=filterMonth(finInData), outs=filterMonth(finOutData);
+  const orders={};
+  ins.forEach(r=>{if(!r.orderId)return;r.orderId.split(',').forEach(oid=>{oid=oid.trim();if(!oid)return;if(!orders[oid])orders[oid]={ins:[],outs:[],company:'',route:''};orders[oid].ins.push(r);orders[oid].company=r.company;orders[oid].route=r.route;});});
+  outs.forEach(r=>{if(!r.orderId)return;r.orderId.split(',').forEach(oid=>{oid=oid.trim();if(!oid)return;if(!orders[oid])orders[oid]={ins:[],outs:[],company:r.company,route:''};orders[oid].outs.push(r);});});
+  const container=document.getElementById('orderCards');
+  if(Object.keys(orders).length===0){container.innerHTML='<div class="empty-msg">주문번호가 연결된 거래가 없습니다</div>';return;}
+  let html='';let detailIdx=0;
+  Object.entries(orders).sort().forEach(([oid,o])=>{
+    const totalIn=o.ins.reduce((s,r)=>s+r.amountUsd,0);
+    const totalInKrw=o.ins.reduce((s,r)=>s+r.amountKrw,0);
+    const totalOut=o.outs.reduce((s,r)=>s+r.amountKrw,0);
+    const profit=totalInKrw-totalOut;
+    const allDone=o.ins.length>0&&o.ins.every(r=>r.status==='done');
+    const routeBadge=o.route==='TA'?'<span class="badge ta" style="margin-left:4px;">T/A</span>':'<span class="badge tt" style="margin-left:4px;">T/T</span>';
+    const stBadge=allDone?'<span class="badge done">입금완료</span>':'<span class="badge partial">부분입금</span>';
+    const pct=totalIn>0?100:0; // simplified
+    const did='od'+detailIdx++;
+    html+='<div class="order-card" onclick="toggleDetail(\''+did+'\')">';
+    html+='<div class="oc-top"><div><span class="oc-id">'+oid+'</span>'+routeBadge+'</div>'+stBadge+'</div>';
+    html+='<div class="oc-buyer">'+o.company+'</div>';
+    html+='<div class="oc-grid"><div class="oc-item"><div class="oc-label">입금액</div><div class="oc-val" style="color:#0ca678;">'+fmtD(totalIn)+'</div></div><div class="oc-item"><div class="oc-label">입금(KRW)</div><div class="oc-val" style="color:#202454;">'+fmtW(totalInKrw)+'</div></div><div class="oc-item"><div class="oc-label">비용</div><div class="oc-val" style="color:#f04452;">'+fmtW(totalOut)+'</div></div><div class="oc-item"><div class="oc-label">순이익</div><div class="oc-val" style="color:'+(profit>=0?'#0ca678':'#f04452')+';">'+(profit>=0?'+':'-')+fmtW(profit)+'</div></div></div>';
+    html+='<div class="oc-progress"><div class="oc-progress-fill" style="width:'+(allDone?100:30)+'%;background:linear-gradient(90deg,#0ca678,#34d399);"></div></div>';
+    html+='<div class="oc-progress-label"><span>입금 '+(allDone?'100':'일부')+'%</span><span style="color:'+(profit>=0?'#0ca678':'#f04452')+';">순이익 '+(profit>=0?'+':'-')+fmtW(profit)+'</span></div>';
+    // 상세
+    html+='<div class="oc-detail" id="'+did+'">';
+    html+='<div class="oc-detail-title">입금 내역</div>';
+    o.ins.forEach(r=>{html+='<div class="oc-detail-row"><span>'+r.date.slice(5)+' '+r.memo+'</span><span class="amt-in">+'+fmtD(r.amountUsd)+'</span></div>';});
+    if(o.outs.length>0){html+='<div class="oc-detail-title" style="margin-top:10px;">비용 내역</div>';
+      o.outs.forEach(r=>{html+='<div class="oc-detail-row"><span>'+r.date.slice(5)+' '+r.category+' · '+r.company+'</span><span class="amt-out">-'+fmtW(r.amountKrw)+'</span></div>';});
+    }
+    html+='<div class="oc-detail-title" style="margin-top:10px;">손익 계산</div>';
+    html+='<div class="oc-detail-row"><span>매출(KRW)</span><span style="font-weight:700;">'+fmtW(totalInKrw)+'</span></div>';
+    html+='<div class="oc-detail-row"><span>총 비용</span><span class="amt-out">-'+fmtW(totalOut)+'</span></div>';
+    const profitRate=totalInKrw>0?((profit/totalInKrw)*100).toFixed(1):'0';
+    html+='<div class="oc-detail-row" style="font-weight:700;"><span>순이익</span><span style="color:'+(profit>=0?'#0ca678':'#f04452')+';">'+(profit>=0?'+':'-')+fmtW(profit)+' (이익률 '+profitRate+'%)</span></div>';
+    html+='</div></div>';
+  });
+  container.innerHTML=html;
+}
+
+// ═══ 전체 렌더링 ═══
+function renderAll(){
+  updateMonthLabel();renderSummary();renderCostBar();
+  renderInTable('tblInAll','tfootInAll',false);
+  renderOutTable('tblOutAll','tfootOutAll');
+  renderInTable('tblInDetail','tfootInDetail',true);
+  renderOutTable('tblOutDetail','tfootOutDetail');
+  renderBuyerChart();renderReceivables();renderOrderCards();
+}
+
+// ═══ 수정/삭제 ═══
+function deleteIn(idx){if(!confirm(finInData[idx].company+' 입금 건을 삭제하시겠습니까?'))return;finInData.splice(idx,1);saveData();renderAll();}
+function deleteOut(idx){if(!confirm(finOutData[idx].company+' 지출 건을 삭제하시겠습니까?'))return;finOutData.splice(idx,1);saveData();renderAll();}
+function editIn(idx){
+  openTxModal();
+  document.getElementById('txListBody').innerHTML='';txRowId=0;
+  const r=finInData[idx];addTxRow('in');
+  const tr=document.getElementById('txRow-1');
+  tr.querySelectorAll('.tx-input')[0].value=r.date;
+  tr.querySelectorAll('.tx-input')[1].value=r.company;
+  tr.querySelectorAll('.tx-input')[2].value=r.orderId||'';
+  tr.querySelector('#txAmt-1').value=r.amountUsd;
+  tr.querySelectorAll('.tx-input')[4].value=r.rate;
+  tr.querySelectorAll('.tx-input')[5].value=r.memo;
+  tr.querySelector('.tx-select').value='in';
+  tr.querySelectorAll('.tx-select')[1].value=r.route;
+  finInData.splice(idx,1);saveData();updateTxSummary();
+}
+function editOut(idx){
+  openTxModal();
+  document.getElementById('txListBody').innerHTML='';txRowId=0;
+  const r=finOutData[idx];addTxRow('out');
+  const tr=document.getElementById('txRow-1');
+  tr.querySelectorAll('.tx-input')[0].value=r.date;
+  tr.querySelectorAll('.tx-input')[1].value=r.company;
+  tr.querySelectorAll('.tx-input')[2].value=r.orderId||'';
+  tr.querySelector('#txAmt-1').value=r.amountKrw;
+  tr.querySelectorAll('.tx-input')[4].value=r.memo;
+  tr.querySelector('.tx-select').value='out';
+  onTxTypeChange(1,tr.querySelector('.tx-select'));
+  tr.querySelectorAll('.tx-select')[1].value=r.category;
+  finOutData.splice(idx,1);saveData();updateTxSummary();
+}
+
+// ═══ 탭 ═══
+function switchTab(t,btn){document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));btn.classList.add('active');document.getElementById('tab-'+t).classList.add('active');}
+function toggleDetail(id){document.getElementById(id).classList.toggle('open');}
+
+// ═══ 모달 ═══
+function openTxModal(){document.getElementById('txListBody').innerHTML='';txRowId=0;addTxRow('in');updateTxSummary();document.getElementById('modal-tx').classList.add('show');}
+function closeTxModal(){document.getElementById('modal-tx').classList.remove('show');}
+
+function addTxRow(type){
+  const t=type||'in';const id=++txRowId;const today=new Date().toISOString().slice(0,10);
+  const tr=document.createElement('tr');tr.id='txRow-'+id;tr.className=t==='in'?'tx-row-in':'tx-row-out';
+  tr.innerHTML='<td><select class="tx-select" onchange="onTxTypeChange('+id+',this)"><option value="in"'+(t==='in'?' selected':'')+'>💰 입금</option><option value="out"'+(t==='out'?' selected':'')+'>💸 지출</option></select></td><td><input type="date" class="tx-input" value="'+today+'"></td><td><input type="text" class="tx-input" placeholder="회사명"></td><td id="txSub-'+id+'">'+getSubField(t)+'</td><td><input type="text" class="tx-input" placeholder="ORD-" style="width:75px;"></td><td><input type="number" class="tx-input" placeholder="0" style="text-align:right;" oninput="updateTxSummary()" id="txAmt-'+id+'"></td><td id="txRateCell-'+id+'">'+(t==='in'?'<input type="number" class="tx-input" value="1477" style="width:60px;">':'<span style="color:#c4c9d0;font-size:10px;">KRW</span>')+'</td><td><input type="text" class="tx-input" placeholder="메모"></td><td><button class="tx-del" onclick="removeTxRow('+id+')">✕</button></td>';
+  document.getElementById('txListBody').appendChild(tr);updateTxSummary();
+}
+function getSubField(type){return type==='in'?'<select class="tx-select"><option value="TT">T/T</option><option value="TA">T/A</option></select>':'<select class="tx-select"><option>제품매입</option><option>물류비</option><option>통관비</option><option>대행비</option><option>수수료</option><option>기타</option></select>';}
+function onTxTypeChange(id,sel){const t=sel.value;const tr=document.getElementById('txRow-'+id);tr.className=t==='in'?'tx-row-in':'tx-row-out';document.getElementById('txSub-'+id).innerHTML=getSubField(t);document.getElementById('txRateCell-'+id).innerHTML=t==='in'?'<input type="number" class="tx-input" value="1477" style="width:60px;">':'<span style="color:#c4c9d0;font-size:10px;">KRW</span>';updateTxSummary();}
+function removeTxRow(id){const r=document.getElementById('txRow-'+id);if(r)r.remove();updateTxSummary();}
+function updateTxSummary(){let ti=0,to=0,ci=0,co=0;document.querySelectorAll('#txListBody tr').forEach(tr=>{const t=tr.querySelector('select').value;const a=parseFloat(tr.querySelector('[id^="txAmt-"]')?.value)||0;if(t==='in'){ti+=a;ci++;}else{to+=a;co++;}});document.getElementById('txTotalIn').textContent='+$'+ti.toLocaleString();document.getElementById('txTotalOut').textContent='-₩'+to.toLocaleString();document.getElementById('txSummary').textContent='입금 '+ci+'건 · 지출 '+co+'건';}
+
+function saveAllTx(){
+  const rows=document.querySelectorAll('#txListBody tr');if(rows.length===0){alert('항목을 추가하세요.');return;}
+  let si=0,so=0;
+  rows.forEach(tr=>{
+    const inputs=tr.querySelectorAll('.tx-input');const selects=tr.querySelectorAll('.tx-select');
+    const type=selects[0].value;const date=inputs[0].value;const company=inputs[1].value.trim();
+    const orderId=inputs[2].value.trim();const amt=parseFloat(tr.querySelector('[id^="txAmt-"]')?.value)||0;
+    const memo=inputs[inputs.length-1].value.trim();
+    if(!date||!company||amt<=0)return;
+    if(type==='in'){
+      const route=selects[1].value;const rate=parseInt(inputs[4]?.value)||1477;
+      finInData.unshift({id:'IN-'+Date.now()+'-'+si,date,company,route,orderId,amountUsd:amt,rate,amountKrw:amt*rate,memo,status:'done'});si++;
+    }else{
+      const category=selects[1].value;
+      finOutData.unshift({id:'OUT-'+Date.now()+'-'+so,date,company,category,orderId,amountKrw:amt,memo});so++;
+    }
+  });
+  if(si===0&&so===0){alert('유효한 항목이 없습니다.');return;}
+  saveData();renderAll();closeTxModal();
+}
+
+// ═══ CSV ═══
+function exportCsv(type){
+  let csv='\uFEFF';
+  if(type==='in'){csv+='입금일,거래처,경로,주문번호,USD,환율,KRW,메모,상태\n';
+    filterMonth(finInData).forEach(r=>{csv+=[r.date,r.company,r.route,r.orderId,r.amountUsd,r.rate,r.amountKrw,r.memo,r.status].join(',')+'\n';});
+  }else{csv+='날짜,거래처,항목,주문번호,KRW,메모\n';
+    filterMonth(finOutData).forEach(r=>{csv+=[r.date,r.company,r.category,r.orderId,r.amountKrw,r.memo].join(',')+'\n';});
   }
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);link.download=(type==='in'?'들어온돈':'나간돈')+'_'+getMonthPrefix()+'.csv';link.click();
 }
 
-function onTxTypeChange(id, sel) {
-  const type = sel.value;
-  const tr = document.getElementById('txRow-' + id);
-  tr.className = type === 'in' ? 'tx-row-in' : 'tx-row-out';
-  document.getElementById('txSub-' + id).innerHTML = getSubField(type, id);
-  document.getElementById('txRateCell-' + id).innerHTML = type === 'in'
-    ? '<input type="number" class="tx-input" value="1477" style="width:60px;">'
-    : '<span style="color:#c4c9d0;font-size:10px;">KRW</span>';
-  updateTxSummary();
-}
-
-function removeTxRow(id) {
-  const row = document.getElementById('txRow-' + id);
-  if (row) row.remove();
-  updateTxSummary();
-}
-
-function updateTxSummary() {
-  let totalIn = 0, totalOut = 0, cntIn = 0, cntOut = 0;
-  document.querySelectorAll('#txListBody tr').forEach(tr => {
-    const type = tr.querySelector('select').value;
-    const amt = parseFloat(tr.querySelector('[id^="txAmt-"]')?.value) || 0;
-    if (type === 'in') { totalIn += amt; cntIn++; }
-    else { totalOut += amt; cntOut++; }
-  });
-  document.getElementById('txTotalIn').textContent = '+$' + totalIn.toLocaleString();
-  document.getElementById('txTotalOut').textContent = '-₩' + totalOut.toLocaleString();
-  document.getElementById('txSummary').textContent = '입금 ' + cntIn + '건 · 지출 ' + cntOut + '건';
-}
-
-function saveAllTx() {
-  const rows = document.querySelectorAll('#txListBody tr');
-  if (rows.length === 0) { alert('항목을 추가하세요.'); return; }
-
-  let savedIn = 0, savedOut = 0;
-  rows.forEach(tr => {
-    const type = tr.querySelector('select').value;
-    const amt = parseFloat(tr.querySelector('[id^="txAmt-"]')?.value) || 0;
-    if (amt <= 0) return;
-    if (type === 'in') savedIn++;
-    else savedOut++;
-    // TODO: 실제 데이터 배열에 push + 테이블 렌더링
-  });
-
-  alert('저장 완료!\n입금 ' + savedIn + '건 → 들어온 돈에 추가\n지출 ' + savedOut + '건 → 나간 돈에 추가');
-  closeTxModal();
-}
+// ═══ 초기화 ═══
+loadData();renderAll();
 </script>
 </body>
 </html>
