@@ -78,6 +78,12 @@
   .recv-info{flex:1;}.recv-name{font-size:12px;font-weight:600;}.recv-sub{font-size:10px;color:#8b95a1;margin-top:1px;}
   .recv-amt{font-size:14px;font-weight:700;}.recv-amt.pending{color:#f59e0b;}.recv-amt.done{color:#0ca678;font-size:11px;}
   .empty-msg{text-align:center;padding:30px;color:#c4c9d0;font-size:12px;}
+  .filter-btn{padding:6px 12px;border:1px solid #e5e8eb;border-radius:7px;background:#fff;color:#6b7684;font-size:11px;font-weight:600;cursor:pointer;transition:all .12s;}
+  .filter-btn:hover{background:#f1f5f9;}.filter-btn.active{background:#202454;color:#fff;border-color:#202454;}
+  .price-tier{font-weight:700;font-size:12px;}.tier-1{color:#ef4444;}.tier-2{color:#f59e0b;}.tier-3{color:#0ca678;}.tier-4{color:#202454;}
+  .margin-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+  .margin-high{background:#dcfce7;color:#16a34a;}.margin-mid{background:#fef3c7;color:#d97706;}.margin-low{background:#fee2e2;color:#ef4444;}
+  .cat-water{background:#dbeafe;color:#2563eb;}.cat-oil{background:#fef3c7;color:#d97706;}.cat-special{background:#dcfce7;color:#16a34a;}.cat-asphalt{background:#f1f5f9;color:#64748b;}.cat-powder{background:#fee2e2;color:#ef4444;}
   .modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;}
   .modal-bg.show{display:flex;}.modal{background:#fff;border-radius:14px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
   .modal-head{padding:16px 22px;border-bottom:1px solid #f4f5f7;display:flex;justify-content:space-between;align-items:center;}
@@ -136,6 +142,7 @@
       <button class="tab" onclick="switchTab('in',this)">들어온 돈</button>
       <button class="tab" onclick="switchTab('out',this)">나간 돈</button>
       <button class="tab" onclick="switchTab('order',this)">주문별 손익</button>
+      <button class="tab" onclick="switchTab('price',this)">제품 단가표</button>
     </div>
     <button class="btn-primary btn-sm" onclick="openTxModal()" style="padding:8px 20px;font-size:13px;">+ 거래 등록</button>
   </div>
@@ -166,6 +173,75 @@
   <div id="tab-order" class="tab-content">
     <div class="sec-head"><h3>주문별 손익 추적</h3></div>
     <div id="orderCards"></div>
+  </div>
+
+  <!-- 탭5: 제품 단가표 -->
+  <div id="tab-price" class="tab-content">
+    <!-- 마진 계산기 -->
+    <div class="card" style="padding:18px 22px;margin-bottom:16px;">
+      <div class="sec-head" style="margin-bottom:14px;"><h3>빠른 마진 계산기</h3></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px;align-items:end;">
+        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">제품 선택</label><select id="calcProduct" onchange="onCalcProductChange()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;font-family:inherit;"></select></div>
+        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">주문량 (kg)</label><input type="number" id="calcQty" value="100" oninput="calcMargin()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;"></div>
+        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">적용 단가 (USD/kg)</label><input type="number" id="calcPrice" step="0.1" oninput="calcMargin()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;"></div>
+        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">환율</label><input type="number" id="calcRate" value="1477" oninput="calcMargin()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;"></div>
+        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">매입가 (KRW/kg)</label><input type="number" id="calcCost" oninput="calcMargin()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:14px;background:#f8f9fa;border-radius:10px;padding:14px;text-align:center;">
+        <div><div style="font-size:10px;color:#8b95a1;">매출 (USD)</div><div style="font-size:16px;font-weight:700;margin-top:2px;" id="crRevUsd">$0</div></div>
+        <div><div style="font-size:10px;color:#8b95a1;">매출 (KRW)</div><div style="font-size:16px;font-weight:700;margin-top:2px;" id="crRevKrw">₩0</div></div>
+        <div><div style="font-size:10px;color:#8b95a1;">매입 원가</div><div style="font-size:16px;font-weight:700;margin-top:2px;color:#f04452;" id="crCost">₩0</div></div>
+        <div><div style="font-size:10px;color:#8b95a1;">마진</div><div style="font-size:16px;font-weight:700;margin-top:2px;color:#0ca678;" id="crMargin">₩0</div></div>
+        <div><div style="font-size:10px;color:#8b95a1;">마진율</div><div style="font-size:16px;font-weight:700;margin-top:2px;color:#202454;" id="crRate">0%</div></div>
+      </div>
+    </div>
+
+    <!-- 검색/필터 -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+      <input type="text" class="search-box" id="priceSearch" placeholder="제품명 검색..." oninput="filterPriceTable()" style="padding:8px 14px;border:1px solid #e5e8eb;border-radius:8px;font-size:12px;width:220px;font-family:inherit;outline:none;">
+      <button class="filter-btn active" onclick="filterPriceCat('all',this)">전체</button>
+      <button class="filter-btn" onclick="filterPriceCat('수용성',this)">수용성</button>
+      <button class="filter-btn" onclick="filterPriceCat('유성',this)">유성</button>
+      <button class="filter-btn" onclick="filterPriceCat('특수기능성',this)">특수기능성</button>
+      <button class="filter-btn" onclick="filterPriceCat('아스팔트',this)">아스팔트</button>
+      <button class="filter-btn" onclick="filterPriceCat('파우더',this)">파우더</button>
+      <div style="margin-left:auto;"><button class="btn-sm btn-outline" onclick="exportProductCsv()">📥 CSV</button></div>
+    </div>
+
+    <!-- 단가 테이블 -->
+    <div class="card">
+      <div class="card-head" style="padding:12px 18px;border-bottom:1px solid #f4f5f7;"><h3 style="font-size:13px;">제품별 단가표</h3><span style="font-size:11px;color:#8b95a1;" id="priceCnt"></span></div>
+      <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
+        <table class="tbl" id="priceTable">
+          <thead><tr>
+            <th style="position:sticky;left:0;z-index:2;background:#f8f9fa;min-width:180px;border-right:2px solid #e5e8eb;">제품명</th>
+            <th>분류</th><th>규격</th><th class="r">수출가</th><th class="r">자사몰</th>
+            <th class="r" style="background:#fff5f5;">1~100kg</th><th class="r" style="background:#fffbeb;">101~999</th><th class="r" style="background:#f0fdf4;">1K~2.9K</th><th class="r" style="background:#eff6ff;">3K+</th>
+            <th class="r">매입가/kg</th><th class="r">마진율</th><th>리드타임</th>
+          </tr></thead>
+          <tbody id="priceBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 채널별 가격 -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-head" style="padding:12px 18px;border-bottom:1px solid #f4f5f7;"><h3 style="font-size:13px;">채널별 가격 정책</h3></div>
+      <div style="padding:14px 18px;overflow-x:auto;">
+        <table class="tbl">
+          <thead><tr><th>채널</th><th>할인율</th><th class="r">코트재I 20kg 기준</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600;">자사몰 정가</td><td>100%</td><td class="r" style="font-weight:600;">₩142,000</td><td style="color:#8b95a1;">기준가</td></tr>
+            <tr><td>쿠팡 아이템위너</td><td>95%</td><td class="r">₩134,900</td><td style="color:#8b95a1;">×0.95</td></tr>
+            <tr><td>온라인 위탁</td><td>93%</td><td class="r">₩132,060</td><td style="color:#8b95a1;">×0.93</td></tr>
+            <tr><td>파트너사/도매</td><td>90%</td><td class="r">₩127,800</td><td style="color:#8b95a1;">×0.90</td></tr>
+            <tr><td>대리점/철물점</td><td>85%</td><td class="r">₩120,700</td><td style="color:#8b95a1;">×0.85</td></tr>
+            <tr><td>총판 유통</td><td>60%</td><td class="r">₩85,200</td><td style="color:#8b95a1;">×0.60</td></tr>
+            <tr style="background:#f0f7ff;"><td style="font-weight:600;color:#202454;">알리바바 수출가</td><td style="color:#202454;">×1.7</td><td class="r" style="font-weight:700;color:#202454;">₩102,000 ($69.06)</td><td style="color:#8b95a1;">도매원가×1.7</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -472,8 +548,111 @@ function exportCsv(type){
   link.href=URL.createObjectURL(blob);link.download=(type==='in'?'들어온돈':'나간돈')+'_'+getMonthPrefix()+'.csv';link.click();
 }
 
+// ═══ 제품 단가 데이터 ═══
+const PROD_DATA=[
+  {name:'POUR 코트재I(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 코트재I(녹색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 코트재I(적갈색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 코트재I(백색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 코트재II(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 코트재II(녹색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 코트재II(적갈색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:119000,retailKrw:142000,t1:5.5,t2:5.0,t3:4.5,t4:4.0,costKg:null,lead:'25일'},
+  {name:'POUR 상도코트재(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:150000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 상도코트재(녹색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:150000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 상도코트재(적갈색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:150000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 써밋페인트 플러스',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:126000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 아크릴배면차수제(A+B)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:156400,retailKrw:152000,t1:6.5,t2:6.0,t3:5.5,t4:5.3,costKg:null,lead:'25일'},
+  {name:'POUR 콘크리트 강화제',cat:'수용성',pkg:14,unit:'kg/통',exportKrw:79900,retailKrw:115500,t1:5.0,t2:4.5,t3:4.2,t4:3.9,costKg:null,lead:'25일'},
+  {name:'POUR 강화재1(슬라브용)',cat:'수용성',pkg:18,unit:'L/통',exportKrw:115600,retailKrw:180000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 강화제2(금속기와용)',cat:'수용성',pkg:18,unit:'L/통',exportKrw:119000,retailKrw:180000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+  {name:'POUR 하이롤퍼티',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:71400,retailKrw:136000,t1:3.5,t2:3.1,t3:2.7,t4:2.4,costKg:null,lead:'25일'},
+  {name:'POUR 하이퍼티',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:74300,retailKrw:136000,t1:3.5,t2:3.2,t3:2.8,t4:2.5,costKg:null,lead:'25일'},
+  {name:'POUR 써밋바인더',cat:'수용성',pkg:18,unit:'kg/통',exportKrw:40000,retailKrw:126000,t1:2.5,t2:2.1,t3:1.8,t4:1.5,costKg:null,lead:'25일'},
+  {name:'POUR 써밋에폭시(하도)',cat:'유성',pkg:13.5,unit:'kg/통',exportKrw:88400,retailKrw:99800,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 써밋에폭시(중도)',cat:'유성',pkg:24,unit:'kg/통',exportKrw:119000,retailKrw:132000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 써밋에폭시(상도)',cat:'유성',pkg:16,unit:'kg/통',exportKrw:110500,retailKrw:124800,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 써밋우레탄 하도',cat:'유성',pkg:17,unit:'kg/통',exportKrw:73200,retailKrw:73000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 써밋우레탄 중도',cat:'유성',pkg:20,unit:'kg/통',exportKrw:73000,retailKrw:72500,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 써밋우레탄 상도',cat:'유성',pkg:15.24,unit:'kg/통',exportKrw:88200,retailKrw:88200,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR PMQ강화코팅제',cat:'유성',pkg:15,unit:'kg/통',exportKrw:209100,retailKrw:345000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 폴리우레아',cat:'유성',pkg:410,unit:'kg/통',exportKrw:3345600,retailKrw:3240000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 써밋엠보라이닝',cat:'유성',pkg:24,unit:'kg/통',exportKrw:127500,retailKrw:137000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 분진방지제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:3.8,t2:3.4,t3:3.0,t4:2.6,costKg:1300,lead:'25일'},
+  {name:'POUR 침투성 표면강화제',cat:'특수기능성',pkg:20,unit:'kg/통',exportKrw:null,retailKrw:null,t1:8.4,t2:7.6,t3:6.8,t4:6.0,costKg:3000,lead:'25일'},
+  {name:'POUR 외벽 방수/발수제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:6.1,t2:5.6,t3:5.1,t4:4.6,costKg:2300,lead:'25일'},
+  {name:'POUR 콘크리트 양생제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:4.0,t2:3.6,t3:3.2,t4:2.8,costKg:1400,lead:'25일'},
+  {name:'POUR 발수코팅제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:4.7,t2:4.2,t3:3.7,t4:3.2,costKg:1600,lead:'25일'},
+  {name:'POUR 구체하이드로쉴드',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:3.6,t2:3.2,t3:2.8,t4:2.4,costKg:1200,lead:'25일'},
+  {name:'POUR 욕실도막방수제',cat:'특수기능성',pkg:4,unit:'kg/통',exportKrw:null,retailKrw:null,t1:10.6,t2:9.6,t3:8.6,t4:7.6,costKg:3800,lead:'25일'},
+  {name:'POUR 외벽방수제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:8.8,t2:8.0,t3:7.2,t4:6.4,costKg:3200,lead:'25일'},
+  {name:'POUR 투명퍼티 1.2kg',cat:'특수기능성',pkg:1.2,unit:'kg/통',exportKrw:null,retailKrw:null,t1:16.5,t2:15.0,t3:13.5,t4:12.0,costKg:6000,lead:'25일'},
+  {name:'POUR 투명퍼티 4kg',cat:'특수기능성',pkg:4,unit:'kg/통',exportKrw:null,retailKrw:null,t1:16.5,t2:15.0,t3:13.5,t4:12.0,costKg:6000,lead:'25일'},
+  {name:'POUR 타일도막방수제 18kg',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:7.7,t2:7.0,t3:6.3,t4:5.6,costKg:2800,lead:'25일'},
+  {name:'POUR 타일도막방수제 9kg',cat:'특수기능성',pkg:9,unit:'kg/통',exportKrw:null,retailKrw:null,t1:7.7,t2:7.0,t3:6.3,t4:5.6,costKg:2800,lead:'25일'},
+  {name:'POUR 콘크리트 중성화방지제',cat:'특수기능성',pkg:20,unit:'kg/통',exportKrw:null,retailKrw:null,t1:10.0,t2:9.0,t3:8.0,t4:7.0,costKg:3500,lead:'25일'},
+  {name:'POUR 106파우더',cat:'파우더',pkg:20,unit:'kg/포',exportKrw:32000,retailKrw:108700,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 107파우더',cat:'파우더',pkg:20,unit:'kg/포',exportKrw:32000,retailKrw:108700,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 표면강화 파우더',cat:'파우더',pkg:20,unit:'kg/포',exportKrw:32000,retailKrw:108700,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR MMA',cat:'아스팔트',pkg:20,unit:'kg/통',exportKrw:100300,retailKrw:207000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 씰코트',cat:'아스팔트',pkg:25,unit:'kg/통',exportKrw:119000,retailKrw:159600,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+  {name:'POUR 하드씰코트',cat:'아스팔트',pkg:20,unit:'kg/통',exportKrw:119000,retailKrw:159600,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+];
+const PCAT_CLS={수용성:'cat-water',유성:'cat-oil',특수기능성:'cat-special',아스팔트:'cat-asphalt',파우더:'cat-powder'};
+let priceCat='all',priceSearch='';
+
+function getFilteredProducts(){return PROD_DATA.filter(p=>{if(priceCat!=='all'&&p.cat!==priceCat)return false;if(priceSearch&&!p.name.toLowerCase().includes(priceSearch))return false;return true;});}
+
+function renderPriceTable(){
+  const data=getFilteredProducts();
+  document.getElementById('priceCnt').textContent=data.length+'개 제품';
+  const tbody=document.getElementById('priceBody');
+  if(data.length===0){tbody.innerHTML='<tr><td colspan="12" class="empty-msg">검색 결과 없음</td></tr>';return;}
+  tbody.innerHTML=data.map(p=>{
+    let marginHtml='-';
+    if(p.costKg&&p.t1){const sell=p.t1*1477;const m=((sell-p.costKg)/sell*100).toFixed(0);const cls=m>=50?'margin-high':m>=30?'margin-mid':'margin-low';marginHtml='<span class="margin-badge '+cls+'">'+m+'%</span>';}
+    return '<tr><td style="position:sticky;left:0;background:#fff;z-index:1;font-weight:600;border-right:2px solid #e5e8eb;">'+p.name+'</td>'+
+      '<td><span class="cat '+(PCAT_CLS[p.cat]||'')+'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;">'+p.cat+'</span></td>'+
+      '<td>'+p.pkg+' '+p.unit+'</td>'+
+      '<td class="r">'+(p.exportKrw?fmtW(p.exportKrw):'-')+'</td>'+
+      '<td class="r">'+(p.retailKrw?fmtW(p.retailKrw):'-')+'</td>'+
+      '<td class="r" style="background:#fffbfb;">'+(p.t1?'<span class="price-tier tier-1">$'+p.t1+'</span>':'-')+'</td>'+
+      '<td class="r" style="background:#fffef5;">'+(p.t2?'<span class="price-tier tier-2">$'+p.t2+'</span>':'-')+'</td>'+
+      '<td class="r" style="background:#f7fdf9;">'+(p.t3?'<span class="price-tier tier-3">$'+p.t3+'</span>':'-')+'</td>'+
+      '<td class="r" style="background:#f5f8ff;">'+(p.t4?'<span class="price-tier tier-4">$'+p.t4+'</span>':'-')+'</td>'+
+      '<td class="r">'+(p.costKg?fmtW(p.costKg):'-')+'</td>'+
+      '<td class="r">'+marginHtml+'</td>'+
+      '<td>'+p.lead+'</td></tr>';
+  }).join('');
+}
+function filterPriceCat(cat,btn){priceCat=cat;document.querySelectorAll('#tab-price .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPriceTable();}
+function filterPriceTable(){priceSearch=document.getElementById('priceSearch').value.toLowerCase();renderPriceTable();}
+
+// 마진 계산기
+function initCalcDropdown(){const sel=document.getElementById('calcProduct');sel.innerHTML='<option value="">-- 선택 --</option>';PROD_DATA.forEach((p,i)=>{const opt=document.createElement('option');opt.value=i;opt.textContent=p.name+' ('+p.pkg+p.unit+')';sel.appendChild(opt);});}
+function onCalcProductChange(){const idx=document.getElementById('calcProduct').value;if(idx==='')return;const p=PROD_DATA[idx];
+  const qty=parseFloat(document.getElementById('calcQty').value)||100;
+  let price=p.t1||0;if(qty>=3000&&p.t4)price=p.t4;else if(qty>=1000&&p.t3)price=p.t3;else if(qty>=101&&p.t2)price=p.t2;
+  if(!price&&p.exportKrw&&p.pkg)price=+(p.exportKrw/p.pkg/1477).toFixed(2);
+  document.getElementById('calcPrice').value=price||'';document.getElementById('calcCost').value=p.costKg||'';calcMargin();}
+function calcMargin(){
+  const qty=parseFloat(document.getElementById('calcQty').value)||0;const price=parseFloat(document.getElementById('calcPrice').value)||0;
+  const rate=parseFloat(document.getElementById('calcRate').value)||1477;const costKg=parseFloat(document.getElementById('calcCost').value)||0;
+  const revU=qty*price;const revK=revU*rate;const costT=costKg*qty;const margin=revK-costT;const mr=revK>0?((margin/revK)*100).toFixed(1):'0';
+  document.getElementById('crRevUsd').textContent='$'+Math.round(revU).toLocaleString();
+  document.getElementById('crRevKrw').textContent=fmtW(Math.round(revK));
+  document.getElementById('crCost').textContent=costT>0?'-'+fmtW(costT):'-';
+  document.getElementById('crMargin').textContent=(margin>=0?'+':'-')+fmtW(Math.abs(Math.round(margin)));
+  document.getElementById('crMargin').style.color=margin>=0?'#0ca678':'#f04452';
+  document.getElementById('crRate').textContent=mr+'%';document.getElementById('crRate').style.color=mr>=50?'#0ca678':mr>=30?'#f59e0b':'#f04452';
+}
+function exportProductCsv(){
+  let csv='\uFEFF제품명,분류,규격,수출가,자사몰,1~100kg,101~999,1K~2.9K,3K+,매입가/kg,리드타임\n';
+  getFilteredProducts().forEach(p=>{csv+=[p.name,p.cat,p.pkg+' '+p.unit,p.exportKrw||'',p.retailKrw||'',p.t1||'',p.t2||'',p.t3||'',p.t4||'',p.costKg||'',p.lead].join(',')+'\n';});
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='제품단가표.csv';link.click();
+}
+
 // ═══ 초기화 ═══
-loadData();renderAll();
+loadData();renderAll();initCalcDropdown();renderPriceTable();
 </script>
 </body>
 </html>
