@@ -4995,22 +4995,24 @@ Best regards,
 
         <!-- [탭4] 월별 정산 -->
         <div id="fin-monthly" class="fin-section">
-          <!-- 캘린더 뷰 -->
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
-            <div class="fin-card">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <button onclick="moveFinCal(-1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">◀</button>
-                <span style="font-size:14px; font-weight:700; color:#333d4b;" id="finCalLabel"></span>
-                <button onclick="moveFinCal(1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">▶</button>
-              </div>
-              <div id="finCalGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px;"></div>
+          <!-- 캘린더 뷰 (전체 너비) -->
+          <div class="fin-card" style="margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <button onclick="moveFinCal(-1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">◀</button>
+              <span style="font-size:14px; font-weight:700; color:#333d4b;" id="finCalLabel"></span>
+              <button onclick="moveFinCal(1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">▶</button>
             </div>
-            <div class="fin-card">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div id="finCalGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px;"></div>
+          </div>
+
+          <!-- 선택 날짜 상세 (아코디언) -->
+          <div id="finCalDetailWrap" style="margin-bottom:14px; display:none;">
+            <div class="fin-card" style="padding:14px 18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <h4 style="margin:0; font-size:13px; font-weight:700; color:#333d4b;">📅 <span id="finCalDateLabel">날짜 선택</span></h4>
                 <span style="font-size:12px; color:#8b95a1;" id="finCalDateInfo"></span>
               </div>
-              <div id="finCalDetail" style="max-height:260px; overflow-y:auto;"></div>
+              <div id="finCalDetail"></div>
             </div>
           </div>
 
@@ -14278,10 +14280,9 @@ Option C: [제품C] - $[가격]
 
     function renderFinCalDetail() {
       const el = document.getElementById('finCalDetail');
+      const wrap = document.getElementById('finCalDetailWrap');
       if (!finCalSelectedDate) {
-        el.innerHTML = '<div style="text-align:center;padding:30px;color:#c4c9d0;font-size:12px;">캘린더에서 날짜를 클릭하세요</div>';
-        document.getElementById('finCalDateLabel').textContent = '날짜 선택';
-        document.getElementById('finCalDateInfo').textContent = '';
+        wrap.style.display = 'none';
         return;
       }
 
@@ -14290,8 +14291,9 @@ Option C: [제품C] - $[가격]
       document.getElementById('finCalDateLabel').textContent = finCalSelectedDate + ' 매출';
       document.getElementById('finCalDateInfo').textContent = records.length + '건 · ' + formatWon(totalKrw);
 
+      wrap.style.display = '';
       if (records.length === 0) {
-        el.innerHTML = '<div style="text-align:center;padding:20px;color:#c4c9d0;font-size:12px;">해당 날짜 매출 없음</div>';
+        el.innerHTML = '<div style="text-align:center;padding:12px;color:#c4c9d0;font-size:12px;">해당 날짜 매출 없음</div>';
         return;
       }
 
