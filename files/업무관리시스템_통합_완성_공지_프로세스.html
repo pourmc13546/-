@@ -306,11 +306,11 @@
     .fcal-day.fd-empty{cursor:default;}
     .fcal-acc{border-bottom:1px solid #f4f5f7;padding:8px 0;cursor:pointer;}
     .fcal-acc:last-child{border-bottom:none;}
-    .fcal-acc-hdr{display:flex;align-items:center;gap:8px;font-size:12px;}
-    .fcal-acc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-    .fcal-acc-name{font-weight:600;color:#333d4b;flex:1;}
-    .fcal-acc-amt{font-weight:700;color:#0ca678;}
-    .fcal-acc-body{display:none;padding:4px 0 4px 22px;font-size:11px;color:#6b7684;}
+    .fcal-acc-hdr{display:flex;align-items:center;gap:10px;font-size:14px;}
+    .fcal-acc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .fcal-acc-name{font-weight:600;color:#333d4b;flex:1;font-size:15px;}
+    .fcal-acc-amt{font-weight:700;color:#0ca678;font-size:15px;}
+    .fcal-acc-body{display:none;padding:6px 0 6px 28px;font-size:13px;color:#6b7684;}
     .fcal-acc-body.open{display:block;}
     .fcal-acc-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f8f9fa;}
     .fcal-acc-row:last-child{border-bottom:none;}
@@ -5017,8 +5017,8 @@ Best regards,
           <div id="finCalDetailWrap" style="margin-bottom:14px; display:none;">
             <div class="fin-card" style="padding:14px 18px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <h4 style="margin:0; font-size:13px; font-weight:700; color:#333d4b;">📅 <span id="finCalDateLabel">날짜 선택</span></h4>
-                <span style="font-size:12px; color:#8b95a1;" id="finCalDateInfo"></span>
+                <h4 style="margin:0; font-size:15px; font-weight:700; color:#333d4b;">📅 <span id="finCalDateLabel">날짜 선택</span></h4>
+                <span style="font-size:14px; color:#8b95a1; font-weight:600;" id="finCalDateInfo"></span>
               </div>
               <div id="finCalDetail"></div>
             </div>
@@ -14361,7 +14361,7 @@ Option C: [제품C] - $[가격]
         const c = COLORS[ci % COLORS.length]; ci++;
         const isOpen = finCalExpanded[company];
         html += '<div class="fcal-acc" onclick="toggleFinCalAcc(\'' + company.replace(/'/g, "\\'") + '\')">';
-        html += '<div class="fcal-acc-hdr"><div class="fcal-acc-dot" style="background:' + c + ';"></div><span class="fcal-acc-name">' + company + '</span><span style="font-size:10px;color:#8b95a1;">' + g.records.length + '건</span><span class="fcal-acc-amt">' + formatWon(g.total) + '</span></div>';
+        html += '<div class="fcal-acc-hdr"><div class="fcal-acc-dot" style="background:' + c + ';"></div><span class="fcal-acc-name">' + company + '</span><span style="font-size:13px;color:#8b95a1;">' + g.records.length + '건</span><span class="fcal-acc-amt">' + formatWon(g.total) + '</span></div>';
         html += '<div class="fcal-acc-body ' + (isOpen ? 'open' : '') + '">';
         g.records.forEach(r => {
           html += '<div class="fcal-acc-row"><span>' + (r.product || r.company || '-') + '</span><span style="font-weight:600;color:#0ca678;">' + formatWon(r.amount || 0) + '</span></div>';
