@@ -4906,17 +4906,17 @@ Best regards,
           <h1 class="text-2xl font-bold text-toss-gray-900">정산관리</h1>
           <p class="text-sm text-slate-500 mt-1">매출·매입 현황 및 월별 정산 관리</p>
           <div class="fin-tabs mt-4">
-            <button class="fin-tab active" onclick="showFinanceTab('fin-dashboard',this)">매출·매입 현황</button>
+            <button class="fin-tab active" onclick="showFinanceTab('fin-monthly',this)">매출 현황</button>
+            <button class="fin-tab" onclick="showFinanceTab('fin-dashboard',this)">매출·매입 현황</button>
             <button class="fin-tab" onclick="showFinanceTab('fin-revenue',this)">매출 관리</button>
             <button class="fin-tab" onclick="showFinanceTab('fin-purchase',this)">매입 관리</button>
-            <button class="fin-tab" onclick="showFinanceTab('fin-monthly',this)">월별 정산</button>
             <button class="fin-tab" onclick="showFinanceTab('fin-price',this)">제품 단가표</button>
           </div>
           </div>
         </div>
 
         <!-- [탭1] 매출·매입 현황 -->
-        <div id="fin-dashboard" class="fin-section active">
+        <div id="fin-dashboard" class="fin-section">
           <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px;">
             <div class="fin-card">
               <h4>이번 달 매출</h4>
@@ -5017,7 +5017,7 @@ Best regards,
         </div>
 
         <!-- [탭4] 월별 정산 -->
-        <div id="fin-monthly" class="fin-section">
+        <div id="fin-monthly" class="fin-section active">
           <!-- 캘린더 뷰 (전체 너비) -->
           <div class="fin-card" style="margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -14160,7 +14160,9 @@ Option C: [제품C] - $[가격]
       const purM = document.getElementById('finPurMonth');
       if (revM && !revM.value) revM.value = ym;
       if (purM && !purM.value) purM.value = ym;
-      renderFinanceDashboard();
+      renderMonthlySummary();
+      renderFinCalendar();
+      renderFinCalDetail();
     }
 
     // ── 대시보드 ──
