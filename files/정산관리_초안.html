@@ -84,6 +84,28 @@
   .margin-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
   .margin-high{background:#dcfce7;color:#16a34a;}.margin-mid{background:#fef3c7;color:#d97706;}.margin-low{background:#fee2e2;color:#ef4444;}
   .cat-water{background:#dbeafe;color:#2563eb;}.cat-oil{background:#fef3c7;color:#d97706;}.cat-special{background:#dcfce7;color:#16a34a;}.cat-asphalt{background:#f1f5f9;color:#64748b;}.cat-powder{background:#fee2e2;color:#ef4444;}
+
+  /* 아코디언 */
+  .acc-group{background:#fff;border:1px solid #e5e8eb;border-radius:12px;margin-bottom:10px;overflow:hidden;}
+  .acc-header{padding:12px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s;user-select:none;}
+  .acc-header:hover{background:#f8f9fa;}
+  .acc-arrow{font-size:10px;color:#8b95a1;transition:transform .2s;width:14px;flex-shrink:0;}
+  .acc-arrow.open{transform:rotate(90deg);}
+  .acc-cat-tag{display:inline-block;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600;}
+  .acc-cat-name{font-size:13px;font-weight:700;color:#333d4b;flex:1;}
+  .acc-cnt{font-size:11px;color:#8b95a1;font-weight:500;}
+  .acc-body{display:none;border-top:1px solid #f4f5f7;}
+  .acc-body.open{display:block;}
+  .acc-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+  .acc-tbl th{text-align:left;padding:7px 14px;background:#fafbfc;color:#8b95a1;font-weight:600;font-size:10px;border-bottom:1px solid #f4f5f7;}
+  .acc-tbl td{padding:7px 14px;border-bottom:1px solid #f8f9fa;}
+  .acc-tbl tr:hover td{background:#fafbfc;}
+  .acc-tbl .r{text-align:right;}
+  .tier-tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;margin:0 1px;}
+  .tt1{background:#fef2f2;color:#ef4444;}.tt2{background:#fffbeb;color:#d97706;}.tt3{background:#ecfdf5;color:#0ca678;}.tt4{background:#eff6ff;color:#202454;}
+  .margin-bar-sm{display:inline-flex;align-items:center;gap:4px;}
+  .margin-bar-track{width:40px;height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;display:inline-block;}
+  .margin-bar-fill{height:100%;border-radius:2px;display:block;}
   .modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;}
   .modal-bg.show{display:flex;}.modal{background:#fff;border-radius:14px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
   .modal-head{padding:16px 22px;border-bottom:1px solid #f4f5f7;display:flex;justify-content:space-between;align-items:center;}
@@ -158,55 +180,17 @@
     <div id="orderCards"></div>
   </div>
 
-  <!-- 탭5: 제품 단가표 -->
+  <!-- 탭3: 제품 단가표 (아코디언) -->
   <div id="tab-price" class="tab-content">
-    <!-- 마진 계산기 -->
-    <div class="card" style="padding:18px 22px;margin-bottom:16px;">
-      <div class="sec-head" style="margin-bottom:14px;"><h3>빠른 마진 계산기</h3></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px;align-items:end;">
-        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">제품 선택</label><select id="calcProduct" onchange="onCalcProductChange()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;font-family:inherit;"></select></div>
-        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">주문량 (kg)</label><input type="number" id="calcQty" value="100" oninput="calcMargin()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;"></div>
-        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">적용 단가 (USD/kg)</label><input type="number" id="calcPrice" step="0.1" oninput="calcMargin()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;"></div>
-        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">환율</label><input type="number" id="calcRate" value="1477" oninput="calcMargin()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;"></div>
-        <div><label style="display:block;font-size:10px;font-weight:600;color:#8b95a1;margin-bottom:4px;">매입가 (KRW/kg)</label><input type="number" id="calcCost" oninput="calcMargin()" style="width:100%;padding:8px 10px;border:1px solid #e5e8eb;border-radius:7px;font-size:12px;"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:14px;background:#f8f9fa;border-radius:10px;padding:14px;text-align:center;">
-        <div><div style="font-size:10px;color:#8b95a1;">매출 (USD)</div><div style="font-size:16px;font-weight:700;margin-top:2px;" id="crRevUsd">$0</div></div>
-        <div><div style="font-size:10px;color:#8b95a1;">매출 (KRW)</div><div style="font-size:16px;font-weight:700;margin-top:2px;" id="crRevKrw">₩0</div></div>
-        <div><div style="font-size:10px;color:#8b95a1;">매입 원가</div><div style="font-size:16px;font-weight:700;margin-top:2px;color:#f04452;" id="crCost">₩0</div></div>
-        <div><div style="font-size:10px;color:#8b95a1;">마진</div><div style="font-size:16px;font-weight:700;margin-top:2px;color:#0ca678;" id="crMargin">₩0</div></div>
-        <div><div style="font-size:10px;color:#8b95a1;">마진율</div><div style="font-size:16px;font-weight:700;margin-top:2px;color:#202454;" id="crRate">0%</div></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">
+      <input type="text" id="priceSearch" placeholder="제품명 검색..." oninput="renderPriceAccordion()" style="padding:8px 14px;border:1px solid #e5e8eb;border-radius:8px;font-size:12px;width:240px;font-family:inherit;outline:none;">
+      <span style="font-size:11px;color:#8b95a1;" id="priceTotalCnt"></span>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <button class="btn-sm btn-outline" onclick="toggleAllAccordion(true)">전체 펼치기</button>
+        <button class="btn-sm btn-outline" onclick="toggleAllAccordion(false)">전체 접기</button>
       </div>
     </div>
-
-    <!-- 검색/필터 -->
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-      <input type="text" class="search-box" id="priceSearch" placeholder="제품명 검색..." oninput="filterPriceTable()" style="padding:8px 14px;border:1px solid #e5e8eb;border-radius:8px;font-size:12px;width:220px;font-family:inherit;outline:none;">
-      <button class="filter-btn active" onclick="filterPriceCat('all',this)">전체</button>
-      <button class="filter-btn" onclick="filterPriceCat('수용성',this)">수용성</button>
-      <button class="filter-btn" onclick="filterPriceCat('유성',this)">유성</button>
-      <button class="filter-btn" onclick="filterPriceCat('특수기능성',this)">특수기능성</button>
-      <button class="filter-btn" onclick="filterPriceCat('아스팔트',this)">아스팔트</button>
-      <button class="filter-btn" onclick="filterPriceCat('파우더',this)">파우더</button>
-      <div style="margin-left:auto;"><button class="btn-sm btn-outline" onclick="exportProductCsv()">📥 CSV</button></div>
-    </div>
-
-    <!-- 단가 테이블 -->
-    <div class="card">
-      <div class="card-head" style="padding:12px 18px;border-bottom:1px solid #f4f5f7;"><h3 style="font-size:13px;">제품별 단가표</h3><span style="font-size:11px;color:#8b95a1;" id="priceCnt"></span></div>
-      <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
-        <table class="tbl" id="priceTable">
-          <thead><tr>
-            <th style="position:sticky;left:0;z-index:2;background:#f8f9fa;min-width:180px;border-right:2px solid #e5e8eb;">제품명</th>
-            <th>분류</th><th>규격</th><th class="r">수출가</th><th class="r">자사몰</th>
-            <th class="r" style="background:#fff5f5;">1~100kg</th><th class="r" style="background:#fffbeb;">101~999</th><th class="r" style="background:#f0fdf4;">1K~2.9K</th><th class="r" style="background:#eff6ff;">3K+</th>
-            <th class="r">매입가/kg</th><th class="r">마진율</th><th>리드타임</th>
-          </tr></thead>
-          <tbody id="priceBody"></tbody>
-        </table>
-      </div>
-    </div>
-
+    <div id="priceAccordion"></div>
   </div>
 </div>
 
@@ -563,51 +547,99 @@ const PROD_DATA=[
 const PCAT_CLS={수용성:'cat-water',유성:'cat-oil',특수기능성:'cat-special',아스팔트:'cat-asphalt',파우더:'cat-powder'};
 let priceCat='all',priceSearch='';
 
-function getFilteredProducts(){return PROD_DATA.filter(p=>{if(priceCat!=='all'&&p.cat!==priceCat)return false;if(priceSearch&&!p.name.toLowerCase().includes(priceSearch))return false;return true;});}
+function getFilteredProducts(){
+  const s=(document.getElementById('priceSearch')?.value||'').toLowerCase();
+  return PROD_DATA.filter(p=>{if(priceCat!=='all'&&p.cat!==priceCat)return false;if(s&&!p.name.toLowerCase().includes(s))return false;return true;});
+}
 
-function renderPriceTable(){
+const CAT_ORDER=['수용성','유성','특수기능성','아스팔트','파우더'];
+const CAT_TAG_CLS={수용성:'cat-water',유성:'cat-oil',특수기능성:'cat-special',아스팔트:'cat-asphalt',파우더:'cat-powder'};
+let accOpenState={수용성:true,유성:false,특수기능성:false,아스팔트:false,파우더:false};
+
+function renderPriceAccordion(){
   const data=getFilteredProducts();
-  document.getElementById('priceCnt').textContent=data.length+'개 제품';
-  const tbody=document.getElementById('priceBody');
-  if(data.length===0){tbody.innerHTML='<tr><td colspan="12" class="empty-msg">검색 결과 없음</td></tr>';return;}
-  tbody.innerHTML=data.map(p=>{
-    let marginHtml='-';
-    if(p.costKg&&p.t1){const sell=p.t1*1477;const m=((sell-p.costKg)/sell*100).toFixed(0);const cls=m>=50?'margin-high':m>=30?'margin-mid':'margin-low';marginHtml='<span class="margin-badge '+cls+'">'+m+'%</span>';}
-    return '<tr><td style="position:sticky;left:0;background:#fff;z-index:1;font-weight:600;border-right:2px solid #e5e8eb;">'+p.name+'</td>'+
-      '<td><span class="cat '+(PCAT_CLS[p.cat]||'')+'" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;">'+p.cat+'</span></td>'+
-      '<td>'+p.pkg+' '+p.unit+'</td>'+
-      '<td class="r">'+(p.exportKrw?fmtW(p.exportKrw):'-')+'</td>'+
-      '<td class="r">'+(p.retailKrw?fmtW(p.retailKrw):'-')+'</td>'+
-      '<td class="r" style="background:#fffbfb;">'+(p.t1?'<span class="price-tier tier-1">$'+p.t1+'</span>':'-')+'</td>'+
-      '<td class="r" style="background:#fffef5;">'+(p.t2?'<span class="price-tier tier-2">$'+p.t2+'</span>':'-')+'</td>'+
-      '<td class="r" style="background:#f7fdf9;">'+(p.t3?'<span class="price-tier tier-3">$'+p.t3+'</span>':'-')+'</td>'+
-      '<td class="r" style="background:#f5f8ff;">'+(p.t4?'<span class="price-tier tier-4">$'+p.t4+'</span>':'-')+'</td>'+
-      '<td class="r">'+(p.costKg?fmtW(p.costKg):'-')+'</td>'+
-      '<td class="r">'+marginHtml+'</td>'+
-      '<td>'+p.lead+'</td></tr>';
-  }).join('');
-}
-function filterPriceCat(cat,btn){priceCat=cat;document.querySelectorAll('#tab-price .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPriceTable();}
-function filterPriceTable(){priceSearch=document.getElementById('priceSearch').value.toLowerCase();renderPriceTable();}
+  const container=document.getElementById('priceAccordion');
+  if(!container)return;
+  document.getElementById('priceTotalCnt').textContent='총 '+data.length+'개 제품';
 
-// 마진 계산기
-function initCalcDropdown(){const sel=document.getElementById('calcProduct');sel.innerHTML='<option value="">-- 선택 --</option>';PROD_DATA.forEach((p,i)=>{const opt=document.createElement('option');opt.value=i;opt.textContent=p.name+' ('+p.pkg+p.unit+')';sel.appendChild(opt);});}
-function onCalcProductChange(){const idx=document.getElementById('calcProduct').value;if(idx==='')return;const p=PROD_DATA[idx];
-  const qty=parseFloat(document.getElementById('calcQty').value)||100;
-  let price=p.t1||0;if(qty>=3000&&p.t4)price=p.t4;else if(qty>=1000&&p.t3)price=p.t3;else if(qty>=101&&p.t2)price=p.t2;
-  if(!price&&p.exportKrw&&p.pkg)price=+(p.exportKrw/p.pkg/1477).toFixed(2);
-  document.getElementById('calcPrice').value=price||'';document.getElementById('calcCost').value=p.costKg||'';calcMargin();}
-function calcMargin(){
-  const qty=parseFloat(document.getElementById('calcQty').value)||0;const price=parseFloat(document.getElementById('calcPrice').value)||0;
-  const rate=parseFloat(document.getElementById('calcRate').value)||1477;const costKg=parseFloat(document.getElementById('calcCost').value)||0;
-  const revU=qty*price;const revK=revU*rate;const costT=costKg*qty;const margin=revK-costT;const mr=revK>0?((margin/revK)*100).toFixed(1):'0';
-  document.getElementById('crRevUsd').textContent='$'+Math.round(revU).toLocaleString();
-  document.getElementById('crRevKrw').textContent=fmtW(Math.round(revK));
-  document.getElementById('crCost').textContent=costT>0?'-'+fmtW(costT):'-';
-  document.getElementById('crMargin').textContent=(margin>=0?'+':'-')+fmtW(Math.abs(Math.round(margin)));
-  document.getElementById('crMargin').style.color=margin>=0?'#0ca678':'#f04452';
-  document.getElementById('crRate').textContent=mr+'%';document.getElementById('crRate').style.color=mr>=50?'#0ca678':mr>=30?'#f59e0b':'#f04452';
+  // 분류별 그룹핑
+  const groups={};
+  data.forEach(p=>{if(!groups[p.cat])groups[p.cat]=[];groups[p.cat].push(p);});
+
+  // 검색 중이면 전부 펼치기
+  const isSearching=(document.getElementById('priceSearch')?.value||'').length>0;
+
+  let html='';
+  CAT_ORDER.forEach(cat=>{
+    const items=groups[cat];
+    if(!items||items.length===0)return;
+    const isOpen=isSearching||accOpenState[cat];
+    const tagCls=CAT_TAG_CLS[cat]||'';
+
+    html+='<div class="acc-group">';
+    html+='<div class="acc-header" onclick="toggleAccordion(\''+cat+'\')">';
+    html+='<span class="acc-arrow '+(isOpen?'open':'')+'">▶</span>';
+    html+='<span class="acc-cat-tag '+tagCls+'">'+cat+'</span>';
+    html+='<span class="acc-cat-name">'+cat+' 도료</span>';
+    html+='<span class="acc-cnt">'+items.length+'종</span>';
+    html+='</div>';
+
+    html+='<div class="acc-body '+(isOpen?'open':'')+'">';
+    if(items[0].t1){
+      // 볼륨 단가 테이블
+      html+='<table class="acc-tbl"><thead><tr><th style="min-width:180px;">제품명</th><th>규격</th><th class="r">수출가</th>';
+      html+='<th class="r">1~100kg</th><th class="r">101~999</th><th class="r">1K~2.9K</th><th class="r">3K+</th>';
+      html+='<th class="r">매입가/kg</th><th class="r">마진</th></tr></thead><tbody>';
+      items.forEach(p=>{
+        let marginHtml='<span style="color:#c4c9d0;">-</span>';
+        if(p.costKg&&p.t1){
+          const sell=p.t1*1477;const m=((sell-p.costKg)/sell*100).toFixed(0);
+          const c=m>=50?'#0ca678':m>=30?'#f59e0b':'#f04452';
+          marginHtml='<span class="margin-bar-sm"><span class="margin-bar-track"><span class="margin-bar-fill" style="width:'+Math.min(m,100)+'%;background:'+c+';"></span></span><span style="font-weight:700;color:'+c+';">'+m+'%</span></span>';
+        }
+        html+='<tr><td style="font-weight:600;">'+p.name+'</td>';
+        html+='<td>'+p.pkg+' '+p.unit+'</td>';
+        html+='<td class="r">'+(p.exportKrw?fmtW(p.exportKrw):'-')+'</td>';
+        html+='<td class="r"><span class="tier-tag tt1">$'+p.t1+'</span></td>';
+        html+='<td class="r"><span class="tier-tag tt2">$'+p.t2+'</span></td>';
+        html+='<td class="r"><span class="tier-tag tt3">$'+p.t3+'</span></td>';
+        html+='<td class="r"><span class="tier-tag tt4">$'+p.t4+'</span></td>';
+        html+='<td class="r">'+(p.costKg?fmtW(p.costKg):'-')+'</td>';
+        html+='<td class="r">'+marginHtml+'</td></tr>';
+      });
+      html+='</tbody></table>';
+    } else {
+      // 단일 가격 테이블
+      html+='<table class="acc-tbl"><thead><tr><th style="min-width:180px;">제품명</th><th>규격</th><th class="r">수출가(KRW)</th><th class="r">USD</th><th class="r">자사몰 정가</th><th class="r">kg당</th><th>리드타임</th></tr></thead><tbody>';
+      items.forEach(p=>{
+        const perKg=p.pkg>0&&p.exportKrw?(p.exportKrw/p.pkg):0;
+        html+='<tr><td style="font-weight:600;">'+p.name+'</td>';
+        html+='<td>'+p.pkg+' '+p.unit+'</td>';
+        html+='<td class="r">'+(p.exportKrw?fmtW(p.exportKrw):'-')+'</td>';
+        html+='<td class="r">'+(p.exportKrw?'$'+(p.exportKrw/1477).toFixed(2):'-')+'</td>';
+        html+='<td class="r">'+(p.retailKrw?fmtW(p.retailKrw):'-')+'</td>';
+        html+='<td class="r">'+(perKg?fmtW(Math.round(perKg)):'-')+'</td>';
+        html+='<td>'+p.lead+'</td></tr>';
+      });
+      html+='</tbody></table>';
+    }
+    html+='</div></div>';
+  });
+
+  if(html==='')html='<div class="empty-msg">검색 결과 없음</div>';
+  container.innerHTML=html;
 }
+
+function toggleAccordion(cat){
+  accOpenState[cat]=!accOpenState[cat];
+  renderPriceAccordion();
+}
+function toggleAllAccordion(open){
+  CAT_ORDER.forEach(c=>{accOpenState[c]=open;});
+  renderPriceAccordion();
+}
+function filterPriceCat(cat,btn){priceCat=cat;document.querySelectorAll('#tab-price .filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPriceAccordion();}
+
 function exportProductCsv(){
   let csv='\uFEFF제품명,분류,규격,수출가,자사몰,1~100kg,101~999,1K~2.9K,3K+,매입가/kg,리드타임\n';
   getFilteredProducts().forEach(p=>{csv+=[p.name,p.cat,p.pkg+' '+p.unit,p.exportKrw||'',p.retailKrw||'',p.t1||'',p.t2||'',p.t3||'',p.t4||'',p.costKg||'',p.lead].join(',')+'\n';});
@@ -615,7 +647,7 @@ function exportProductCsv(){
 }
 
 // ═══ 초기화 ═══
-loadData();renderAll();initCalcDropdown();renderPriceTable();
+loadData();renderAll();renderPriceAccordion();
 </script>
 </body>
 </html>
