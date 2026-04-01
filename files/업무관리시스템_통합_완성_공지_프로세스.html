@@ -295,6 +295,25 @@
     .fin-status.waiting { background:#f1f5f9; color:#64748b; }
     .fin-section { display:none; animation:fadeIn .3s ease; }
     .fin-section.active { display:block; }
+    .fcal-hdr{text-align:center;font-size:10px;font-weight:600;color:#8b95a1;padding:6px 0;}
+    .fcal-day{text-align:center;padding:5px 2px;border-radius:8px;cursor:pointer;transition:all .12s;min-height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+    .fcal-day:hover{background:#f1f5f9;}
+    .fcal-day .fd-num{font-size:11px;font-weight:500;color:#333d4b;}
+    .fcal-day .fd-sales{font-size:8px;font-weight:700;color:#0ca678;}
+    .fcal-day.fd-today .fd-num{background:#202454;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+    .fcal-day.fd-selected{background:#eff6ff;border:1px solid #3182f6;}
+    .fcal-day.fd-has{background:#f0fdf4;}
+    .fcal-day.fd-empty{cursor:default;}
+    .fcal-acc{border-bottom:1px solid #f4f5f7;padding:8px 0;cursor:pointer;}
+    .fcal-acc:last-child{border-bottom:none;}
+    .fcal-acc-hdr{display:flex;align-items:center;gap:8px;font-size:12px;}
+    .fcal-acc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .fcal-acc-name{font-weight:600;color:#333d4b;flex:1;}
+    .fcal-acc-amt{font-weight:700;color:#0ca678;}
+    .fcal-acc-body{display:none;padding:4px 0 4px 22px;font-size:11px;color:#6b7684;}
+    .fcal-acc-body.open{display:block;}
+    .fcal-acc-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f8f9fa;}
+    .fcal-acc-row:last-child{border-bottom:none;}
     .kpi-checklist li { padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
     .kpi-checklist li:last-child { border-bottom: none; }
     .kpi-chk {
@@ -4976,6 +4995,25 @@ Best regards,
 
         <!-- [탭4] 월별 정산 -->
         <div id="fin-monthly" class="fin-section">
+          <!-- 캘린더 뷰 -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
+            <div class="fin-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <button onclick="moveFinCal(-1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">◀</button>
+                <span style="font-size:14px; font-weight:700; color:#333d4b;" id="finCalLabel"></span>
+                <button onclick="moveFinCal(1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">▶</button>
+              </div>
+              <div id="finCalGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px;"></div>
+            </div>
+            <div class="fin-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 style="margin:0; font-size:13px; font-weight:700; color:#333d4b;">📅 <span id="finCalDateLabel">날짜 선택</span></h4>
+                <span style="font-size:12px; color:#8b95a1;" id="finCalDateInfo"></span>
+              </div>
+              <div id="finCalDetail" style="max-height:260px; overflow-y:auto;"></div>
+            </div>
+          </div>
+
           <div class="fin-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
               <h4 style="margin:0; font-size:14px; font-weight:700; color:#333d4b;">월별 정산 요약</h4>
@@ -14059,7 +14097,7 @@ Option C: [제품C] - $[가격]
       if (tabId === 'fin-dashboard') renderFinanceDashboard();
       if (tabId === 'fin-revenue') renderRevenueTable();
       if (tabId === 'fin-purchase') renderPurchaseTable();
-      if (tabId === 'fin-monthly') renderMonthlySummary();
+      if (tabId === 'fin-monthly') { renderMonthlySummary(); renderFinCalendar(); renderFinCalDetail(); }
     }
 
     // 초기화
@@ -14187,6 +14225,104 @@ Option C: [제품C] - $[가격]
             '</tr>';
         }).join('');
       document.getElementById('finPurTotal').textContent = '합계: -' + formatWon(total);
+    }
+
+    // ── 캘린더 뷰 ──
+    let finCalYear = 2026, finCalMonth = 2, finCalSelectedDate = '', finCalExpanded = {};
+    function moveFinCal(d) {
+      finCalMonth += d;
+      if (finCalMonth > 11) { finCalMonth = 0; finCalYear++; }
+      if (finCalMonth < 0) { finCalMonth = 11; finCalYear--; }
+      renderFinCalendar();
+    }
+    function renderFinCalendar() {
+      const y = finCalYear, m = finCalMonth;
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      const firstDay = new Date(y, m, 1).getDay();
+      const today = new Date();
+      const prefix = y + '-' + String(m + 1).padStart(2, '0');
+
+      // 일별 매출 합산
+      const daySales = {};
+      finRevenueData.forEach(r => {
+        if (r.date && r.date.startsWith(prefix)) {
+          daySales[r.date] = (daySales[r.date] || 0) + (r.amount || 0);
+        }
+      });
+
+      document.getElementById('finCalLabel').textContent = y + '년 ' + (m + 1) + '월';
+
+      let html = '';
+      ['일', '월', '화', '수', '목', '금', '토'].forEach(d => { html += '<div class="fcal-hdr">' + d + '</div>'; });
+      for (let i = 0; i < firstDay; i++) html += '<div class="fcal-day fd-empty"></div>';
+      for (let d = 1; d <= daysInMonth; d++) {
+        const ds = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        const sales = daySales[ds] || 0;
+        const isToday = y === today.getFullYear() && m === today.getMonth() && d === today.getDate();
+        const isSel = ds === finCalSelectedDate;
+        const cls = 'fcal-day' + (isToday ? ' fd-today' : '') + (isSel ? ' fd-selected' : '') + (sales > 0 ? ' fd-has' : '');
+        html += '<div class="' + cls + '" onclick="selectFinCalDate(\'' + ds + '\')">';
+        html += '<span class="fd-num">' + d + '</span>';
+        if (sales > 0) html += '<span class="fd-sales">' + formatWon(sales) + '</span>';
+        html += '</div>';
+      }
+      document.getElementById('finCalGrid').innerHTML = html;
+    }
+
+    function selectFinCalDate(ds) {
+      finCalSelectedDate = ds;
+      finCalExpanded = {};
+      renderFinCalendar();
+      renderFinCalDetail();
+    }
+
+    function renderFinCalDetail() {
+      const el = document.getElementById('finCalDetail');
+      if (!finCalSelectedDate) {
+        el.innerHTML = '<div style="text-align:center;padding:30px;color:#c4c9d0;font-size:12px;">캘린더에서 날짜를 클릭하세요</div>';
+        document.getElementById('finCalDateLabel').textContent = '날짜 선택';
+        document.getElementById('finCalDateInfo').textContent = '';
+        return;
+      }
+
+      const records = finRevenueData.filter(r => r.date === finCalSelectedDate);
+      const totalKrw = records.reduce((s, r) => s + (r.amount || 0), 0);
+      document.getElementById('finCalDateLabel').textContent = finCalSelectedDate + ' 매출';
+      document.getElementById('finCalDateInfo').textContent = records.length + '건 · ' + formatWon(totalKrw);
+
+      if (records.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:#c4c9d0;font-size:12px;">해당 날짜 매출 없음</div>';
+        return;
+      }
+
+      // 거래처별 그룹핑
+      const groups = {};
+      const COLORS = ['#3182f6', '#0ca678', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899'];
+      records.forEach(r => {
+        const key = r.company || '기타';
+        if (!groups[key]) groups[key] = { records: [], total: 0 };
+        groups[key].records.push(r);
+        groups[key].total += (r.amount || 0);
+      });
+
+      let html = ''; let ci = 0;
+      Object.entries(groups).sort((a, b) => b[1].total - a[1].total).forEach(([company, g]) => {
+        const c = COLORS[ci % COLORS.length]; ci++;
+        const isOpen = finCalExpanded[company];
+        html += '<div class="fcal-acc" onclick="toggleFinCalAcc(\'' + company.replace(/'/g, "\\'") + '\')">';
+        html += '<div class="fcal-acc-hdr"><div class="fcal-acc-dot" style="background:' + c + ';"></div><span class="fcal-acc-name">' + company + '</span><span style="font-size:10px;color:#8b95a1;">' + g.records.length + '건</span><span class="fcal-acc-amt">' + formatWon(g.total) + '</span></div>';
+        html += '<div class="fcal-acc-body ' + (isOpen ? 'open' : '') + '">';
+        g.records.forEach(r => {
+          html += '<div class="fcal-acc-row"><span>' + (r.product || r.company || '-') + '</span><span style="font-weight:600;color:#0ca678;">' + formatWon(r.amount || 0) + '</span></div>';
+        });
+        html += '</div></div>';
+      });
+      el.innerHTML = html;
+    }
+
+    function toggleFinCalAcc(company) {
+      finCalExpanded[company] = !finCalExpanded[company];
+      renderFinCalDetail();
     }
 
     // ── 월별 정산 ──
