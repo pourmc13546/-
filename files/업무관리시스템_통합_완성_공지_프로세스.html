@@ -14692,7 +14692,7 @@ Option C: [제품C] - $[가격]
     ];
     const FP_CAT_ORDER=['수용성','유성','특수기능성','아스팔트','파우더'];
     const FP_CAT_CLS={수용성:'cat-water',유성:'cat-oil',특수기능성:'cat-special',아스팔트:'cat-asphalt',파우더:'cat-powder'};
-    let fpOpenState={수용성:true,유성:false,특수기능성:false,아스팔트:false,파우더:false};
+    let fpOpenState={수용성:false,유성:false,특수기능성:false,아스팔트:false,파우더:false};
 
     function renderFinPriceAccordion(){
       const search=(document.getElementById('finPriceSearch')?.value||'').toLowerCase();
