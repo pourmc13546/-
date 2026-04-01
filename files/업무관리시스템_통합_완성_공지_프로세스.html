@@ -9130,11 +9130,16 @@ Option C: [제품C] - $[가격]
       document.querySelectorAll('.nav-sub-item').forEach(item => item.classList.remove('active'));
 
       // 다른 뷰들 숨기기
+      document.getElementById('dashboardView')?.classList.add('hidden');
       document.getElementById('noticeView')?.classList.add('hidden');
       document.getElementById('processView')?.classList.add('hidden');
       document.getElementById('performanceView')?.classList.add('hidden');
+      document.getElementById('financeView')?.classList.add('hidden');
       document.getElementById('referenceView')?.classList.add('hidden');
       document.getElementById('templatesView')?.classList.add('hidden');
+      document.getElementById('educationView')?.classList.add('hidden');
+      // nav-item 전부 비활성화
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
 
       if (menu === 'operation') {
         operationMenu.classList.add('active');
@@ -9193,6 +9198,11 @@ Option C: [제품C] - $[가격]
 
       // 다른 뷰들 숨기기
       document.getElementById('performanceView')?.classList.add('hidden');
+      document.getElementById('financeView')?.classList.add('hidden');
+      document.getElementById('referenceView')?.classList.add('hidden');
+      document.getElementById('templatesView')?.classList.add('hidden');
+      document.getElementById('educationView')?.classList.add('hidden');
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
       document.getElementById('referenceView')?.classList.add('hidden');
       document.getElementById('templatesView')?.classList.add('hidden');
 
