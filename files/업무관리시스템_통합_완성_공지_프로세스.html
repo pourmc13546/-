@@ -1466,7 +1466,7 @@
       </div>
 
       <!-- ==================== 공지/결정사항 뷰 ==================== -->
-      <div id="noticeView" class="fade-in p-8 hidden">
+      <div id="noticeView" class="fade-in hidden">
         <div class="flex items-center justify-between mb-6">
           <div>
             <h1 class="text-2xl font-bold text-slate-800">공지 / 결정사항</h1>
@@ -3043,12 +3043,13 @@
   </div>
 
       <!-- ==================== 성과관리 뷰 (KPI 대시보드) ==================== -->
-      <div id="performanceView" class="hidden fade-in p-6">
+      <div id="performanceView" class="hidden fade-in">
         <!-- 헤더 -->
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-2xl font-bold text-slate-800">2026 KPI 대시보드</h1>
+              <h1 class="text-2xl font-bold text-toss-gray-900">2026 KPI 대시보드</h1>
               <p class="text-slate-500 mt-1">1~2분기: 구축 | 3~4분기: 매출 5억</p>
               <p class="text-sm text-slate-400 mt-1" id="kpi-date">2026년 2월 2일 월요일</p>
             </div>
@@ -3056,6 +3057,7 @@
               <button onclick="kpiSaveAll()" class="btn-primary text-sm">저장</button>
               <button onclick="kpiResetAll()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm hover:bg-slate-200">초기화</button>
             </div>
+          </div>
           </div>
         </div>
 
@@ -3690,7 +3692,7 @@
       </div>
 
       <!-- ==================== 자료집 뷰 ==================== -->
-      <div id="referenceView" class="hidden fade-in p-8">
+      <div id="referenceView" class="hidden fade-in">
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
           <div class="flex items-center justify-between">
             <div>
@@ -4538,7 +4540,7 @@
       </div>
 
       <!-- ==================== 응답 템플릿 뷰 ==================== -->
-      <div id="templatesView" class="hidden fade-in p-8">
+      <div id="templatesView" class="hidden fade-in">
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
           <div class="flex items-center justify-between">
             <div>
@@ -4879,16 +4881,18 @@ Best regards,
       </div>
 
       <!-- ==================== 정산관리 뷰 ==================== -->
-      <div id="financeView" class="hidden fade-in p-6">
+      <div id="financeView" class="hidden fade-in">
         <!-- 헤더 -->
-        <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
-          <h1 class="text-lg font-bold text-slate-800">정산관리</h1>
+        <div class="bg-white rounded-2xl shadow-sm mb-6">
+          <div class="px-8 pt-8 pb-6">
+          <h1 class="text-2xl font-bold text-toss-gray-900">정산관리</h1>
           <p class="text-sm text-slate-500 mt-1">매출·매입 현황 및 월별 정산 관리</p>
           <div class="fin-tabs mt-4">
             <button class="fin-tab active" onclick="showFinanceTab('fin-dashboard',this)">매출·매입 현황</button>
             <button class="fin-tab" onclick="showFinanceTab('fin-revenue',this)">매출 관리</button>
             <button class="fin-tab" onclick="showFinanceTab('fin-purchase',this)">매입 관리</button>
             <button class="fin-tab" onclick="showFinanceTab('fin-monthly',this)">월별 정산</button>
+          </div>
           </div>
         </div>
 
@@ -5106,7 +5110,7 @@ Best regards,
       </div>
 
       <!-- ==================== 교육자료 뷰 ==================== -->
-      <div id="educationView" class="hidden fade-in p-8">
+      <div id="educationView" class="hidden fade-in">
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
           <div class="flex items-center justify-between">
             <div>
