@@ -106,6 +106,36 @@
   .margin-bar-sm{display:inline-flex;align-items:center;gap:4px;}
   .margin-bar-track{width:40px;height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;display:inline-block;}
   .margin-bar-fill{height:100%;border-radius:2px;display:block;}
+
+  /* 캘린더 */
+  .cal-hdr{text-align:center;font-size:10px;font-weight:600;color:#8b95a1;padding:6px 0;}
+  .cal-day{text-align:center;padding:6px 2px;border-radius:8px;cursor:pointer;transition:all .12s;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+  .cal-day:hover{background:#f1f5f9;}
+  .cal-day .d-num{font-size:12px;font-weight:500;color:#333d4b;}
+  .cal-day .d-sales{font-size:9px;font-weight:700;color:#0ca678;}
+  .cal-day.today .d-num{background:#202454;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+  .cal-day.selected{background:#eff6ff;border:1px solid #3182f6;}
+  .cal-day.has-sales{background:#f0fdf4;}
+  .cal-day.empty{cursor:default;}
+
+  /* 날짜별 바이어 아코디언 */
+  .day-acc-item{border-bottom:1px solid #f4f5f7;}
+  .day-acc-item:last-child{border-bottom:none;}
+  .day-acc-hdr{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;transition:background .1s;}
+  .day-acc-hdr:hover{background:#fafbfc;margin:0 -18px;padding:10px 18px;}
+  .day-acc-arrow{font-size:9px;color:#8b95a1;transition:transform .2s;width:12px;}
+  .day-acc-arrow.open{transform:rotate(90deg);}
+  .day-acc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .day-acc-name{font-size:13px;font-weight:600;color:#333d4b;flex:1;}
+  .day-acc-cnt{font-size:11px;color:#8b95a1;}
+  .day-acc-total{font-size:13px;font-weight:700;color:#202454;}
+  .day-acc-body{display:none;padding:0 0 8px 30px;}
+  .day-acc-body.open{display:block;}
+  .day-acc-product{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;border-bottom:1px solid #f8f9fa;}
+  .day-acc-product:last-child{border-bottom:none;}
+  .day-acc-pname{font-weight:500;color:#333d4b;}
+  .day-acc-pqty{color:#8b95a1;font-size:11px;margin-left:6px;}
+  .day-acc-pamt{font-weight:700;color:#0ca678;}
   .modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;}
   .modal-bg.show{display:flex;}.modal{background:#fff;border-radius:14px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
   .modal-head{padding:16px 22px;border-bottom:1px solid #f4f5f7;display:flex;justify-content:space-between;align-items:center;}
@@ -164,15 +194,46 @@
     </div>
   </div>
 
-  <!-- 탭1: 정산 현황 (들어온돈 + 나간돈 + 거래처 + 미수금 통합) -->
+  <!-- 탭1: 정산 현황 -->
   <div id="tab-all" class="tab-content active">
-    <div class="row-2" style="margin-bottom:16px;">
-      <div><div class="sec-head"><h3>거래처별 매출</h3></div><div class="card"><div class="buyer-list" id="buyerList"></div></div></div>
-      <div><div class="sec-head"><h3>미수금 현황 <span style="font-size:12px;font-weight:600;color:#f59e0b;" id="recvTotal"></span></h3></div><div class="card"><div class="recv-list" id="recvList"></div></div></div>
+    <!-- 월 총 매출 카드 -->
+    <div class="card" style="padding:16px 20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+      <div><span style="font-size:12px;color:#8b95a1;" id="salesMonthLabel">3월 총 매출</span><div style="font-size:24px;font-weight:800;color:#202454;margin-top:2px;" id="salesMonthTotal">₩0</div></div>
+      <div style="text-align:right;"><span style="font-size:20px;font-weight:700;color:#0ca678;" id="salesMonthUsd">$0</span><div style="font-size:11px;color:#8b95a1;margin-top:2px;" id="salesMonthCnt">0건</div></div>
     </div>
-    <!-- 제품별 매출 -->
-    <div style="margin-bottom:16px;"><div class="sec-head"><h3>제품별 매출</h3></div><div class="card"><div class="buyer-list" id="productSalesList"></div></div></div>
-    <div style="margin-bottom:16px;"><div class="sec-head"><h3>들어온 돈 <span class="cnt-badge" id="cntIn">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>입금일</th><th>거래처</th><th>제품</th><th>수량</th><th>단가</th><th>경로</th><th class="r">USD</th><th class="r">KRW</th><th>상태</th><th></th></tr></thead><tbody id="tblInAll"></tbody><tfoot id="tfootInAll"></tfoot></table></div></div></div>
+
+    <!-- 캘린더 + 바이어별 매출 -->
+    <div class="row-2" style="margin-bottom:16px;">
+      <div class="card" style="padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <button onclick="changeMonth(-1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">◀</button>
+          <span style="font-size:14px;font-weight:700;color:#333d4b;" id="calLabel"></span>
+          <button onclick="changeMonth(1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">▶</button>
+        </div>
+        <div id="salesCalendar" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div>
+      </div>
+      <div class="card" style="padding:16px;">
+        <h3 style="font-size:13px;font-weight:700;color:#333d4b;margin-bottom:12px;" id="buyerMonthLabel">3월 바이어별 매출</h3>
+        <div id="buyerList" style="max-height:280px;overflow-y:auto;"></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0 0;margin-top:8px;border-top:2px solid #e5e8eb;font-size:13px;font-weight:700;">
+          <span style="color:#6b7684;">월 총 매출</span>
+          <span style="color:#202454;" id="buyerTotal">₩0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 선택 날짜 매출 현황 -->
+    <div class="card" style="margin-bottom:16px;">
+      <div style="padding:14px 18px;border-bottom:1px solid #f4f5f7;display:flex;justify-content:space-between;align-items:center;">
+        <div><h3 style="font-size:14px;font-weight:700;color:#333d4b;display:flex;align-items:center;gap:6px;">📅 <span id="selectedDateLabel">날짜를 선택하세요</span></h3>
+          <div style="display:flex;gap:10px;margin-top:4px;font-size:12px;"><span style="color:#8b95a1;" id="selectedDateCnt">0건</span><span style="font-weight:700;color:#202454;" id="selectedDateTotal">₩0</span></div>
+        </div>
+        <button class="btn-primary btn-sm" onclick="openTxModal()" style="padding:7px 16px;">+ 매출 입력</button>
+      </div>
+      <div id="selectedDateAccordion" style="padding:8px 18px;"></div>
+    </div>
+
+    <!-- 나간 돈 -->
     <div><div class="sec-head"><h3>나간 돈 <span class="cnt-badge" id="cntOut">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th><th></th></tr></thead><tbody id="tblOutAll"></tbody><tfoot id="tfootOutAll"></tfoot></table></div></div></div>
   </div>
 
@@ -307,28 +368,129 @@ function renderCostBar(){
 }
 
 // ═══ 테이블 렌더링 ═══
-function renderInTable(tbodyId,tfootId){
-  const data=filterMonth(finInData).sort((a,b)=>b.date.localeCompare(a.date));
-  const tbody=document.getElementById(tbodyId);if(!tbody)return;
-  let total=0;
-  tbody.innerHTML=data.length===0?'<tr><td colspan="10" class="empty-msg">입금 내역이 없습니다</td></tr>':
-    data.map(r=>{const idx=finInData.indexOf(r);total+=r.amountUsd;
-      const routeBadge=r.route==='TA'?'<span class="badge ta">T/A</span>':'<span class="badge tt">T/T</span>';
-      const stBadge=r.status==='done'?'<span class="badge done">완료</span>':r.status==='partial'?'<span class="badge partial">부분</span>':'<span class="badge wait">대기</span>';
-      const prodInfo=r.productName?r.productName:'<span style="color:#c4c9d0;">-</span>';
-      const qtyInfo=r.qty?(r.qty+'통 <span style="color:#8b95a1;font-size:10px;">('+((r.totalKg||0).toLocaleString())+'kg)</span>'):'';
-      const priceInfo=r.pricePerKg?'$'+r.pricePerKg+'/kg':'';
-      return '<tr><td style="font-weight:600;">'+r.date.slice(5)+'</td><td>'+r.company+'</td>'+
-        '<td style="font-weight:500;">'+prodInfo+'</td>'+
-        '<td>'+qtyInfo+'</td>'+
-        '<td style="color:#8b95a1;">'+priceInfo+'</td>'+
-        '<td>'+routeBadge+'</td>'+
-        '<td class="r amt-in">+'+fmtD(r.amountUsd)+'</td><td class="r" style="font-weight:600;">'+fmtW(r.amountKrw)+'</td>'+
-        '<td>'+stBadge+'</td><td><button class="btn-edit" onclick="editIn('+idx+')">수정</button><button class="btn-del" onclick="deleteIn('+idx+')">삭제</button></td></tr>';
-    }).join('');
-  document.getElementById(tfootId).innerHTML='<tr><td colspan="6" class="r" style="color:#6b7684;">합계</td><td class="r amt-in" style="font-size:14px;">+'+fmtD(total)+'</td><td class="r" style="color:#0ca678;font-size:14px;">'+fmtW(data.reduce((s,r)=>s+r.amountKrw,0))+'</td><td colspan="2"></td></tr>';
-  if(document.getElementById('cntIn'))document.getElementById('cntIn').textContent=data.length;
+// ═══ 캘린더 ═══
+let selectedDate='';
+function renderCalendar(){
+  const year=curYear,month=curMonth;
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const firstDay=new Date(year,month,1).getDay();
+  const today=new Date();const prefix=getMonthPrefix();
+  const ins=finInData.filter(r=>r.date&&r.date.startsWith(prefix));
+
+  // 일별 매출 합산
+  const daySales={};
+  ins.forEach(r=>{const d=r.date;daySales[d]=(daySales[d]||0)+r.amountUsd;});
+
+  document.getElementById('calLabel').textContent=year+'년 '+(month+1)+'월';
+
+  let html='';
+  ['일','월','화','수','목','금','토'].forEach(d=>{html+='<div class="cal-hdr">'+d+'</div>';});
+  for(let i=0;i<firstDay;i++)html+='<div class="cal-day empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const sales=daySales[ds]||0;
+    const isToday=year===today.getFullYear()&&month===today.getMonth()&&d===today.getDate();
+    const isSel=ds===selectedDate;
+    const cls='cal-day'+(isToday?' today':'')+(isSel?' selected':'')+(sales>0?' has-sales':'');
+    html+='<div class="'+cls+'" onclick="selectDate(\''+ds+'\')">';
+    html+='<span class="d-num">'+d+'</span>';
+    if(sales>0)html+='<span class="d-sales">'+fmtD(sales)+'</span>';
+    html+='</div>';
+  }
+  document.getElementById('salesCalendar').innerHTML=html;
+
+  // 월 총 매출
+  const totalUsd=ins.reduce((s,r)=>s+r.amountUsd,0);
+  const totalKrw=ins.reduce((s,r)=>s+r.amountKrw,0);
+  document.getElementById('salesMonthLabel').textContent=(month+1)+'월 총 매출';
+  document.getElementById('salesMonthTotal').textContent=fmtW(totalKrw);
+  document.getElementById('salesMonthUsd').textContent=fmtD(totalUsd);
+  document.getElementById('salesMonthCnt').textContent=ins.length+'건 등록';
+  document.getElementById('buyerMonthLabel').textContent=(month+1)+'월 바이어별 매출';
 }
+
+function selectDate(ds){
+  selectedDate=ds;
+  renderCalendar();
+  renderSelectedDateDetail();
+}
+
+// ═══ 바이어별 매출 (우측) ═══
+function renderBuyerChart(){
+  const ins=filterMonth(finInData);const map={};
+  ins.forEach(r=>{map[r.company]=(map[r.company]||0)+r.amountKrw;});
+  const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const max=sorted.length>0?sorted[0][1]:1;
+  const el=document.getElementById('buyerList');
+  el.innerHTML=sorted.length===0?'<div class="empty-msg">매출 내역 없음</div>':
+    sorted.map((e,i)=>{
+      const c=BUYER_COLORS[i%BUYER_COLORS.length];
+      return '<div class="buyer-row"><div class="buyer-av" style="background:'+c+';">'+e[0][0]+'</div><div class="buyer-name">'+e[0]+'</div><div class="buyer-bar-bg"><div class="buyer-bar-fill" style="width:'+(e[1]/max*100)+'%;background:linear-gradient(90deg,'+c+','+c+'80);"></div></div><div class="buyer-amt">'+fmtW(e[1])+'</div></div>';
+    }).join('');
+  document.getElementById('buyerTotal').textContent=fmtW(sorted.reduce((s,e)=>s+e[1],0));
+}
+
+// ═══ 선택 날짜 상세 (바이어별 아코디언) ═══
+let expandedBuyers={};
+function renderSelectedDateDetail(){
+  const el=document.getElementById('selectedDateAccordion');
+  if(!selectedDate){el.innerHTML='<div class="empty-msg">캘린더에서 날짜를 클릭하세요</div>';
+    document.getElementById('selectedDateLabel').textContent='날짜를 선택하세요';
+    document.getElementById('selectedDateCnt').textContent='';
+    document.getElementById('selectedDateTotal').textContent='';
+    return;
+  }
+  const records=finInData.filter(r=>r.date===selectedDate);
+  document.getElementById('selectedDateLabel').textContent=selectedDate+' 매출 현황';
+  document.getElementById('selectedDateCnt').textContent=records.length+'건';
+  document.getElementById('selectedDateTotal').textContent=fmtW(records.reduce((s,r)=>s+r.amountKrw,0));
+
+  if(records.length===0){el.innerHTML='<div class="empty-msg" style="padding:20px;">해당 날짜에 등록된 매출이 없습니다</div>';return;}
+
+  // 바이어별 그룹핑
+  const groups={};
+  records.forEach(r=>{
+    if(!groups[r.company])groups[r.company]={records:[],total:0,totalUsd:0};
+    groups[r.company].records.push(r);
+    groups[r.company].total+=r.amountKrw;
+    groups[r.company].totalUsd+=r.amountUsd;
+  });
+
+  let html='';let bi=0;
+  Object.entries(groups).sort((a,b)=>b[1].total-a[1].total).forEach(([buyer,g])=>{
+    const c=BUYER_COLORS[bi%BUYER_COLORS.length];bi++;
+    const isOpen=expandedBuyers[buyer];
+    html+='<div class="day-acc-item">';
+    html+='<div class="day-acc-hdr" onclick="toggleBuyerAcc(\''+buyer.replace(/'/g,"\\'")+'\')">';
+    html+='<span class="day-acc-arrow '+(isOpen?'open':'')+'">▶</span>';
+    html+='<div class="day-acc-dot" style="background:'+c+';"></div>';
+    html+='<span class="day-acc-name">'+buyer+'</span>';
+    html+='<span class="day-acc-cnt">'+g.records.length+'건</span>';
+    html+='<span class="day-acc-total">'+fmtD(g.totalUsd)+' <span style="font-size:11px;color:#8b95a1;font-weight:400;">('+fmtW(g.total)+')</span></span>';
+    html+='</div>';
+
+    html+='<div class="day-acc-body '+(isOpen?'open':'')+'">';
+    // 제품별 그룹핑
+    const prods={};
+    g.records.forEach(r=>{
+      const pn=r.productName||'기타';
+      if(!prods[pn])prods[pn]={qty:0,kg:0,usd:0,krw:0,price:r.pricePerKg||0};
+      prods[pn].qty+=(r.qty||0);
+      prods[pn].kg+=(r.totalKg||0);
+      prods[pn].usd+=r.amountUsd;
+      prods[pn].krw+=r.amountKrw;
+    });
+    Object.entries(prods).forEach(([pn,d])=>{
+      html+='<div class="day-acc-product">';
+      html+='<div><span class="day-acc-pname">'+pn+'</span><span class="day-acc-pqty">'+d.qty+'통 · '+d.kg.toLocaleString()+'kg'+(d.price?' · $'+d.price+'/kg':'')+'</span></div>';
+      html+='<span class="day-acc-pamt">'+fmtD(d.usd)+'</span>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  });
+  el.innerHTML=html;
+}
+function toggleBuyerAcc(buyer){expandedBuyers[buyer]=!expandedBuyers[buyer];renderSelectedDateDetail();}
 
 function renderOutTable(tbodyId,tfootId){
   const data=filterMonth(finOutData).sort((a,b)=>b.date.localeCompare(a.date));
@@ -407,41 +569,11 @@ function renderOrderCards(){
   container.innerHTML=html;
 }
 
-// ═══ 제품별 매출 ═══
-function renderProductSales(){
-  const ins=filterMonth(finInData).filter(r=>r.productName);
-  const map={};
-  ins.forEach(r=>{
-    if(!map[r.productName])map[r.productName]={usd:0,qty:0,kg:0};
-    map[r.productName].usd+=r.amountUsd;
-    map[r.productName].qty+=(r.qty||0);
-    map[r.productName].kg+=(r.totalKg||0);
-  });
-  const sorted=Object.entries(map).sort((a,b)=>b[1].usd-a[1].usd);
-  const totalUsd=sorted.reduce((s,e)=>s+e[1].usd,0);
-  const max=sorted.length>0?sorted[0][1].usd:1;
-  const PROD_COLORS=['#202454','#3182f6','#0ca678','#f59e0b','#8b5cf6','#ef4444','#ec4899'];
-  const el=document.getElementById('productSalesList');
-  if(!el)return;
-  el.innerHTML=sorted.length===0?'<div class="empty-msg">제품 매출 데이터 없음</div>':
-    sorted.map((e,i)=>{
-      const pct=totalUsd>0?(e[1].usd/totalUsd*100).toFixed(0):'0';
-      const c=PROD_COLORS[i%PROD_COLORS.length];
-      return '<div class="buyer-row">'+
-        '<div class="buyer-av" style="background:'+c+';font-size:9px;">'+(i+1)+'</div>'+
-        '<div style="flex:1;"><div class="buyer-name">'+e[0]+'</div><div style="font-size:10px;color:#8b95a1;">'+e[1].qty+'통 · '+e[1].kg.toLocaleString()+'kg</div></div>'+
-        '<div class="buyer-bar-bg"><div class="buyer-bar-fill" style="width:'+(e[1].usd/max*100)+'%;background:linear-gradient(90deg,'+c+','+c+'80);"></div></div>'+
-        '<div style="text-align:right;min-width:80px;"><div class="buyer-amt">'+fmtD(e[1].usd)+'</div><div style="font-size:10px;color:#8b95a1;">'+pct+'%</div></div>'+
-        '</div>';
-    }).join('');
-}
-
 // ═══ 전체 렌더링 ═══
 function renderAll(){
-  updateMonthLabel();renderSummary();
-  renderInTable('tblInAll','tfootInAll');
+  updateMonthLabel();renderSummary();renderCalendar();renderBuyerChart();renderSelectedDateDetail();
   renderOutTable('tblOutAll','tfootOutAll');
-  renderProductSales();renderBuyerChart();renderReceivables();renderOrderCards();
+  renderReceivables();renderOrderCards();
 }
 
 // ═══ 수정/삭제 ═══
@@ -731,7 +863,9 @@ function exportProductCsv(){
 }
 
 // ═══ 초기화 ═══
-loadData();renderAll();renderPriceAccordion();
+loadData();
+selectedDate='2026-03-20'; // 샘플 데이터가 있는 날짜
+renderAll();renderPriceAccordion();
 </script>
 </body>
 </html>
