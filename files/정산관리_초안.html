@@ -128,48 +128,31 @@
     </div>
   </div>
 
-  <!-- 비용 비중 -->
-  <div class="cost-section">
-    <div class="cost-title">비용 구성</div>
-    <div class="cost-stack" id="costBar"></div>
-    <div class="cost-legend" id="costLegend"></div>
-  </div>
-
   <!-- 탭 -->
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
     <div class="tabs" style="margin-bottom:0;">
-      <button class="tab active" onclick="switchTab('all',this)">전체 현황</button>
-      <button class="tab" onclick="switchTab('in',this)">들어온 돈</button>
-      <button class="tab" onclick="switchTab('out',this)">나간 돈</button>
+      <button class="tab active" onclick="switchTab('all',this)">정산 현황</button>
       <button class="tab" onclick="switchTab('order',this)">주문별 손익</button>
       <button class="tab" onclick="switchTab('price',this)">제품 단가표</button>
     </div>
-    <button class="btn-primary btn-sm" onclick="openTxModal()" style="padding:8px 20px;font-size:13px;">+ 거래 등록</button>
-  </div>
-
-  <!-- 탭1: 전체 -->
-  <div id="tab-all" class="tab-content active">
-    <div style="margin-bottom:20px;"><div class="sec-head"><h3>들어온 돈 <span class="cnt-badge" id="cntIn">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>메모</th><th>상태</th><th></th></tr></thead><tbody id="tblInAll"></tbody><tfoot id="tfootInAll"></tfoot></table></div></div></div>
-    <div style="margin-bottom:20px;"><div class="sec-head"><h3>나간 돈 <span class="cnt-badge" id="cntOut">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th><th></th></tr></thead><tbody id="tblOutAll"></tbody><tfoot id="tfootOutAll"></tfoot></table></div></div></div>
-    <div class="row-2">
-      <div><div class="sec-head"><h3>거래처별 매출</h3></div><div class="card"><div class="buyer-list" id="buyerList"></div></div></div>
-      <div><div class="sec-head"><h3>미수금 현황 <span style="font-size:12px;font-weight:600;color:#f59e0b;" id="recvTotal"></span></h3></div><div class="card"><div class="recv-list" id="recvList"></div></div></div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn-sm btn-outline" onclick="exportCsv('in')">📥 입금 CSV</button>
+      <button class="btn-sm btn-outline" onclick="exportCsv('out')">📥 지출 CSV</button>
+      <button class="btn-primary btn-sm" onclick="openTxModal()" style="padding:8px 20px;font-size:13px;">+ 거래 등록</button>
     </div>
   </div>
 
-  <!-- 탭2: 들어온 돈 -->
-  <div id="tab-in" class="tab-content">
-    <div class="sec-head"><h3>들어온 돈 상세</h3><div style="display:flex;gap:6px;"><button class="btn-sm btn-outline" onclick="exportCsv('in')">📥 CSV</button></div></div>
-    <div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th>내용</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>상태</th><th></th></tr></thead><tbody id="tblInDetail"></tbody><tfoot id="tfootInDetail"></tfoot></table></div></div>
+  <!-- 탭1: 정산 현황 (들어온돈 + 나간돈 + 거래처 + 미수금 통합) -->
+  <div id="tab-all" class="tab-content active">
+    <div class="row-2" style="margin-bottom:16px;">
+      <div><div class="sec-head"><h3>거래처별 매출</h3></div><div class="card"><div class="buyer-list" id="buyerList"></div></div></div>
+      <div><div class="sec-head"><h3>미수금 현황 <span style="font-size:12px;font-weight:600;color:#f59e0b;" id="recvTotal"></span></h3></div><div class="card"><div class="recv-list" id="recvList"></div></div></div>
+    </div>
+    <div style="margin-bottom:16px;"><div class="sec-head"><h3>들어온 돈 <span class="cnt-badge" id="cntIn">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>메모</th><th>상태</th><th></th></tr></thead><tbody id="tblInAll"></tbody><tfoot id="tfootInAll"></tfoot></table></div></div></div>
+    <div><div class="sec-head"><h3>나간 돈 <span class="cnt-badge" id="cntOut">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th><th></th></tr></thead><tbody id="tblOutAll"></tbody><tfoot id="tfootOutAll"></tfoot></table></div></div></div>
   </div>
 
-  <!-- 탭3: 나간 돈 -->
-  <div id="tab-out" class="tab-content">
-    <div class="sec-head"><h3>나간 돈 상세</h3><div style="display:flex;gap:6px;"><button class="btn-sm btn-outline" onclick="exportCsv('out')">📥 CSV</button></div></div>
-    <div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th><th></th></tr></thead><tbody id="tblOutDetail"></tbody><tfoot id="tfootOutDetail"></tfoot></table></div></div>
-  </div>
-
-  <!-- 탭4: 주문별 손익 -->
+  <!-- 탭2: 주문별 손익 -->
   <div id="tab-order" class="tab-content">
     <div class="sec-head"><h3>주문별 손익 추적</h3></div>
     <div id="orderCards"></div>
@@ -224,24 +207,6 @@
       </div>
     </div>
 
-    <!-- 채널별 가격 -->
-    <div class="card" style="margin-top:16px;">
-      <div class="card-head" style="padding:12px 18px;border-bottom:1px solid #f4f5f7;"><h3 style="font-size:13px;">채널별 가격 정책</h3></div>
-      <div style="padding:14px 18px;overflow-x:auto;">
-        <table class="tbl">
-          <thead><tr><th>채널</th><th>할인율</th><th class="r">코트재I 20kg 기준</th><th>비고</th></tr></thead>
-          <tbody>
-            <tr><td style="font-weight:600;">자사몰 정가</td><td>100%</td><td class="r" style="font-weight:600;">₩142,000</td><td style="color:#8b95a1;">기준가</td></tr>
-            <tr><td>쿠팡 아이템위너</td><td>95%</td><td class="r">₩134,900</td><td style="color:#8b95a1;">×0.95</td></tr>
-            <tr><td>온라인 위탁</td><td>93%</td><td class="r">₩132,060</td><td style="color:#8b95a1;">×0.93</td></tr>
-            <tr><td>파트너사/도매</td><td>90%</td><td class="r">₩127,800</td><td style="color:#8b95a1;">×0.90</td></tr>
-            <tr><td>대리점/철물점</td><td>85%</td><td class="r">₩120,700</td><td style="color:#8b95a1;">×0.85</td></tr>
-            <tr><td>총판 유통</td><td>60%</td><td class="r">₩85,200</td><td style="color:#8b95a1;">×0.60</td></tr>
-            <tr style="background:#f0f7ff;"><td style="font-weight:600;color:#202454;">알리바바 수출가</td><td style="color:#202454;">×1.7</td><td class="r" style="font-weight:700;color:#202454;">₩102,000 ($69.06)</td><td style="color:#8b95a1;">도매원가×1.7</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -454,11 +419,9 @@ function renderOrderCards(){
 
 // ═══ 전체 렌더링 ═══
 function renderAll(){
-  updateMonthLabel();renderSummary();renderCostBar();
+  updateMonthLabel();renderSummary();
   renderInTable('tblInAll','tfootInAll',false);
   renderOutTable('tblOutAll','tfootOutAll');
-  renderInTable('tblInDetail','tfootInDetail',true);
-  renderOutTable('tblOutDetail','tfootOutDetail');
   renderBuyerChart();renderReceivables();renderOrderCards();
 }
 
