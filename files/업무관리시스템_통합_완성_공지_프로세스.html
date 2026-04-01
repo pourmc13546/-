@@ -5093,17 +5093,31 @@ Best regards,
           </div>
           <div style="padding:24px;">
             <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">날짜 *</label><input id="finR-date" type="date" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">거래처 *</label><input id="finR-company" type="text" placeholder="회사명" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
-              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">제품명</label><input id="finR-product" type="text" placeholder="제품명" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+            <div style="margin-bottom:14px;">
+              <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">거래처 *</label>
+              <input id="finR-company" type="text" placeholder="바이어 회사명" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;">
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">제품 선택 *</label>
+              <select id="finR-product" onchange="onFinProductSelect()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; background:#fff;">
+                <option value="">-- 단가표에서 선택 --</option>
+              </select>
+              <div id="finR-productInfo" style="display:none; margin-top:8px; padding:10px 14px; background:#f8f9fa; border-radius:8px; font-size:12px; color:#6b7684;"></div>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px;">
-              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">수량</label><input id="finR-qty" type="number" placeholder="0" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
-              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">단가 (원)</label><input id="finR-price" type="number" placeholder="0" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">수량 (통)</label><input id="finR-qty" type="number" placeholder="0" oninput="calcFinRevAmount()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">단가 (USD/kg)</label><input id="finR-price" type="number" step="0.1" placeholder="0" oninput="calcFinRevAmount()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
               <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">결제상태</label>
                 <select id="finR-status" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; background:#fff;">
                   <option value="대기">대기</option><option value="처리중">처리중</option><option value="완료">완료</option>
                 </select>
+              </div>
+            </div>
+            <div style="margin-bottom:14px; padding:12px 14px; background:#eff6ff; border-radius:8px; display:none;" id="finR-calcResult">
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; text-align:center; font-size:12px;">
+                <div><div style="color:#8b95a1;">총 중량</div><div style="font-weight:700; color:#333d4b; margin-top:2px;" id="finR-totalKg">0 kg</div></div>
+                <div><div style="color:#8b95a1;">매출액 (USD)</div><div style="font-weight:700; color:#0ca678; margin-top:2px;" id="finR-totalUsd">$0</div></div>
+                <div><div style="color:#8b95a1;">매출액 (KRW)</div><div style="font-weight:700; color:#202454; margin-top:2px;" id="finR-totalKrw">₩0</div></div>
               </div>
             </div>
             <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">메모</label><input id="finR-memo" type="text" placeholder="메모" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
@@ -14412,17 +14426,28 @@ Option C: [제품C] - $[가격]
 
     // ── 매출 모달 ──
     function openRevenueModal(idx) {
+      initFinProductDropdown();
       finRevEditIdx = idx;
+      finRevSelectedPkg = 0;
+      document.getElementById('finR-productInfo').style.display = 'none';
+      document.getElementById('finR-calcResult').style.display = 'none';
       if (idx >= 0 && idx < finRevenueData.length) {
         const r = finRevenueData[idx];
         document.getElementById('finRevModalTitle').textContent = '매출 수정';
         document.getElementById('finR-date').value = r.date || '';
         document.getElementById('finR-company').value = r.company || '';
-        document.getElementById('finR-product').value = r.product || '';
+        // 제품 드롭다운에서 매칭
+        const sel = document.getElementById('finR-product');
+        let matched = false;
+        for (let i = 0; i < FP_DATA.length; i++) {
+          if (FP_DATA[i].name === r.product) { sel.value = i; matched = true; break; }
+        }
+        if (!matched) sel.value = '';
         document.getElementById('finR-qty').value = r.quantity || '';
         document.getElementById('finR-price').value = r.unitPrice || '';
         document.getElementById('finR-status').value = r.paymentStatus || '대기';
         document.getElementById('finR-memo').value = r.memo || '';
+        if (matched) onFinProductSelect();
       } else {
         document.getElementById('finRevModalTitle').textContent = '매출 등록';
         document.getElementById('finR-date').value = new Date().toISOString().slice(0,10);
@@ -14441,11 +14466,18 @@ Option C: [제품C] - $[가격]
       const company = document.getElementById('finR-company').value.trim();
       if (!date || !company) { alert('날짜와 거래처를 입력하세요.'); return; }
       const qty = parseInt(document.getElementById('finR-qty').value) || 0;
-      const price = parseInt(document.getElementById('finR-price').value) || 0;
+      const price = parseFloat(document.getElementById('finR-price').value) || 0;
+      // 제품 드롭다운에서 이름 가져오기
+      const prodIdx = document.getElementById('finR-product').value;
+      const prodName = prodIdx !== '' && FP_DATA[prodIdx] ? FP_DATA[prodIdx].name : '';
+      const pkg = prodIdx !== '' && FP_DATA[prodIdx] ? FP_DATA[prodIdx].pkg : 0;
+      const totalKg = qty * pkg;
+      const amountUsd = totalKg * price;
+      const amount = Math.round(amountUsd * 1477);
       const rec = {
         date, company,
-        product: document.getElementById('finR-product').value.trim(),
-        quantity: qty, unitPrice: price, amount: qty * price,
+        product: prodName,
+        quantity: qty, unitPrice: price, amount: amount,
         paymentStatus: document.getElementById('finR-status').value,
         memo: document.getElementById('finR-memo').value.trim(),
         createdBy: (JSON.parse(localStorage.getItem('loggedInUser')||'{}').name) || '',
@@ -14550,6 +14582,88 @@ Option C: [제품C] - $[가격]
       link.download = (type === 'revenue' ? '매출' : '매입') + '_' + new Date().toISOString().slice(0,10) + '.csv';
       link.click();
     }
+    // ── 매출 모달 ↔ 단가표 연동 ──
+    let finRevSelectedPkg = 0;
+    function initFinProductDropdown() {
+      const sel = document.getElementById('finR-product');
+      if (!sel || sel.options.length > 1) return;
+      FP_DATA.forEach((p, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = p.name + ' (' + p.pkg + p.unit + ')';
+        sel.appendChild(opt);
+      });
+    }
+
+    function onFinProductSelect() {
+      const sel = document.getElementById('finR-product');
+      const idx = sel.value;
+      const infoEl = document.getElementById('finR-productInfo');
+      const calcEl = document.getElementById('finR-calcResult');
+      if (idx === '') { infoEl.style.display = 'none'; calcEl.style.display = 'none'; finRevSelectedPkg = 0; return; }
+      const p = FP_DATA[idx];
+      finRevSelectedPkg = p.pkg;
+      // 단가 자동 채움
+      const priceEl = document.getElementById('finR-price');
+      if (p.t1) {
+        priceEl.value = p.t1;
+        // 제품 정보 표시
+        let info = '<strong>' + p.name + '</strong> · ' + p.pkg + ' ' + p.unit + ' · ' + p.cat;
+        if (p.t1) info += '<br>볼륨 단가: <span style="color:#ef4444;">$' + p.t1 + '</span> → <span style="color:#f59e0b;">$' + p.t2 + '</span> → <span style="color:#0ca678;">$' + p.t3 + '</span> → <span style="color:#202454;">$' + p.t4 + '</span> /kg';
+        if (p.costKg) info += '<br>매입가: ₩' + p.costKg.toLocaleString() + '/kg';
+        if (p.exportKrw) info += '<br>수출가: ₩' + p.exportKrw.toLocaleString();
+        infoEl.innerHTML = info;
+        infoEl.style.display = '';
+      } else if (p.exportKrw) {
+        priceEl.value = (p.exportKrw / p.pkg / 1477).toFixed(2);
+        infoEl.innerHTML = '<strong>' + p.name + '</strong> · ' + p.pkg + ' ' + p.unit + '<br>수출가: ₩' + p.exportKrw.toLocaleString() + ' · 자사몰: ₩' + (p.retailKrw || 0).toLocaleString();
+        infoEl.style.display = '';
+      }
+      calcFinRevAmount();
+    }
+
+    function calcFinRevAmount() {
+      const qty = parseInt(document.getElementById('finR-qty').value) || 0;
+      const price = parseFloat(document.getElementById('finR-price').value) || 0;
+      const calcEl = document.getElementById('finR-calcResult');
+      if (qty > 0 && price > 0 && finRevSelectedPkg > 0) {
+        const totalKg = qty * finRevSelectedPkg;
+        const totalUsd = totalKg * price;
+        const totalKrw = totalUsd * 1477;
+        // 볼륨 단계별 자동 단가 추천
+        const idx = document.getElementById('finR-product').value;
+        if (idx !== '') {
+          const p = FP_DATA[idx];
+          if (p.t1) {
+            let recommended = p.t1;
+            if (totalKg >= 3000 && p.t4) recommended = p.t4;
+            else if (totalKg >= 1000 && p.t3) recommended = p.t3;
+            else if (totalKg >= 101 && p.t2) recommended = p.t2;
+            if (parseFloat(document.getElementById('finR-price').value) === p.t1 && recommended !== p.t1) {
+              document.getElementById('finR-price').value = recommended;
+              calcFinRevAmount();
+              return;
+            }
+          }
+        }
+        document.getElementById('finR-totalKg').textContent = totalKg.toLocaleString() + ' kg';
+        document.getElementById('finR-totalUsd').textContent = '$' + Math.round(totalUsd).toLocaleString();
+        document.getElementById('finR-totalKrw').textContent = '₩' + Math.round(totalKrw).toLocaleString();
+        calcEl.style.display = '';
+      } else {
+        calcEl.style.display = 'none';
+      }
+    }
+
+    // openRevenueModal 호출 시 드롭다운 초기화
+    const _origOpenRevModal = typeof openRevenueModal === 'function' ? openRevenueModal : null;
+    const _patchRevModal = function() {
+      initFinProductDropdown();
+      document.getElementById('finR-productInfo').style.display = 'none';
+      document.getElementById('finR-calcResult').style.display = 'none';
+      finRevSelectedPkg = 0;
+    };
+
     // ── 제품 단가표 ──
     const FP_DATA=[
       {name:'POUR 코트재I(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
