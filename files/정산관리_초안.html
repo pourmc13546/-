@@ -170,7 +170,9 @@
       <div><div class="sec-head"><h3>거래처별 매출</h3></div><div class="card"><div class="buyer-list" id="buyerList"></div></div></div>
       <div><div class="sec-head"><h3>미수금 현황 <span style="font-size:12px;font-weight:600;color:#f59e0b;" id="recvTotal"></span></h3></div><div class="card"><div class="recv-list" id="recvList"></div></div></div>
     </div>
-    <div style="margin-bottom:16px;"><div class="sec-head"><h3>들어온 돈 <span class="cnt-badge" id="cntIn">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>입금일</th><th>거래처</th><th>경로</th><th>관련주문</th><th class="r">USD</th><th class="r">환율</th><th class="r">KRW</th><th>메모</th><th>상태</th><th></th></tr></thead><tbody id="tblInAll"></tbody><tfoot id="tfootInAll"></tfoot></table></div></div></div>
+    <!-- 제품별 매출 -->
+    <div style="margin-bottom:16px;"><div class="sec-head"><h3>제품별 매출</h3></div><div class="card"><div class="buyer-list" id="productSalesList"></div></div></div>
+    <div style="margin-bottom:16px;"><div class="sec-head"><h3>들어온 돈 <span class="cnt-badge" id="cntIn">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>입금일</th><th>거래처</th><th>제품</th><th>수량</th><th>단가</th><th>경로</th><th class="r">USD</th><th class="r">KRW</th><th>상태</th><th></th></tr></thead><tbody id="tblInAll"></tbody><tfoot id="tfootInAll"></tfoot></table></div></div></div>
     <div><div class="sec-head"><h3>나간 돈 <span class="cnt-badge" id="cntOut">0</span></h3></div><div class="card"><div style="overflow-x:auto;"><table class="tbl"><thead><tr><th>날짜</th><th>거래처</th><th>항목</th><th>관련주문</th><th class="r">KRW</th><th>메모</th><th></th></tr></thead><tbody id="tblOutAll"></tbody><tfoot id="tfootOutAll"></tfoot></table></div></div></div>
   </div>
 
@@ -219,10 +221,10 @@ let curYear = 2026, curMonth = 2; // 0-indexed (2=March)
 let txRowId = 0;
 
 const defaultIn = [
-  {id:'IN-001',date:'2026-03-20',company:'India Steel Corp',route:'TT',orderId:'ORD-003',amountUsd:5500,rate:1477,amountKrw:8123500,memo:'전액 입금',status:'done'},
-  {id:'IN-002',date:'2026-03-10',company:'Dubai Imports LLC',route:'TA',orderId:'ORD-002',amountUsd:3200,rate:1477,amountKrw:4726400,memo:'T/A 정산',status:'done'},
-  {id:'IN-003',date:'2026-03-05',company:'ABC Trading Co.',route:'TT',orderId:'ORD-001',amountUsd:1350,rate:1477,amountKrw:1993950,memo:'선금 30%',status:'partial'},
-  {id:'IN-004',date:'2026-02-15',company:'ABC Trading Co.',route:'TT',orderId:'ORD-001',amountUsd:2000,rate:1450,amountKrw:2900000,memo:'2월 거래',status:'done'}
+  {id:'IN-001',date:'2026-03-20',company:'India Steel Corp',route:'TT',orderId:'ORD-003',productName:'POUR 방청코팅',pkg:20,unit:'kg/통',qty:30,pricePerKg:9.17,totalKg:600,amountUsd:5500,rate:1477,amountKrw:8123500,memo:'전액 입금',status:'done'},
+  {id:'IN-002',date:'2026-03-10',company:'Dubai Imports LLC',route:'TA',orderId:'ORD-002',productName:'POUR 발수코팅제',pkg:18,unit:'kg/통',qty:100,pricePerKg:1.78,totalKg:1800,amountUsd:3200,rate:1477,amountKrw:4726400,memo:'T/A 정산',status:'done'},
+  {id:'IN-003',date:'2026-03-05',company:'ABC Trading Co.',route:'TT',orderId:'ORD-001',productName:'POUR 코트재I(회색)',pkg:20,unit:'kg/통',qty:50,pricePerKg:4.50,totalKg:1000,amountUsd:1350,rate:1477,amountKrw:1993950,memo:'선금 30%',status:'partial'},
+  {id:'IN-004',date:'2026-02-15',company:'ABC Trading Co.',route:'TT',orderId:'ORD-001',productName:'POUR 코트재I(회색)',pkg:20,unit:'kg/통',qty:40,pricePerKg:4.50,totalKg:800,amountUsd:2000,rate:1450,amountKrw:2900000,memo:'2월 거래',status:'done'}
 ];
 const defaultOut = [
   {id:'OUT-001',date:'2026-03-18',company:'검역원',category:'수수료',orderId:'ORD-003',amountKrw:150000,memo:'검역 수수료'},
@@ -305,22 +307,26 @@ function renderCostBar(){
 }
 
 // ═══ 테이블 렌더링 ═══
-function renderInTable(tbodyId,tfootId,detailed){
+function renderInTable(tbodyId,tfootId){
   const data=filterMonth(finInData).sort((a,b)=>b.date.localeCompare(a.date));
   const tbody=document.getElementById(tbodyId);if(!tbody)return;
   let total=0;
-  tbody.innerHTML=data.length===0?'<tr><td colspan="'+(detailed?10:10)+'" class="empty-msg">입금 내역이 없습니다</td></tr>':
-    data.map((r,i)=>{const idx=finInData.indexOf(r);total+=r.amountUsd;
+  tbody.innerHTML=data.length===0?'<tr><td colspan="10" class="empty-msg">입금 내역이 없습니다</td></tr>':
+    data.map(r=>{const idx=finInData.indexOf(r);total+=r.amountUsd;
       const routeBadge=r.route==='TA'?'<span class="badge ta">T/A</span>':'<span class="badge tt">T/T</span>';
       const stBadge=r.status==='done'?'<span class="badge done">완료</span>':r.status==='partial'?'<span class="badge partial">부분</span>':'<span class="badge wait">대기</span>';
-      return '<tr><td style="font-weight:600;">'+r.date.slice(5)+'</td><td>'+r.company+'</td><td>'+routeBadge+'</td><td class="link">'+(r.orderId||'-')+'</td>'+
-        (detailed?'<td style="color:#8b95a1;">'+r.memo+'</td>':'')+
-        '<td class="r amt-in">+'+fmtD(r.amountUsd)+'</td><td class="r" style="color:#8b95a1;">'+r.rate+'</td><td class="r" style="font-weight:600;">'+fmtW(r.amountKrw)+'</td>'+
-        (detailed?'':'<td style="color:#8b95a1;font-size:11px;">'+r.memo+'</td>')+
+      const prodInfo=r.productName?r.productName:'<span style="color:#c4c9d0;">-</span>';
+      const qtyInfo=r.qty?(r.qty+'통 <span style="color:#8b95a1;font-size:10px;">('+((r.totalKg||0).toLocaleString())+'kg)</span>'):'';
+      const priceInfo=r.pricePerKg?'$'+r.pricePerKg+'/kg':'';
+      return '<tr><td style="font-weight:600;">'+r.date.slice(5)+'</td><td>'+r.company+'</td>'+
+        '<td style="font-weight:500;">'+prodInfo+'</td>'+
+        '<td>'+qtyInfo+'</td>'+
+        '<td style="color:#8b95a1;">'+priceInfo+'</td>'+
+        '<td>'+routeBadge+'</td>'+
+        '<td class="r amt-in">+'+fmtD(r.amountUsd)+'</td><td class="r" style="font-weight:600;">'+fmtW(r.amountKrw)+'</td>'+
         '<td>'+stBadge+'</td><td><button class="btn-edit" onclick="editIn('+idx+')">수정</button><button class="btn-del" onclick="deleteIn('+idx+')">삭제</button></td></tr>';
     }).join('');
-  const cols=detailed?10:10;
-  document.getElementById(tfootId).innerHTML='<tr><td colspan="'+(detailed?5:4)+'" class="r" style="color:#6b7684;">합계</td><td class="r amt-in" style="font-size:14px;">+'+fmtD(total)+'</td><td></td><td class="r" style="color:#0ca678;font-size:14px;">'+fmtW(data.reduce((s,r)=>s+r.amountKrw,0))+'</td><td colspan="2"></td></tr>';
+  document.getElementById(tfootId).innerHTML='<tr><td colspan="6" class="r" style="color:#6b7684;">합계</td><td class="r amt-in" style="font-size:14px;">+'+fmtD(total)+'</td><td class="r" style="color:#0ca678;font-size:14px;">'+fmtW(data.reduce((s,r)=>s+r.amountKrw,0))+'</td><td colspan="2"></td></tr>';
   if(document.getElementById('cntIn'))document.getElementById('cntIn').textContent=data.length;
 }
 
@@ -401,12 +407,41 @@ function renderOrderCards(){
   container.innerHTML=html;
 }
 
+// ═══ 제품별 매출 ═══
+function renderProductSales(){
+  const ins=filterMonth(finInData).filter(r=>r.productName);
+  const map={};
+  ins.forEach(r=>{
+    if(!map[r.productName])map[r.productName]={usd:0,qty:0,kg:0};
+    map[r.productName].usd+=r.amountUsd;
+    map[r.productName].qty+=(r.qty||0);
+    map[r.productName].kg+=(r.totalKg||0);
+  });
+  const sorted=Object.entries(map).sort((a,b)=>b[1].usd-a[1].usd);
+  const totalUsd=sorted.reduce((s,e)=>s+e[1].usd,0);
+  const max=sorted.length>0?sorted[0][1].usd:1;
+  const PROD_COLORS=['#202454','#3182f6','#0ca678','#f59e0b','#8b5cf6','#ef4444','#ec4899'];
+  const el=document.getElementById('productSalesList');
+  if(!el)return;
+  el.innerHTML=sorted.length===0?'<div class="empty-msg">제품 매출 데이터 없음</div>':
+    sorted.map((e,i)=>{
+      const pct=totalUsd>0?(e[1].usd/totalUsd*100).toFixed(0):'0';
+      const c=PROD_COLORS[i%PROD_COLORS.length];
+      return '<div class="buyer-row">'+
+        '<div class="buyer-av" style="background:'+c+';font-size:9px;">'+(i+1)+'</div>'+
+        '<div style="flex:1;"><div class="buyer-name">'+e[0]+'</div><div style="font-size:10px;color:#8b95a1;">'+e[1].qty+'통 · '+e[1].kg.toLocaleString()+'kg</div></div>'+
+        '<div class="buyer-bar-bg"><div class="buyer-bar-fill" style="width:'+(e[1].usd/max*100)+'%;background:linear-gradient(90deg,'+c+','+c+'80);"></div></div>'+
+        '<div style="text-align:right;min-width:80px;"><div class="buyer-amt">'+fmtD(e[1].usd)+'</div><div style="font-size:10px;color:#8b95a1;">'+pct+'%</div></div>'+
+        '</div>';
+    }).join('');
+}
+
 // ═══ 전체 렌더링 ═══
 function renderAll(){
   updateMonthLabel();renderSummary();
-  renderInTable('tblInAll','tfootInAll',false);
+  renderInTable('tblInAll','tfootInAll');
   renderOutTable('tblOutAll','tfootOutAll');
-  renderBuyerChart();renderReceivables();renderOrderCards();
+  renderProductSales();renderBuyerChart();renderReceivables();renderOrderCards();
 }
 
 // ═══ 수정/삭제 ═══
@@ -454,11 +489,49 @@ function closeTxModal(){document.getElementById('modal-tx').classList.remove('sh
 function addTxRow(type){
   const t=type||'in';const id=++txRowId;const today=new Date().toISOString().slice(0,10);
   const tr=document.createElement('tr');tr.id='txRow-'+id;tr.className=t==='in'?'tx-row-in':'tx-row-out';
-  tr.innerHTML='<td><select class="tx-select" onchange="onTxTypeChange('+id+',this)"><option value="in"'+(t==='in'?' selected':'')+'>💰 입금</option><option value="out"'+(t==='out'?' selected':'')+'>💸 지출</option></select></td><td><input type="date" class="tx-input" value="'+today+'"></td><td><input type="text" class="tx-input" placeholder="회사명"></td><td id="txSub-'+id+'">'+getSubField(t)+'</td><td><input type="text" class="tx-input" placeholder="ORD-" style="width:75px;"></td><td><input type="number" class="tx-input" placeholder="0" style="text-align:right;" oninput="updateTxSummary()" id="txAmt-'+id+'"></td><td id="txRateCell-'+id+'">'+(t==='in'?'<input type="number" class="tx-input" value="1477" style="width:60px;">':'<span style="color:#c4c9d0;font-size:10px;">KRW</span>')+'</td><td><input type="text" class="tx-input" placeholder="메모"></td><td><button class="tx-del" onclick="removeTxRow('+id+')">✕</button></td>';
+  tr.innerHTML='<td><select class="tx-select" onchange="onTxTypeChange('+id+',this)"><option value="in"'+(t==='in'?' selected':'')+'>💰 입금</option><option value="out"'+(t==='out'?' selected':'')+'>💸 지출</option></select></td><td><input type="date" class="tx-input" value="'+today+'"></td><td><input type="text" class="tx-input" placeholder="회사명"></td><td id="txSub-'+id+'">'+getSubField(t,id)+'</td><td><input type="text" class="tx-input" placeholder="ORD-" style="width:75px;"></td><td><input type="number" class="tx-input" placeholder="0" style="text-align:right;" oninput="updateTxSummary()" id="txAmt-'+id+'"></td><td id="txRateCell-'+id+'">'+(t==='in'?'<input type="number" class="tx-input" value="1477" style="width:60px;">':'<span style="color:#c4c9d0;font-size:10px;">KRW</span>')+'</td><td><input type="text" class="tx-input" placeholder="메모"></td><td><button class="tx-del" onclick="removeTxRow('+id+')">✕</button></td>';
   document.getElementById('txListBody').appendChild(tr);updateTxSummary();
 }
-function getSubField(type){return type==='in'?'<select class="tx-select"><option value="TT">T/T</option><option value="TA">T/A</option></select>':'<select class="tx-select"><option>제품매입</option><option>물류비</option><option>통관비</option><option>대행비</option><option>수수료</option><option>기타</option></select>';}
-function onTxTypeChange(id,sel){const t=sel.value;const tr=document.getElementById('txRow-'+id);tr.className=t==='in'?'tx-row-in':'tx-row-out';document.getElementById('txSub-'+id).innerHTML=getSubField(t);document.getElementById('txRateCell-'+id).innerHTML=t==='in'?'<input type="number" class="tx-input" value="1477" style="width:60px;">':'<span style="color:#c4c9d0;font-size:10px;">KRW</span>';updateTxSummary();}
+function getSubField(type,id){
+  if(type==='in'){
+    let opts='<option value="">제품선택</option>';
+    PROD_DATA.forEach(p=>{opts+='<option value="'+p.name+'|'+p.pkg+'|'+p.unit+'">'+p.name+' ('+p.pkg+p.unit+')</option>';});
+    return '<select class="tx-select" style="font-size:10px;" onchange="onProductSelect('+id+',this)">'+opts+'</select>'+
+      '<div style="display:flex;gap:3px;margin-top:3px;" id="txProdDetail-'+id+'">'+
+        '<input type="number" class="tx-input" placeholder="수량" style="width:45px;" id="txQty-'+id+'" oninput="calcTxAmount('+id+')">'+
+        '<input type="number" class="tx-input" placeholder="$/kg" step="0.1" style="width:50px;" id="txPriceKg-'+id+'" oninput="calcTxAmount('+id+')">'+
+        '<select class="tx-select" style="width:45px;font-size:9px;"><option value="TT">T/T</option><option value="TA">T/A</option></select>'+
+      '</div>';
+  } else {
+    return '<select class="tx-select"><option>제품매입</option><option>물류비</option><option>통관비</option><option>대행비</option><option>수수료</option><option>기타</option></select>';
+  }
+}
+function onTxTypeChange(id,sel){const t=sel.value;const tr=document.getElementById('txRow-'+id);tr.className=t==='in'?'tx-row-in':'tx-row-out';document.getElementById('txSub-'+id).innerHTML=getSubField(t,id);document.getElementById('txRateCell-'+id).innerHTML=t==='in'?'<input type="number" class="tx-input" value="1477" style="width:60px;">':'<span style="color:#c4c9d0;font-size:10px;">KRW</span>';updateTxSummary();}
+
+function onProductSelect(id,sel){
+  const val=sel.value;if(!val)return;
+  const parts=val.split('|');const name=parts[0];const pkg=parseFloat(parts[1])||0;
+  // 단가표에서 해당 제품 찾기
+  const prod=PROD_DATA.find(p=>p.name===name&&p.pkg===pkg);
+  if(prod&&prod.t1){
+    const qtyEl=document.getElementById('txQty-'+id);
+    const priceEl=document.getElementById('txPriceKg-'+id);
+    if(!priceEl.value)priceEl.value=prod.t1;
+  }
+}
+function calcTxAmount(id){
+  const qtyEl=document.getElementById('txQty-'+id);
+  const priceEl=document.getElementById('txPriceKg-'+id);
+  const amtEl=document.getElementById('txAmt-'+id);
+  const subEl=document.getElementById('txSub-'+id);
+  const prodSel=subEl?.querySelector('select');
+  if(!prodSel||!prodSel.value)return;
+  const parts=prodSel.value.split('|');const pkg=parseFloat(parts[1])||0;
+  const qty=parseFloat(qtyEl?.value)||0;const price=parseFloat(priceEl?.value)||0;
+  const totalKg=qty*pkg;
+  amtEl.value=(totalKg*price).toFixed(0);
+  updateTxSummary();
+}
 function removeTxRow(id){const r=document.getElementById('txRow-'+id);if(r)r.remove();updateTxSummary();}
 function updateTxSummary(){let ti=0,to=0,ci=0,co=0;document.querySelectorAll('#txListBody tr').forEach(tr=>{const t=tr.querySelector('select').value;const a=parseFloat(tr.querySelector('[id^="txAmt-"]')?.value)||0;if(t==='in'){ti+=a;ci++;}else{to+=a;co++;}});document.getElementById('txTotalIn').textContent='+$'+ti.toLocaleString();document.getElementById('txTotalOut').textContent='-₩'+to.toLocaleString();document.getElementById('txSummary').textContent='입금 '+ci+'건 · 지출 '+co+'건';}
 
@@ -472,8 +545,19 @@ function saveAllTx(){
     const memo=inputs[inputs.length-1].value.trim();
     if(!date||!company||amt<=0)return;
     if(type==='in'){
-      const route=selects[1].value;const rate=parseInt(inputs[4]?.value)||1477;
-      finInData.unshift({id:'IN-'+Date.now()+'-'+si,date,company,route,orderId,amountUsd:amt,rate,amountKrw:amt*rate,memo,status:'done'});si++;
+      const subCell=document.getElementById('txSub-'+tr.id.split('-')[1]);
+      const prodSel=subCell?.querySelector('select');
+      const prodVal=prodSel?.value||'';
+      const parts=prodVal.split('|');
+      const productName=parts[0]||'';const pkg=parseFloat(parts[1])||0;const unit=parts[2]||'';
+      const qtyEl=document.getElementById('txQty-'+tr.id.split('-')[1]);
+      const priceEl=document.getElementById('txPriceKg-'+tr.id.split('-')[1]);
+      const routeSel=subCell?.querySelectorAll('select')[2]||subCell?.querySelectorAll('select')[1];
+      const route=routeSel?.value||'TT';
+      const qty=parseInt(qtyEl?.value)||0;const pricePerKg=parseFloat(priceEl?.value)||0;
+      const totalKg=qty*pkg;
+      const rate=parseInt(document.getElementById('txRateCell-'+tr.id.split('-')[1])?.querySelector('input')?.value)||1477;
+      finInData.unshift({id:'IN-'+Date.now()+'-'+si,date,company,route,orderId,productName,pkg,unit,qty,pricePerKg,totalKg,amountUsd:amt,rate,amountKrw:amt*rate,memo,status:'done'});si++;
     }else{
       const category=selects[1].value;
       finOutData.unshift({id:'OUT-'+Date.now()+'-'+so,date,company,category,orderId,amountKrw:amt,memo});so++;
