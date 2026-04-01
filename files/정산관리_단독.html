@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>정산관리 · 해외사업부</title>
+  <style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Pretendard',sans-serif; background:#f2f4f6; color:#191f28; }
+.page { max-width:1200px; margin:0 auto; padding:24px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.fin-tabs { display:flex; gap:4px; margin-bottom:20px; flex-wrap:wrap; }
+.fin-tab { padding:8px 18px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; color:#64748b; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; }
+.fin-tab:hover { background:#e2e8f0; }
+.fin-tab.active { background:#202454; color:#fff; border-color:#202454; font-weight:600; }
+.fin-card { background:#fff; border:1px solid #e5e8eb; border-radius:14px; padding:20px; }
+.fin-card h4 { font-size:12px; color:#8b95a1; font-weight:600; margin:0 0 8px; }
+.fin-card .val { font-size:22px; font-weight:800; color:#191f28; }
+.fin-card .sub { font-size:12px; margin-top:4px; }
+.fin-card .sub.up { color:#0ca678; }
+.fin-card .sub.down { color:#f04452; }
+.fin-tbl { width:100%; border-collapse:collapse; font-size:13px; }
+.fin-tbl th { text-align:left; padding:10px 12px; background:#f8f9fa; border-bottom:2px solid #e5e8eb; color:#6b7684; font-weight:600; font-size:12px; }
+.fin-tbl td { padding:10px 12px; border-bottom:1px solid #f4f5f7; color:#333d4b; }
+.fin-tbl tr:hover td { background:#f8fafc; }
+.fin-status { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.fin-status.done { background:#dcfce7; color:#16a34a; }
+.fin-status.processing { background:#dbeafe; color:#2563eb; }
+.fin-status.waiting { background:#f1f5f9; color:#64748b; }
+.fin-section { display:none; animation:fadeIn .3s ease; }
+.fin-section.active { display:block; }
+.fcal-hdr{text-align:center;font-size:13px;font-weight:600;color:#8b95a1;padding:8px 0;}
+.fcal-day{text-align:center;padding:8px 4px;border-radius:10px;cursor:pointer;transition:all .12s;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.fcal-day:hover{background:#f1f5f9;}
+.fcal-day .fd-num{font-size:15px;font-weight:600;color:#333d4b;}
+.fcal-day .fd-sales{font-size:11px;font-weight:700;color:#0ca678;}
+.fcal-day.fd-today .fd-num{background:#202454;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;}
+.fcal-day.fd-selected{background:#eff6ff;border:1px solid #3182f6;}
+.fcal-day.fd-has{background:#f0fdf4;}
+.fcal-day.fd-empty{cursor:default;}
+.fcal-acc{border-bottom:1px solid #f4f5f7;padding:8px 0;cursor:pointer;}
+.fcal-acc:last-child{border-bottom:none;}
+.fcal-acc-hdr{display:flex;align-items:center;gap:10px;font-size:14px;}
+.fcal-acc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.fcal-acc-name{font-weight:600;color:#333d4b;flex:1;font-size:15px;}
+.fcal-acc-amt{font-weight:700;color:#0ca678;font-size:15px;}
+.fcal-acc-body{display:none;padding:6px 0 6px 28px;font-size:13px;color:#6b7684;}
+.fcal-acc-body.open{display:block;}
+.fcal-acc-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f8f9fa;}
+.fcal-acc-row:last-child{border-bottom:none;}
+.fp-group{background:#fff;border:1px solid #e5e8eb;border-radius:12px;margin-bottom:10px;overflow:hidden;}
+.fp-header{padding:12px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s;user-select:none;}
+.fp-header:hover{background:#f8f9fa;}
+.fp-arrow{font-size:10px;color:#8b95a1;transition:transform .2s;width:14px;flex-shrink:0;}
+.fp-arrow.open{transform:rotate(90deg);}
+.fp-cat{display:inline-block;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600;}
+.fp-name{font-size:13px;font-weight:700;color:#333d4b;flex:1;}
+.fp-cnt{font-size:11px;color:#8b95a1;}
+.fp-body{display:none;border-top:1px solid #f4f5f7;}
+.fp-body.open{display:block;}
+.fp-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.fp-tbl th{text-align:left;padding:7px 14px;background:#fafbfc;color:#8b95a1;font-weight:600;font-size:10px;border-bottom:1px solid #f4f5f7;}
+.fp-tbl td{padding:7px 14px;border-bottom:1px solid #f8f9fa;}
+.fp-tbl tr:hover td{background:#fafbfc;}
+.fp-tbl .r{text-align:right;}
+.fp-tier{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;margin:0 1px;}
+.fp-t1{background:#fef2f2;color:#ef4444;}.fp-t2{background:#fffbeb;color:#d97706;}.fp-t3{background:#ecfdf5;color:#0ca678;}.fp-t4{background:#eff6ff;color:#202454;}
+.cat-water{background:#dbeafe;color:#2563eb;}.cat-oil{background:#fef3c7;color:#d97706;}.cat-special{background:#dcfce7;color:#16a34a;}.cat-asphalt{background:#f1f5f9;color:#64748b;}.cat-powder{background:#fee2e2;color:#ef4444;}
+
+.header-card { background:#fff; border:1px solid #e5e8eb; border-radius:14px; padding:24px 32px 20px; margin-bottom:20px; }
+.header-card h1 { font-size:24px; font-weight:800; color:#191f28; margin-bottom:4px; }
+.header-card p { font-size:14px; color:#8b95a1; }
+
+.toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#333d4b; color:#fff; padding:12px 24px; border-radius:10px; font-size:13px; font-weight:600; z-index:9999; opacity:0; transition:opacity .3s; pointer-events:none; }
+.toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- 헤더 -->
+    <div class="header-card">
+      <h1>정산관리 · 해외사업부</h1>
+      <p>매출·매입 현황 및 월별 정산 관리</p>
+      <div class="fin-tabs" style="margin-top:16px;">
+        <button class="fin-tab active" onclick="showFinanceTab('fin-monthly',this)">매출 현황</button>
+        <button class="fin-tab" onclick="showFinanceTab('fin-revenue',this)">매출 관리</button>
+        <button class="fin-tab" onclick="showFinanceTab('fin-purchase',this)">비용 관리</button>
+        <button class="fin-tab" onclick="showFinanceTab('fin-price',this)">제품 단가표</button>
+      </div>
+    </div>
+
+    <!-- [탭2] 매출 관리 -->
+    <div id="fin-revenue" class="fin-section">
+      <div class="fin-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="month" id="finRevMonth" onchange="renderRevenueTable()" style="padding:7px 12px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;">
+            <input type="text" id="finRevSearch" placeholder="거래처 검색" oninput="renderRevenueTable()" style="padding:7px 12px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; width:160px;">
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button onclick="openRevenueModal(-1)" style="padding:7px 16px; background:#202454; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">+ 매출 등록</button>
+            <button onclick="exportFinanceCsv('revenue')" style="padding:7px 16px; background:#fff; color:#333d4b; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; cursor:pointer;">📥 엑셀 다운로드</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="fin-tbl">
+            <thead>
+              <tr>
+                <th>날짜</th><th>거래처</th><th>제품명</th><th style="text-align:right;">수량</th><th style="text-align:right;">단가</th><th style="text-align:right;">금액</th><th>결제상태</th><th>메모</th><th style="width:80px;">관리</th>
+              </tr>
+            </thead>
+            <tbody id="finRevBody"></tbody>
+          </table>
+        </div>
+        <div id="finRevTotal" style="text-align:right; margin-top:12px; font-size:14px; font-weight:700; color:#202454;"></div>
+      </div>
+    </div>
+
+    <!-- [탭3] 매입 관리 -->
+    <div id="fin-purchase" class="fin-section">
+      <div class="fin-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="month" id="finPurMonth" onchange="renderPurchaseTable()" style="padding:7px 12px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;">
+            <select id="finPurCategory" onchange="renderPurchaseTable()" style="padding:7px 12px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;">
+              <option value="">전체 항목</option>
+              <option value="물류비">물류비</option>
+              <option value="통관비">통관비</option>
+              <option value="대행비">대행비</option>
+              <option value="제품매입">제품매입</option>
+              <option value="수수료">수수료</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button onclick="openPurchaseModal(-1)" style="padding:7px 16px; background:#202454; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">+ 매입 등록</button>
+            <button onclick="exportFinanceCsv('purchase')" style="padding:7px 16px; background:#fff; color:#333d4b; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; cursor:pointer;">📥 엑셀 다운로드</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="fin-tbl">
+            <thead>
+              <tr>
+                <th>날짜</th><th>거래처</th><th>항목</th><th style="text-align:right;">금액</th><th>메모</th><th style="width:80px;">관리</th>
+              </tr>
+            </thead>
+            <tbody id="finPurBody"></tbody>
+          </table>
+        </div>
+        <div id="finPurTotal" style="text-align:right; margin-top:12px; font-size:14px; font-weight:700; color:#f04452;"></div>
+      </div>
+    </div>
+
+    <!-- [탭1] 매출 현황 (월별 정산) -->
+    <div id="fin-monthly" class="fin-section active">
+      <!-- 요약 카드 -->
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:14px;">
+        <div class="fin-card">
+          <h4>이번 달 매출</h4>
+          <div class="val" id="finTotalRevenue">₩0</div>
+          <div class="sub" id="finRevenueDiff"></div>
+        </div>
+        <div class="fin-card">
+          <h4>이번 달 비용</h4>
+          <div class="val" id="finTotalPurchase">₩0</div>
+          <div class="sub" id="finPurchaseDiff"></div>
+        </div>
+        <div class="fin-card">
+          <h4>순이익</h4>
+          <div class="val" id="finNetProfit" style="color:#0ca678;">₩0</div>
+          <div class="sub" id="finProfitRate"></div>
+        </div>
+        <div class="fin-card">
+          <h4>전월 대비</h4>
+          <div class="val" id="finMonthDiff">-</div>
+          <div class="sub" id="finMonthDiffLabel"></div>
+        </div>
+      </div>
+
+      <!-- 캘린더 뷰 -->
+      <div class="fin-card" style="margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <button onclick="moveFinCal(-1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">◀</button>
+          <span style="font-size:14px; font-weight:700; color:#333d4b;" id="finCalLabel"></span>
+          <button onclick="moveFinCal(1)" style="border:1px solid #e5e8eb;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;color:#6b7684;">▶</button>
+        </div>
+        <div id="finCalGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px;"></div>
+      </div>
+
+      <!-- 선택 날짜 상세 -->
+      <div id="finCalDetailWrap" style="margin-bottom:14px; display:none;">
+        <div class="fin-card" style="padding:14px 18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h4 style="margin:0; font-size:15px; font-weight:700; color:#333d4b;">📅 <span id="finCalDateLabel">날짜 선택</span></h4>
+            <span style="font-size:14px; color:#8b95a1; font-weight:600;" id="finCalDateInfo"></span>
+          </div>
+          <div id="finCalDetail"></div>
+        </div>
+      </div>
+
+      <div class="fin-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <h4 style="margin:0; font-size:14px; font-weight:700; color:#333d4b;">월별 정산 요약</h4>
+          <select id="finMonthlyYear" onchange="renderMonthlySummary()" style="padding:7px 12px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;">
+            <option value="2026">2026년</option>
+            <option value="2025">2025년</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="fin-tbl">
+            <thead>
+              <tr>
+                <th>월</th><th style="text-align:right;">매출</th><th style="text-align:right;">매입</th><th style="text-align:right;">순이익</th><th style="text-align:right;">이익률</th>
+              </tr>
+            </thead>
+            <tbody id="finMonthlyBody"></tbody>
+            <tfoot>
+              <tr style="font-weight:700; background:#f8f9fa;">
+                <td>합계</td>
+                <td style="text-align:right;" id="finYearRevenue">₩0</td>
+                <td style="text-align:right;" id="finYearPurchase">₩0</td>
+                <td style="text-align:right;" id="finYearProfit">₩0</td>
+                <td style="text-align:right;" id="finYearRate">0%</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- [탭4] 제품 단가표 -->
+    <div id="fin-price" class="fin-section">
+      <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">
+        <input type="text" id="finPriceSearch" placeholder="제품명 검색..." oninput="renderFinPriceAccordion()" style="padding:8px 14px;border:1px solid #e5e8eb;border-radius:8px;font-size:12px;width:240px;font-family:inherit;outline:none;">
+        <span style="font-size:11px;color:#8b95a1;" id="finPriceCnt"></span>
+        <div style="margin-left:auto;display:flex;gap:6px;">
+          <button class="fin-tab" onclick="toggleFinPriceAll(true)" style="padding:5px 12px;font-size:11px;">전체 펼치기</button>
+          <button class="fin-tab" onclick="toggleFinPriceAll(false)" style="padding:5px 12px;font-size:11px;">전체 접기</button>
+        </div>
+      </div>
+      <div id="finPriceAccordion"></div>
+    </div>
+  </div>
+
+  <!-- 정산관리 모달: 매출 등록/수정 -->
+  <div id="finRevModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; width:480px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+      <div style="padding:20px 24px; border-bottom:1px solid #f4f5f7; display:flex; align-items:center; justify-content:space-between;">
+        <h3 id="finRevModalTitle" style="font-size:16px; font-weight:800; color:#202454; margin:0;">매출 등록</h3>
+        <button onclick="closeFinModal('rev')" style="background:none; border:none; cursor:pointer; padding:4px;"><svg width="20" height="20" fill="none" stroke="#8b95a1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div style="padding:24px;">
+        <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">날짜 *</label><input id="finR-date" type="date" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">거래처 *</label>
+          <input id="finR-company" type="text" placeholder="바이어 회사명" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;">
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">제품 선택 *</label>
+          <select id="finR-product" onchange="onFinProductSelect()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; background:#fff;">
+            <option value="">-- 단가표에서 선택 --</option>
+          </select>
+          <div id="finR-productInfo" style="display:none; margin-top:8px; padding:10px 14px; background:#f8f9fa; border-radius:8px; font-size:12px; color:#6b7684;"></div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px;">
+          <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">주문량 (kg)</label><input id="finR-qty" type="number" placeholder="0" oninput="calcFinRevAmount()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+          <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">단가 (USD/kg)</label><input id="finR-price" type="number" step="0.1" placeholder="0" oninput="calcFinRevAmount()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+          <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">결제상태</label>
+            <select id="finR-status" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; background:#fff;">
+              <option value="대기">대기</option><option value="처리중">처리중</option><option value="완료">완료</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:14px; padding:12px 14px; background:#eff6ff; border-radius:8px; display:none;" id="finR-calcResult">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; text-align:center; font-size:12px;">
+            <div><div style="color:#8b95a1;">매출액 (USD)</div><div style="font-weight:700; color:#0ca678; margin-top:2px;" id="finR-totalUsd">$0</div></div>
+            <div><div style="color:#8b95a1;">매출액 (KRW)</div><div style="font-weight:700; color:#202454; margin-top:2px;" id="finR-totalKrw">₩0</div></div>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">메모</label><input id="finR-memo" type="text" placeholder="메모" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button onclick="closeFinModal('rev')" style="padding:10px 20px; border:1px solid #e5e8eb; border-radius:8px; background:#fff; color:#6b7684; font-size:13px; font-weight:600; cursor:pointer;">취소</button>
+          <button onclick="saveRevenue()" style="padding:10px 20px; border:none; border-radius:8px; background:#202454; color:#fff; font-size:13px; font-weight:600; cursor:pointer;">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 정산관리 모달: 매입 등록/수정 -->
+  <div id="finPurModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; width:440px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+      <div style="padding:20px 24px; border-bottom:1px solid #f4f5f7; display:flex; align-items:center; justify-content:space-between;">
+        <h3 id="finPurModalTitle" style="font-size:16px; font-weight:800; color:#202454; margin:0;">매입 등록</h3>
+        <button onclick="closeFinModal('pur')" style="background:none; border:none; cursor:pointer; padding:4px;"><svg width="20" height="20" fill="none" stroke="#8b95a1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div style="padding:24px;">
+        <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">날짜 *</label><input id="finP-date" type="date" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+          <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">거래처 *</label><input id="finP-company" type="text" placeholder="회사명" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+          <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">항목 *</label>
+            <select id="finP-category" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; background:#fff;">
+              <option value="물류비">물류비</option><option value="통관비">통관비</option><option value="대행비">대행비</option><option value="제품매입">제품매입</option><option value="수수료">수수료</option><option value="기타">기타</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">금액 (원) *</label><input id="finP-amount" type="number" placeholder="0" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+        <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">메모</label><input id="finP-memo" type="text" placeholder="메모" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button onclick="closeFinModal('pur')" style="padding:10px 20px; border:1px solid #e5e8eb; border-radius:8px; background:#fff; color:#6b7684; font-size:13px; font-weight:600; cursor:pointer;">취소</button>
+          <button onclick="savePurchase()" style="padding:10px 20px; border:none; border-radius:8px; background:#202454; color:#fff; font-size:13px; font-weight:600; cursor:pointer;">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toastEl" class="toast"></div>
+
+  <script>
+    // ===== 정산관리 기능 =====
+    let finRevenueData = [];
+    let finPurchaseData = [];
+    let finRevEditIdx = -1;
+    let finPurEditIdx = -1;
+
+    // 샘플 데이터
+    const finDefaultRevenue = [
+      { date:'2026-03-05', company:'ABC Trading', product:'코트재 I 20kg', quantity:50, unitPrice:45000, amount:2250000, paymentStatus:'완료', memo:'첫 선적분', createdBy:'김채원', createdAt:'2026-03-05' },
+      { date:'2026-03-10', company:'Dubai Imports LLC', product:'발수코팅제 10L', quantity:100, unitPrice:32000, amount:3200000, paymentStatus:'처리중', memo:'두바이 2차', createdBy:'김채원', createdAt:'2026-03-10' },
+      { date:'2026-03-15', company:'Vietnam Partner Co.', product:'프라이머 5L', quantity:200, unitPrice:18000, amount:3600000, paymentStatus:'대기', memo:'', createdBy:'허지은', createdAt:'2026-03-15' },
+      { date:'2026-03-20', company:'India Steel Corp', product:'방청코팅 20kg', quantity:30, unitPrice:55000, amount:1650000, paymentStatus:'완료', memo:'인도 첫 거래', createdBy:'김채원', createdAt:'2026-03-20' },
+      { date:'2026-02-12', company:'ABC Trading', product:'코트재 I 20kg', quantity:40, unitPrice:45000, amount:1800000, paymentStatus:'완료', memo:'2월분', createdBy:'김채원', createdAt:'2026-02-12' },
+      { date:'2026-02-20', company:'Dubai Imports LLC', product:'발수코팅제 10L', quantity:80, unitPrice:32000, amount:2560000, paymentStatus:'완료', memo:'', createdBy:'허지은', createdAt:'2026-02-20' }
+    ];
+    const finDefaultPurchase = [
+      { date:'2026-03-03', company:'Extrans 물류', category:'물류비', amount:850000, memo:'3월 해상운송비', createdBy:'김채원', createdAt:'2026-03-03' },
+      { date:'2026-03-08', company:'관세법인 A', category:'통관비', amount:320000, memo:'두바이 통관 대행', createdBy:'허지은', createdAt:'2026-03-08' },
+      { date:'2026-03-12', company:'KP화학', category:'제품매입', amount:2100000, memo:'코트재 원재료', createdBy:'김채원', createdAt:'2026-03-12' },
+      { date:'2026-03-18', company:'검역원', category:'수수료', amount:150000, memo:'검역 수수료', createdBy:'허지은', createdAt:'2026-03-18' },
+      { date:'2026-02-05', company:'Extrans 물류', category:'물류비', amount:720000, memo:'2월 해상운송', createdBy:'김채원', createdAt:'2026-02-05' },
+      { date:'2026-02-15', company:'KP화학', category:'제품매입', amount:1800000, memo:'2월 원재료', createdBy:'김채원', createdAt:'2026-02-15' }
+    ];
+
+    function loadFinanceData() {
+      try {
+        const r = localStorage.getItem('financeRevenueData');
+        const p = localStorage.getItem('financePurchaseData');
+        finRevenueData = r ? JSON.parse(r) : JSON.parse(JSON.stringify(finDefaultRevenue));
+        finPurchaseData = p ? JSON.parse(p) : JSON.parse(JSON.stringify(finDefaultPurchase));
+      } catch(e) {
+        finRevenueData = JSON.parse(JSON.stringify(finDefaultRevenue));
+        finPurchaseData = JSON.parse(JSON.stringify(finDefaultPurchase));
+      }
+    }
+
+    function saveFinanceData() {
+      try {
+        localStorage.setItem('financeRevenueData', JSON.stringify(finRevenueData));
+        localStorage.setItem('financePurchaseData', JSON.stringify(finPurchaseData));
+      } catch(e) {}
+    }
+
+    function formatWon(n) {
+      if (!n && n !== 0) return '₩0';
+      return '₩' + Math.abs(n).toLocaleString('ko-KR');
+    }
+
+    // Toast 알림
+    function showToast(msg) {
+      const el = document.getElementById('toastEl');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2000);
+    }
+
+    // 탭 전환
+    function showFinanceTab(tabId, btn) {
+      document.querySelectorAll('.fin-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.fin-section').forEach(s => s.classList.remove('active'));
+      const sec = document.getElementById(tabId);
+      if (sec) sec.classList.add('active');
+      if (tabId === 'fin-dashboard') renderFinanceDashboard();
+      if (tabId === 'fin-revenue') renderRevenueTable();
+      if (tabId === 'fin-purchase') renderPurchaseTable();
+      if (tabId === 'fin-monthly') { renderFinanceDashboard(); renderMonthlySummary(); renderFinCalendar(); renderFinCalDetail(); }
+      if (tabId === 'fin-price') { renderFinPriceAccordion(); }
+    }
+
+    // 초기화
+    function initFinance() {
+      loadFinanceData();
+      const now = new Date();
+      const ym = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+      const revM = document.getElementById('finRevMonth');
+      const purM = document.getElementById('finPurMonth');
+      if (revM && !revM.value) revM.value = ym;
+      if (purM && !purM.value) purM.value = ym;
+      renderFinanceDashboard();
+      renderMonthlySummary();
+      renderFinCalendar();
+      renderFinCalDetail();
+    }
+
+    // ── 대시보드 ──
+    function renderFinanceDashboard() {
+      const now = new Date();
+      const cm = now.getMonth(), cy = now.getFullYear();
+      const pm = cm === 0 ? 11 : cm - 1;
+      const py = cm === 0 ? cy - 1 : cy;
+
+      const curRev = finRevenueData.filter(r => { const d = new Date(r.date); return d.getMonth() === cm && d.getFullYear() === cy; }).reduce((s,r) => s + (r.amount||0), 0);
+      const curPur = finPurchaseData.filter(r => { const d = new Date(r.date); return d.getMonth() === cm && d.getFullYear() === cy; }).reduce((s,r) => s + (r.amount||0), 0);
+      const prevRev = finRevenueData.filter(r => { const d = new Date(r.date); return d.getMonth() === pm && d.getFullYear() === py; }).reduce((s,r) => s + (r.amount||0), 0);
+      const prevPur = finPurchaseData.filter(r => { const d = new Date(r.date); return d.getMonth() === pm && d.getFullYear() === py; }).reduce((s,r) => s + (r.amount||0), 0);
+      const netProfit = curRev - curPur;
+      const prevProfit = prevRev - prevPur;
+      const diffPct = prevProfit !== 0 ? ((netProfit - prevProfit) / Math.abs(prevProfit) * 100).toFixed(1) : (netProfit > 0 ? '+100' : '0');
+
+      document.getElementById('finTotalRevenue').textContent = formatWon(curRev);
+      document.getElementById('finTotalPurchase').textContent = formatWon(curPur);
+      document.getElementById('finNetProfit').textContent = (netProfit >= 0 ? '' : '-') + formatWon(netProfit);
+      document.getElementById('finNetProfit').style.color = netProfit >= 0 ? '#0ca678' : '#f04452';
+
+      const revDiff = curRev - prevRev;
+      document.getElementById('finRevenueDiff').className = 'sub ' + (revDiff >= 0 ? 'up' : 'down');
+      document.getElementById('finRevenueDiff').textContent = (revDiff >= 0 ? '▲' : '▼') + ' 전월 대비 ' + formatWon(revDiff);
+
+      const purDiff = curPur - prevPur;
+      document.getElementById('finPurchaseDiff').className = 'sub ' + (purDiff <= 0 ? 'up' : 'down');
+      document.getElementById('finPurchaseDiff').textContent = (purDiff > 0 ? '▲' : '▼') + ' 전월 대비 ' + formatWon(purDiff);
+
+      const rate = curRev > 0 ? ((netProfit / curRev) * 100).toFixed(1) : 0;
+      document.getElementById('finProfitRate').className = 'sub ' + (netProfit >= 0 ? 'up' : 'down');
+      document.getElementById('finProfitRate').textContent = '이익률 ' + rate + '%';
+
+      document.getElementById('finMonthDiff').textContent = (parseFloat(diffPct) >= 0 ? '+' : '') + diffPct + '%';
+      document.getElementById('finMonthDiff').style.color = parseFloat(diffPct) >= 0 ? '#0ca678' : '#f04452';
+      document.getElementById('finMonthDiffLabel').textContent = '순이익 전월 대비';
+    }
+
+    // ── 매출 테이블 ──
+    function renderRevenueTable() {
+      const month = document.getElementById('finRevMonth')?.value || '';
+      const search = (document.getElementById('finRevSearch')?.value || '').toLowerCase();
+      let data = finRevenueData;
+      if (month) data = data.filter(r => r.date && r.date.startsWith(month));
+      if (search) data = data.filter(r => (r.company||'').toLowerCase().includes(search) || (r.product||'').toLowerCase().includes(search));
+
+      const tbody = document.getElementById('finRevBody');
+      if (!tbody) return;
+      let total = 0;
+      tbody.innerHTML = data.length === 0 ? '<tr><td colspan="9" style="text-align:center;padding:30px;color:#c4c9d0;">데이터가 없습니다</td></tr>' :
+        data.map(r => {
+          const idx = finRevenueData.indexOf(r);
+          total += r.amount || 0;
+          const stCls = r.paymentStatus === '완료' ? 'done' : r.paymentStatus === '처리중' ? 'processing' : 'waiting';
+          return '<tr>' +
+            '<td>' + r.date + '</td>' +
+            '<td>' + (r.company||'') + '</td>' +
+            '<td>' + (r.product||'') + '</td>' +
+            '<td style="text-align:right;">' + (r.quantity||0).toLocaleString() + '</td>' +
+            '<td style="text-align:right;">' + formatWon(r.unitPrice) + '</td>' +
+            '<td style="text-align:right;font-weight:600;color:#0ca678;">' + formatWon(r.amount) + '</td>' +
+            '<td><span class="fin-status ' + stCls + '">' + (r.paymentStatus||'대기') + '</span></td>' +
+            '<td style="color:#8b95a1;font-size:12px;">' + (r.memo||'') + '</td>' +
+            '<td><button onclick="openRevenueModal(' + idx + ')" style="border:none;background:none;color:#3182f6;cursor:pointer;font-size:12px;margin-right:4px;">수정</button><button onclick="deleteRevenue(' + idx + ')" style="border:none;background:none;color:#f04452;cursor:pointer;font-size:12px;">삭제</button></td>' +
+            '</tr>';
+        }).join('');
+      document.getElementById('finRevTotal').textContent = '합계: ' + formatWon(total);
+    }
+
+    // ── 매입 테이블 ──
+    function renderPurchaseTable() {
+      const month = document.getElementById('finPurMonth')?.value || '';
+      const cat = document.getElementById('finPurCategory')?.value || '';
+      let data = finPurchaseData;
+      if (month) data = data.filter(r => r.date && r.date.startsWith(month));
+      if (cat) data = data.filter(r => r.category === cat);
+
+      const tbody = document.getElementById('finPurBody');
+      if (!tbody) return;
+      let total = 0;
+      tbody.innerHTML = data.length === 0 ? '<tr><td colspan="6" style="text-align:center;padding:30px;color:#c4c9d0;">데이터가 없습니다</td></tr>' :
+        data.map(r => {
+          const idx = finPurchaseData.indexOf(r);
+          total += r.amount || 0;
+          return '<tr>' +
+            '<td>' + r.date + '</td>' +
+            '<td>' + (r.company||'') + '</td>' +
+            '<td><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500;background:#f1f5f9;color:#64748b;">' + (r.category||'') + '</span></td>' +
+            '<td style="text-align:right;font-weight:600;color:#f04452;">' + formatWon(r.amount) + '</td>' +
+            '<td style="color:#8b95a1;font-size:12px;">' + (r.memo||'') + '</td>' +
+            '<td><button onclick="openPurchaseModal(' + idx + ')" style="border:none;background:none;color:#3182f6;cursor:pointer;font-size:12px;margin-right:4px;">수정</button><button onclick="deletePurchase(' + idx + ')" style="border:none;background:none;color:#f04452;cursor:pointer;font-size:12px;">삭제</button></td>' +
+            '</tr>';
+        }).join('');
+      document.getElementById('finPurTotal').textContent = '합계: -' + formatWon(total);
+    }
+
+    // ── 캘린더 뷰 ──
+    let finCalYear = 2026, finCalMonth = 2, finCalSelectedDate = '', finCalExpanded = {};
+    function moveFinCal(d) {
+      finCalMonth += d;
+      if (finCalMonth > 11) { finCalMonth = 0; finCalYear++; }
+      if (finCalMonth < 0) { finCalMonth = 11; finCalYear--; }
+      renderFinCalendar();
+    }
+    function renderFinCalendar() {
+      const y = finCalYear, m = finCalMonth;
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      const firstDay = new Date(y, m, 1).getDay();
+      const today = new Date();
+      const prefix = y + '-' + String(m + 1).padStart(2, '0');
+
+      const daySales = {};
+      finRevenueData.forEach(r => {
+        if (r.date && r.date.startsWith(prefix)) {
+          daySales[r.date] = (daySales[r.date] || 0) + (r.amount || 0);
+        }
+      });
+
+      document.getElementById('finCalLabel').textContent = y + '년 ' + (m + 1) + '월';
+
+      let html = '';
+      ['일', '월', '화', '수', '목', '금', '토'].forEach(d => { html += '<div class="fcal-hdr">' + d + '</div>'; });
+      for (let i = 0; i < firstDay; i++) html += '<div class="fcal-day fd-empty"></div>';
+      for (let d = 1; d <= daysInMonth; d++) {
+        const ds = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        const sales = daySales[ds] || 0;
+        const isToday = y === today.getFullYear() && m === today.getMonth() && d === today.getDate();
+        const isSel = ds === finCalSelectedDate;
+        const cls = 'fcal-day' + (isToday ? ' fd-today' : '') + (isSel ? ' fd-selected' : '') + (sales > 0 ? ' fd-has' : '');
+        html += '<div class="' + cls + '" onclick="selectFinCalDate(\'' + ds + '\')">';
+        html += '<span class="fd-num">' + d + '</span>';
+        if (sales > 0) html += '<span class="fd-sales">' + formatWon(sales) + '</span>';
+        html += '</div>';
+      }
+      document.getElementById('finCalGrid').innerHTML = html;
+    }
+
+    function selectFinCalDate(ds) {
+      finCalSelectedDate = ds;
+      finCalExpanded = {};
+      renderFinCalendar();
+      renderFinCalDetail();
+    }
+
+    function renderFinCalDetail() {
+      const el = document.getElementById('finCalDetail');
+      const wrap = document.getElementById('finCalDetailWrap');
+      if (!finCalSelectedDate) {
+        wrap.style.display = 'none';
+        return;
+      }
+
+      const records = finRevenueData.filter(r => r.date === finCalSelectedDate);
+      const totalKrw = records.reduce((s, r) => s + (r.amount || 0), 0);
+      document.getElementById('finCalDateLabel').textContent = finCalSelectedDate + ' 매출';
+      document.getElementById('finCalDateInfo').textContent = records.length + '건 · ' + formatWon(totalKrw);
+
+      wrap.style.display = '';
+      if (records.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:12px;color:#c4c9d0;font-size:12px;">해당 날짜 매출 없음</div>';
+        return;
+      }
+
+      const groups = {};
+      const COLORS = ['#3182f6', '#0ca678', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899'];
+      records.forEach(r => {
+        const key = r.company || '기타';
+        if (!groups[key]) groups[key] = { records: [], total: 0 };
+        groups[key].records.push(r);
+        groups[key].total += (r.amount || 0);
+      });
+
+      let html = ''; let ci = 0;
+      Object.entries(groups).sort((a, b) => b[1].total - a[1].total).forEach(([company, g]) => {
+        const c = COLORS[ci % COLORS.length]; ci++;
+        const isOpen = finCalExpanded[company];
+        html += '<div class="fcal-acc" onclick="toggleFinCalAcc(\'' + company.replace(/'/g, "\\'") + '\')">';
+        html += '<div class="fcal-acc-hdr"><div class="fcal-acc-dot" style="background:' + c + ';"></div><span class="fcal-acc-name">' + company + '</span><span style="font-size:13px;color:#8b95a1;">' + g.records.length + '건</span><span class="fcal-acc-amt">' + formatWon(g.total) + '</span></div>';
+        html += '<div class="fcal-acc-body ' + (isOpen ? 'open' : '') + '">';
+        g.records.forEach(r => {
+          html += '<div class="fcal-acc-row"><span>' + (r.product || r.company || '-') + '</span><span style="font-weight:600;color:#0ca678;">' + formatWon(r.amount || 0) + '</span></div>';
+        });
+        html += '</div></div>';
+      });
+      el.innerHTML = html;
+    }
+
+    function toggleFinCalAcc(company) {
+      finCalExpanded[company] = !finCalExpanded[company];
+      renderFinCalDetail();
+    }
+
+    // ── 월별 정산 ──
+    function renderMonthlySummary() {
+      const year = parseInt(document.getElementById('finMonthlyYear')?.value || new Date().getFullYear());
+      const tbody = document.getElementById('finMonthlyBody');
+      if (!tbody) return;
+      let yearRev = 0, yearPur = 0;
+      let html = '';
+      for (let m = 0; m < 12; m++) {
+        const prefix = year + '-' + String(m+1).padStart(2,'0');
+        const rev = finRevenueData.filter(r => r.date && r.date.startsWith(prefix)).reduce((s,r) => s + (r.amount||0), 0);
+        const pur = finPurchaseData.filter(r => r.date && r.date.startsWith(prefix)).reduce((s,r) => s + (r.amount||0), 0);
+        const profit = rev - pur;
+        const rate = rev > 0 ? ((profit / rev) * 100).toFixed(1) : '-';
+        yearRev += rev; yearPur += pur;
+        const profitColor = profit > 0 ? '#0ca678' : profit < 0 ? '#f04452' : '#8b95a1';
+        html += '<tr>' +
+          '<td style="font-weight:600;">' + (m+1) + '월</td>' +
+          '<td style="text-align:right;">' + (rev > 0 ? formatWon(rev) : '-') + '</td>' +
+          '<td style="text-align:right;">' + (pur > 0 ? formatWon(pur) : '-') + '</td>' +
+          '<td style="text-align:right;font-weight:600;color:' + profitColor + ';">' + (rev > 0 || pur > 0 ? (profit >= 0 ? '' : '-') + formatWon(profit) : '-') + '</td>' +
+          '<td style="text-align:right;color:' + profitColor + ';">' + (rate !== '-' ? rate + '%' : '-') + '</td>' +
+          '</tr>';
+      }
+      tbody.innerHTML = html;
+      const yearProfit = yearRev - yearPur;
+      const yearRate = yearRev > 0 ? ((yearProfit / yearRev) * 100).toFixed(1) : '0';
+      document.getElementById('finYearRevenue').textContent = formatWon(yearRev);
+      document.getElementById('finYearPurchase').textContent = formatWon(yearPur);
+      document.getElementById('finYearProfit').textContent = (yearProfit >= 0 ? '' : '-') + formatWon(yearProfit);
+      document.getElementById('finYearProfit').style.color = yearProfit >= 0 ? '#0ca678' : '#f04452';
+      document.getElementById('finYearRate').textContent = yearRate + '%';
+    }
+
+    // ── 매출 모달 ──
+    function openRevenueModal(idx) {
+      initFinProductDropdown();
+      finRevEditIdx = idx;
+      finRevSelectedPkg = 0;
+      document.getElementById('finR-productInfo').style.display = 'none';
+      document.getElementById('finR-calcResult').style.display = 'none';
+      if (idx >= 0 && idx < finRevenueData.length) {
+        const r = finRevenueData[idx];
+        document.getElementById('finRevModalTitle').textContent = '매출 수정';
+        document.getElementById('finR-date').value = r.date || '';
+        document.getElementById('finR-company').value = r.company || '';
+        const sel = document.getElementById('finR-product');
+        let matched = false;
+        for (let i = 0; i < FP_DATA.length; i++) {
+          if (FP_DATA[i].name === r.product) { sel.value = i; matched = true; break; }
+        }
+        if (!matched) sel.value = '';
+        document.getElementById('finR-qty').value = r.quantity || '';
+        document.getElementById('finR-price').value = r.unitPrice || '';
+        document.getElementById('finR-status').value = r.paymentStatus || '대기';
+        document.getElementById('finR-memo').value = r.memo || '';
+        if (matched) onFinProductSelect();
+      } else {
+        document.getElementById('finRevModalTitle').textContent = '매출 등록';
+        document.getElementById('finR-date').value = new Date().toISOString().slice(0,10);
+        document.getElementById('finR-company').value = '';
+        document.getElementById('finR-product').value = '';
+        document.getElementById('finR-qty').value = '';
+        document.getElementById('finR-price').value = '';
+        document.getElementById('finR-status').value = '대기';
+        document.getElementById('finR-memo').value = '';
+      }
+      document.getElementById('finRevModal').style.display = 'flex';
+    }
+
+    function saveRevenue() {
+      const date = document.getElementById('finR-date').value;
+      const company = document.getElementById('finR-company').value.trim();
+      if (!date || !company) { alert('날짜와 거래처를 입력하세요.'); return; }
+      const kg = parseFloat(document.getElementById('finR-qty').value) || 0;
+      const price = parseFloat(document.getElementById('finR-price').value) || 0;
+      const prodIdx = document.getElementById('finR-product').value;
+      const prodName = prodIdx !== '' && FP_DATA[prodIdx] ? FP_DATA[prodIdx].name : '';
+      const amountUsd = kg * price;
+      const amount = Math.round(amountUsd * 1477);
+      const rec = {
+        date, company,
+        product: prodName,
+        quantity: kg, unitPrice: price, amount: amount,
+        paymentStatus: document.getElementById('finR-status').value,
+        memo: document.getElementById('finR-memo').value.trim(),
+        createdBy: (JSON.parse(localStorage.getItem('loggedInUser')||'{}').name) || '',
+        createdAt: new Date().toISOString().slice(0,10)
+      };
+      if (finRevEditIdx >= 0 && finRevEditIdx < finRevenueData.length) {
+        finRevenueData[finRevEditIdx] = rec;
+      } else {
+        finRevenueData.unshift(rec);
+      }
+      saveFinanceData();
+      renderRevenueTable();
+      closeFinModal('rev');
+      showToast('매출이 저장되었습니다');
+    }
+
+    function deleteRevenue(idx) {
+      if (!confirm('"' + (finRevenueData[idx]?.company||'') + '" 매출 건을 삭제하시겠습니까?')) return;
+      finRevenueData.splice(idx, 1);
+      saveFinanceData();
+      renderRevenueTable();
+      showToast('매출이 삭제되었습니다');
+    }
+
+    // ── 매입 모달 ──
+    function openPurchaseModal(idx) {
+      finPurEditIdx = idx;
+      if (idx >= 0 && idx < finPurchaseData.length) {
+        const r = finPurchaseData[idx];
+        document.getElementById('finPurModalTitle').textContent = '매입 수정';
+        document.getElementById('finP-date').value = r.date || '';
+        document.getElementById('finP-company').value = r.company || '';
+        document.getElementById('finP-category').value = r.category || '물류비';
+        document.getElementById('finP-amount').value = r.amount || '';
+        document.getElementById('finP-memo').value = r.memo || '';
+      } else {
+        document.getElementById('finPurModalTitle').textContent = '매입 등록';
+        document.getElementById('finP-date').value = new Date().toISOString().slice(0,10);
+        document.getElementById('finP-company').value = '';
+        document.getElementById('finP-category').value = '물류비';
+        document.getElementById('finP-amount').value = '';
+        document.getElementById('finP-memo').value = '';
+      }
+      document.getElementById('finPurModal').style.display = 'flex';
+    }
+
+    function savePurchase() {
+      const date = document.getElementById('finP-date').value;
+      const company = document.getElementById('finP-company').value.trim();
+      const amount = parseInt(document.getElementById('finP-amount').value) || 0;
+      if (!date || !company || !amount) { alert('날짜, 거래처, 금액을 입력하세요.'); return; }
+      const rec = {
+        date, company,
+        category: document.getElementById('finP-category').value,
+        amount,
+        memo: document.getElementById('finP-memo').value.trim(),
+        createdBy: (JSON.parse(localStorage.getItem('loggedInUser')||'{}').name) || '',
+        createdAt: new Date().toISOString().slice(0,10)
+      };
+      if (finPurEditIdx >= 0 && finPurEditIdx < finPurchaseData.length) {
+        finPurchaseData[finPurEditIdx] = rec;
+      } else {
+        finPurchaseData.unshift(rec);
+      }
+      saveFinanceData();
+      renderPurchaseTable();
+      closeFinModal('pur');
+      showToast('매입이 저장되었습니다');
+    }
+
+    function deletePurchase(idx) {
+      if (!confirm('"' + (finPurchaseData[idx]?.company||'') + '" 매입 건을 삭제하시겠습니까?')) return;
+      finPurchaseData.splice(idx, 1);
+      saveFinanceData();
+      renderPurchaseTable();
+      showToast('매입이 삭제되었습니다');
+    }
+
+    // ── 모달 닫기 ──
+    function closeFinModal(type) {
+      if (type === 'rev') document.getElementById('finRevModal').style.display = 'none';
+      if (type === 'pur') document.getElementById('finPurModal').style.display = 'none';
+    }
+
+    // ── CSV 다운로드 ──
+    function exportFinanceCsv(type) {
+      let csv = '\uFEFF';
+      if (type === 'revenue') {
+        csv += '날짜,거래처,제품명,수량,단가,금액,결제상태,메모\n';
+        finRevenueData.forEach(r => {
+          csv += [r.date, r.company, r.product, r.quantity, r.unitPrice, r.amount, r.paymentStatus, r.memo||''].join(',') + '\n';
+        });
+      } else {
+        csv += '날짜,거래처,항목,금액,메모\n';
+        finPurchaseData.forEach(r => {
+          csv += [r.date, r.company, r.category, r.amount, r.memo||''].join(',') + '\n';
+        });
+      }
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = (type === 'revenue' ? '매출' : '매입') + '_' + new Date().toISOString().slice(0,10) + '.csv';
+      link.click();
+    }
+
+    // ── 매출 모달 ↔ 단가표 연동 ──
+    let finRevSelectedPkg = 0;
+    function initFinProductDropdown() {
+      const sel = document.getElementById('finR-product');
+      if (!sel || sel.options.length > 1) return;
+      FP_DATA.forEach((p, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = p.name + ' (' + p.pkg + p.unit + ')';
+        sel.appendChild(opt);
+      });
+    }
+
+    function onFinProductSelect() {
+      const sel = document.getElementById('finR-product');
+      const idx = sel.value;
+      const infoEl = document.getElementById('finR-productInfo');
+      const calcEl = document.getElementById('finR-calcResult');
+      if (idx === '') { infoEl.style.display = 'none'; calcEl.style.display = 'none'; finRevSelectedPkg = 0; return; }
+      const p = FP_DATA[idx];
+      finRevSelectedPkg = p.pkg;
+      const priceEl = document.getElementById('finR-price');
+      if (p.t1) {
+        priceEl.value = p.t1;
+        let info = '<strong>' + p.name + '</strong> · ' + p.pkg + ' ' + p.unit + ' · ' + p.cat;
+        if (p.t1) info += '<br>볼륨 단가: <span style="color:#ef4444;">$' + p.t1 + '</span> → <span style="color:#f59e0b;">$' + p.t2 + '</span> → <span style="color:#0ca678;">$' + p.t3 + '</span> → <span style="color:#202454;">$' + p.t4 + '</span> /kg';
+        if (p.costKg) info += '<br>매입가: ₩' + p.costKg.toLocaleString() + '/kg';
+        if (p.exportKrw) info += '<br>수출가: ₩' + p.exportKrw.toLocaleString();
+        infoEl.innerHTML = info;
+        infoEl.style.display = '';
+      } else if (p.exportKrw) {
+        priceEl.value = (p.exportKrw / p.pkg / 1477).toFixed(2);
+        infoEl.innerHTML = '<strong>' + p.name + '</strong> · ' + p.pkg + ' ' + p.unit + '<br>수출가: ₩' + p.exportKrw.toLocaleString() + ' · 자사몰: ₩' + (p.retailKrw || 0).toLocaleString();
+        infoEl.style.display = '';
+      }
+      calcFinRevAmount();
+    }
+
+    function calcFinRevAmount() {
+      const kg = parseFloat(document.getElementById('finR-qty').value) || 0;
+      const calcEl = document.getElementById('finR-calcResult');
+      const priceEl = document.getElementById('finR-price');
+      const idx = document.getElementById('finR-product').value;
+      if (idx !== '' && kg > 0) {
+        const p = FP_DATA[idx];
+        if (p.t1) {
+          let auto = p.t1;
+          if (kg >= 3000 && p.t4) auto = p.t4;
+          else if (kg >= 1000 && p.t3) auto = p.t3;
+          else if (kg >= 101 && p.t2) auto = p.t2;
+          priceEl.value = auto;
+        }
+      }
+      const price = parseFloat(priceEl.value) || 0;
+      if (kg > 0 && price > 0) {
+        const totalUsd = kg * price;
+        const totalKrw = totalUsd * 1477;
+        document.getElementById('finR-totalUsd').textContent = '$' + Math.round(totalUsd).toLocaleString();
+        document.getElementById('finR-totalKrw').textContent = '₩' + Math.round(totalKrw).toLocaleString();
+        calcEl.style.display = '';
+      } else {
+        calcEl.style.display = 'none';
+      }
+    }
+
+    // ── 제품 단가표 ──
+    const FP_DATA=[
+      {name:'POUR 코트재I(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재I(녹색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재I(적갈색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재I(백색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재II(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재II(녹색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재II(적갈색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:119000,retailKrw:142000,t1:5.5,t2:5.0,t3:4.5,t4:4.0,costKg:null,lead:'25일'},
+      {name:'POUR 상도코트재(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:150000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 상도코트재(녹색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:150000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 상도코트재(적갈색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:150000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 써밋페인트 플러스',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:126000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 아크릴배면차수제(A+B)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:156400,retailKrw:152000,t1:6.5,t2:6.0,t3:5.5,t4:5.3,costKg:null,lead:'25일'},
+      {name:'POUR 콘크리트 강화제',cat:'수용성',pkg:14,unit:'kg/통',exportKrw:79900,retailKrw:115500,t1:5.0,t2:4.5,t3:4.2,t4:3.9,costKg:null,lead:'25일'},
+      {name:'POUR 강화재1(슬라브용)',cat:'수용성',pkg:18,unit:'L/통',exportKrw:115600,retailKrw:180000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 강화제2(금속기와용)',cat:'수용성',pkg:18,unit:'L/통',exportKrw:119000,retailKrw:180000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 하이롤퍼티',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:71400,retailKrw:136000,t1:3.5,t2:3.1,t3:2.7,t4:2.4,costKg:null,lead:'25일'},
+      {name:'POUR 하이퍼티',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:74300,retailKrw:136000,t1:3.5,t2:3.2,t3:2.8,t4:2.5,costKg:null,lead:'25일'},
+      {name:'POUR 써밋바인더',cat:'수용성',pkg:18,unit:'kg/통',exportKrw:40000,retailKrw:126000,t1:2.5,t2:2.1,t3:1.8,t4:1.5,costKg:null,lead:'25일'},
+      {name:'POUR 써밋에폭시(하도)',cat:'유성',pkg:13.5,unit:'kg/통',exportKrw:88400,retailKrw:99800,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋에폭시(중도)',cat:'유성',pkg:24,unit:'kg/통',exportKrw:119000,retailKrw:132000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋에폭시(상도)',cat:'유성',pkg:16,unit:'kg/통',exportKrw:110500,retailKrw:124800,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋우레탄 하도',cat:'유성',pkg:17,unit:'kg/통',exportKrw:73200,retailKrw:73000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋우레탄 중도',cat:'유성',pkg:20,unit:'kg/통',exportKrw:73000,retailKrw:72500,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋우레탄 상도',cat:'유성',pkg:15.24,unit:'kg/통',exportKrw:88200,retailKrw:88200,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR PMQ강화코팅제',cat:'유성',pkg:15,unit:'kg/통',exportKrw:209100,retailKrw:345000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 폴리우레아',cat:'유성',pkg:410,unit:'kg/통',exportKrw:3345600,retailKrw:3240000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋엠보라이닝',cat:'유성',pkg:24,unit:'kg/통',exportKrw:127500,retailKrw:137000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 분진방지제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:3.8,t2:3.4,t3:3.0,t4:2.6,costKg:1300,lead:'25일'},
+      {name:'POUR 침투성 표면강화제',cat:'특수기능성',pkg:20,unit:'kg/통',exportKrw:null,retailKrw:null,t1:8.4,t2:7.6,t3:6.8,t4:6.0,costKg:3000,lead:'25일'},
+      {name:'POUR 외벽 방수/발수제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:6.1,t2:5.6,t3:5.1,t4:4.6,costKg:2300,lead:'25일'},
+      {name:'POUR 콘크리트 양생제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:4.0,t2:3.6,t3:3.2,t4:2.8,costKg:1400,lead:'25일'},
+      {name:'POUR 발수코팅제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:4.7,t2:4.2,t3:3.7,t4:3.2,costKg:1600,lead:'25일'},
+      {name:'POUR 구체하이드로쉴드',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:3.6,t2:3.2,t3:2.8,t4:2.4,costKg:1200,lead:'25일'},
+      {name:'POUR 욕실도막방수제',cat:'특수기능성',pkg:4,unit:'kg/통',exportKrw:null,retailKrw:null,t1:10.6,t2:9.6,t3:8.6,t4:7.6,costKg:3800,lead:'25일'},
+      {name:'POUR 외벽방수제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:8.8,t2:8.0,t3:7.2,t4:6.4,costKg:3200,lead:'25일'},
+      {name:'POUR 투명퍼티 1.2kg',cat:'특수기능성',pkg:1.2,unit:'kg/통',exportKrw:null,retailKrw:null,t1:16.5,t2:15.0,t3:13.5,t4:12.0,costKg:6000,lead:'25일'},
+      {name:'POUR 투명퍼티 4kg',cat:'특수기능성',pkg:4,unit:'kg/통',exportKrw:null,retailKrw:null,t1:16.5,t2:15.0,t3:13.5,t4:12.0,costKg:6000,lead:'25일'},
+      {name:'POUR 타일도막방수제 18kg',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:7.7,t2:7.0,t3:6.3,t4:5.6,costKg:2800,lead:'25일'},
+      {name:'POUR 타일도막방수제 9kg',cat:'특수기능성',pkg:9,unit:'kg/통',exportKrw:null,retailKrw:null,t1:7.7,t2:7.0,t3:6.3,t4:5.6,costKg:2800,lead:'25일'},
+      {name:'POUR 콘크리트 중성화방지제',cat:'특수기능성',pkg:20,unit:'kg/통',exportKrw:null,retailKrw:null,t1:10.0,t2:9.0,t3:8.0,t4:7.0,costKg:3500,lead:'25일'},
+      {name:'POUR 106파우더',cat:'파우더',pkg:20,unit:'kg/포',exportKrw:32000,retailKrw:108700,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 107파우더',cat:'파우더',pkg:20,unit:'kg/포',exportKrw:32000,retailKrw:108700,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 표면강화 파우더',cat:'파우더',pkg:20,unit:'kg/포',exportKrw:32000,retailKrw:108700,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR MMA',cat:'아스팔트',pkg:20,unit:'kg/통',exportKrw:100300,retailKrw:207000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 씰코트',cat:'아스팔트',pkg:25,unit:'kg/통',exportKrw:119000,retailKrw:159600,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 하드씰코트',cat:'아스팔트',pkg:20,unit:'kg/통',exportKrw:119000,retailKrw:159600,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+    ];
+    const FP_CAT_ORDER=['수용성','유성','특수기능성','아스팔트','파우더'];
+    const FP_CAT_CLS={수용성:'cat-water',유성:'cat-oil',특수기능성:'cat-special',아스팔트:'cat-asphalt',파우더:'cat-powder'};
+    let fpOpenState={수용성:false,유성:false,특수기능성:false,아스팔트:false,파우더:false};
+
+    function renderFinPriceAccordion(){
+      const search=(document.getElementById('finPriceSearch')?.value||'').toLowerCase();
+      const filtered=FP_DATA.filter(p=>!search||p.name.toLowerCase().includes(search));
+      const container=document.getElementById('finPriceAccordion');
+      if(!container)return;
+      document.getElementById('finPriceCnt').textContent='총 '+filtered.length+'개 제품';
+      const groups={};filtered.forEach(p=>{if(!groups[p.cat])groups[p.cat]=[];groups[p.cat].push(p);});
+      const isSearching=search.length>0;
+      let html='';
+      FP_CAT_ORDER.forEach(cat=>{
+        const items=groups[cat];if(!items||items.length===0)return;
+        const isOpen=isSearching||fpOpenState[cat];
+        const tagCls=FP_CAT_CLS[cat]||'';
+        html+='<div class="fp-group"><div class="fp-header" onclick="toggleFpAcc(\''+cat+'\')"><span class="fp-arrow '+(isOpen?'open':'')+'">▶</span><span class="fp-cat '+tagCls+'">'+cat+'</span><span class="fp-name">'+cat+' 도료</span><span class="fp-cnt">'+items.length+'종</span></div>';
+        html+='<div class="fp-body '+(isOpen?'open':'')+'">';
+        if(items[0].t1){
+          html+='<table class="fp-tbl"><thead><tr><th style="min-width:180px;">제품명</th><th>규격</th><th class="r">수출가</th><th class="r">1~100kg</th><th class="r">101~999</th><th class="r">1K~2.9K</th><th class="r">3K+</th><th class="r">매입가/kg</th><th class="r">마진</th></tr></thead><tbody>';
+          items.forEach(p=>{
+            let mHtml='<span style="color:#c4c9d0;">-</span>';
+            if(p.costKg&&p.t1){const s=p.t1*1477;const m=((s-p.costKg)/s*100).toFixed(0);const c=m>=50?'#0ca678':m>=30?'#f59e0b':'#f04452';mHtml='<span style="font-weight:700;color:'+c+';">'+m+'%</span>';}
+            html+='<tr><td style="font-weight:600;">'+p.name+'</td><td>'+p.pkg+' '+p.unit+'</td><td class="r">'+(p.exportKrw?formatWon(p.exportKrw):'-')+'</td>';
+            html+='<td class="r"><span class="fp-tier fp-t1">$'+p.t1+'</span></td><td class="r"><span class="fp-tier fp-t2">$'+p.t2+'</span></td><td class="r"><span class="fp-tier fp-t3">$'+p.t3+'</span></td><td class="r"><span class="fp-tier fp-t4">$'+p.t4+'</span></td>';
+            html+='<td class="r">'+(p.costKg?formatWon(p.costKg):'-')+'</td><td class="r">'+mHtml+'</td></tr>';
+          });
+          html+='</tbody></table>';
+        } else {
+          html+='<table class="fp-tbl"><thead><tr><th style="min-width:180px;">제품명</th><th>규격</th><th class="r">수출가(KRW)</th><th class="r">USD</th><th class="r">자사몰 정가</th><th class="r">kg당</th><th>리드타임</th></tr></thead><tbody>';
+          items.forEach(p=>{
+            const perKg=p.pkg>0&&p.exportKrw?(p.exportKrw/p.pkg):0;
+            html+='<tr><td style="font-weight:600;">'+p.name+'</td><td>'+p.pkg+' '+p.unit+'</td><td class="r">'+(p.exportKrw?formatWon(p.exportKrw):'-')+'</td><td class="r">'+(p.exportKrw?'$'+(p.exportKrw/1477).toFixed(2):'-')+'</td><td class="r">'+(p.retailKrw?formatWon(p.retailKrw):'-')+'</td><td class="r">'+(perKg?formatWon(Math.round(perKg)):'-')+'</td><td>'+p.lead+'</td></tr>';
+          });
+          html+='</tbody></table>';
+        }
+        html+='</div></div>';
+      });
+      container.innerHTML=html||'<div style="text-align:center;padding:30px;color:#c4c9d0;">검색 결과 없음</div>';
+    }
+    function toggleFpAcc(cat){fpOpenState[cat]=!fpOpenState[cat];renderFinPriceAccordion();}
+    function toggleFinPriceAll(open){FP_CAT_ORDER.forEach(c=>{fpOpenState[c]=open;});renderFinPriceAccordion();}
+
+    // ===== 초기화 =====
+    document.addEventListener('DOMContentLoaded', function() {
+      initFinance();
+    });
+  </script>
+</body>
+</html>
