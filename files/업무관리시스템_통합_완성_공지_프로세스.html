@@ -314,6 +314,24 @@
     .fcal-acc-body.open{display:block;}
     .fcal-acc-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f8f9fa;}
     .fcal-acc-row:last-child{border-bottom:none;}
+    /* 단가표 아코디언 */
+    .fp-group{background:#fff;border:1px solid #e5e8eb;border-radius:12px;margin-bottom:10px;overflow:hidden;}
+    .fp-header{padding:12px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s;user-select:none;}
+    .fp-header:hover{background:#f8f9fa;}
+    .fp-arrow{font-size:10px;color:#8b95a1;transition:transform .2s;width:14px;flex-shrink:0;}
+    .fp-arrow.open{transform:rotate(90deg);}
+    .fp-cat{display:inline-block;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600;}
+    .fp-name{font-size:13px;font-weight:700;color:#333d4b;flex:1;}
+    .fp-cnt{font-size:11px;color:#8b95a1;}
+    .fp-body{display:none;border-top:1px solid #f4f5f7;}
+    .fp-body.open{display:block;}
+    .fp-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+    .fp-tbl th{text-align:left;padding:7px 14px;background:#fafbfc;color:#8b95a1;font-weight:600;font-size:10px;border-bottom:1px solid #f4f5f7;}
+    .fp-tbl td{padding:7px 14px;border-bottom:1px solid #f8f9fa;}
+    .fp-tbl tr:hover td{background:#fafbfc;}
+    .fp-tbl .r{text-align:right;}
+    .fp-tier{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;margin:0 1px;}
+    .fp-t1{background:#fef2f2;color:#ef4444;}.fp-t2{background:#fffbeb;color:#d97706;}.fp-t3{background:#ecfdf5;color:#0ca678;}.fp-t4{background:#eff6ff;color:#202454;}
     .kpi-checklist li { padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
     .kpi-checklist li:last-child { border-bottom: none; }
     .kpi-chk {
@@ -4892,6 +4910,7 @@ Best regards,
             <button class="fin-tab" onclick="showFinanceTab('fin-revenue',this)">매출 관리</button>
             <button class="fin-tab" onclick="showFinanceTab('fin-purchase',this)">매입 관리</button>
             <button class="fin-tab" onclick="showFinanceTab('fin-monthly',this)">월별 정산</button>
+            <button class="fin-tab" onclick="showFinanceTab('fin-price',this)">제품 단가표</button>
           </div>
           </div>
         </div>
@@ -5049,6 +5068,20 @@ Best regards,
             </div>
           </div>
         </div>
+
+        <!-- [탭5] 제품 단가표 (아코디언) -->
+        <div id="fin-price" class="fin-section">
+          <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">
+            <input type="text" id="finPriceSearch" placeholder="제품명 검색..." oninput="renderFinPriceAccordion()" style="padding:8px 14px;border:1px solid #e5e8eb;border-radius:8px;font-size:12px;width:240px;font-family:inherit;outline:none;">
+            <span style="font-size:11px;color:#8b95a1;" id="finPriceCnt"></span>
+            <div style="margin-left:auto;display:flex;gap:6px;">
+              <button class="fin-tab" onclick="toggleFinPriceAll(true)" style="padding:5px 12px;font-size:11px;">전체 펼치기</button>
+              <button class="fin-tab" onclick="toggleFinPriceAll(false)" style="padding:5px 12px;font-size:11px;">전체 접기</button>
+            </div>
+          </div>
+          <div id="finPriceAccordion"></div>
+        </div>
+
       </div>
 
       <!-- 정산관리 모달: 매출 등록/수정 -->
@@ -14114,6 +14147,7 @@ Option C: [제품C] - $[가격]
       if (tabId === 'fin-revenue') renderRevenueTable();
       if (tabId === 'fin-purchase') renderPurchaseTable();
       if (tabId === 'fin-monthly') { renderMonthlySummary(); renderFinCalendar(); renderFinCalDetail(); }
+      if (tabId === 'fin-price') { renderFinPriceAccordion(); }
     }
 
     // 초기화
@@ -14514,6 +14548,99 @@ Option C: [제품C] - $[가격]
       link.download = (type === 'revenue' ? '매출' : '매입') + '_' + new Date().toISOString().slice(0,10) + '.csv';
       link.click();
     }
+    // ── 제품 단가표 ──
+    const FP_DATA=[
+      {name:'POUR 코트재I(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재I(녹색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재I(적갈색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재I(백색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재II(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재II(녹색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:142000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 코트재II(적갈색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:119000,retailKrw:142000,t1:5.5,t2:5.0,t3:4.5,t4:4.0,costKg:null,lead:'25일'},
+      {name:'POUR 상도코트재(회색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:150000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 상도코트재(녹색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:150000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 상도코트재(적갈색)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:150000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 써밋페인트 플러스',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:102000,retailKrw:126000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 아크릴배면차수제(A+B)',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:156400,retailKrw:152000,t1:6.5,t2:6.0,t3:5.5,t4:5.3,costKg:null,lead:'25일'},
+      {name:'POUR 콘크리트 강화제',cat:'수용성',pkg:14,unit:'kg/통',exportKrw:79900,retailKrw:115500,t1:5.0,t2:4.5,t3:4.2,t4:3.9,costKg:null,lead:'25일'},
+      {name:'POUR 강화재1(슬라브용)',cat:'수용성',pkg:18,unit:'L/통',exportKrw:115600,retailKrw:180000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 강화제2(금속기와용)',cat:'수용성',pkg:18,unit:'L/통',exportKrw:119000,retailKrw:180000,t1:5.0,t2:4.5,t3:4.0,t4:3.5,costKg:null,lead:'25일'},
+      {name:'POUR 하이롤퍼티',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:71400,retailKrw:136000,t1:3.5,t2:3.1,t3:2.7,t4:2.4,costKg:null,lead:'25일'},
+      {name:'POUR 하이퍼티',cat:'수용성',pkg:20,unit:'kg/통',exportKrw:74300,retailKrw:136000,t1:3.5,t2:3.2,t3:2.8,t4:2.5,costKg:null,lead:'25일'},
+      {name:'POUR 써밋바인더',cat:'수용성',pkg:18,unit:'kg/통',exportKrw:40000,retailKrw:126000,t1:2.5,t2:2.1,t3:1.8,t4:1.5,costKg:null,lead:'25일'},
+      {name:'POUR 써밋에폭시(하도)',cat:'유성',pkg:13.5,unit:'kg/통',exportKrw:88400,retailKrw:99800,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋에폭시(중도)',cat:'유성',pkg:24,unit:'kg/통',exportKrw:119000,retailKrw:132000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋에폭시(상도)',cat:'유성',pkg:16,unit:'kg/통',exportKrw:110500,retailKrw:124800,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋우레탄 하도',cat:'유성',pkg:17,unit:'kg/통',exportKrw:73200,retailKrw:73000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋우레탄 중도',cat:'유성',pkg:20,unit:'kg/통',exportKrw:73000,retailKrw:72500,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋우레탄 상도',cat:'유성',pkg:15.24,unit:'kg/통',exportKrw:88200,retailKrw:88200,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR PMQ강화코팅제',cat:'유성',pkg:15,unit:'kg/통',exportKrw:209100,retailKrw:345000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 폴리우레아',cat:'유성',pkg:410,unit:'kg/통',exportKrw:3345600,retailKrw:3240000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 써밋엠보라이닝',cat:'유성',pkg:24,unit:'kg/통',exportKrw:127500,retailKrw:137000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 분진방지제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:3.8,t2:3.4,t3:3.0,t4:2.6,costKg:1300,lead:'25일'},
+      {name:'POUR 침투성 표면강화제',cat:'특수기능성',pkg:20,unit:'kg/통',exportKrw:null,retailKrw:null,t1:8.4,t2:7.6,t3:6.8,t4:6.0,costKg:3000,lead:'25일'},
+      {name:'POUR 외벽 방수/발수제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:6.1,t2:5.6,t3:5.1,t4:4.6,costKg:2300,lead:'25일'},
+      {name:'POUR 콘크리트 양생제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:4.0,t2:3.6,t3:3.2,t4:2.8,costKg:1400,lead:'25일'},
+      {name:'POUR 발수코팅제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:4.7,t2:4.2,t3:3.7,t4:3.2,costKg:1600,lead:'25일'},
+      {name:'POUR 구체하이드로쉴드',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:3.6,t2:3.2,t3:2.8,t4:2.4,costKg:1200,lead:'25일'},
+      {name:'POUR 욕실도막방수제',cat:'특수기능성',pkg:4,unit:'kg/통',exportKrw:null,retailKrw:null,t1:10.6,t2:9.6,t3:8.6,t4:7.6,costKg:3800,lead:'25일'},
+      {name:'POUR 외벽방수제',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:8.8,t2:8.0,t3:7.2,t4:6.4,costKg:3200,lead:'25일'},
+      {name:'POUR 투명퍼티 1.2kg',cat:'특수기능성',pkg:1.2,unit:'kg/통',exportKrw:null,retailKrw:null,t1:16.5,t2:15.0,t3:13.5,t4:12.0,costKg:6000,lead:'25일'},
+      {name:'POUR 투명퍼티 4kg',cat:'특수기능성',pkg:4,unit:'kg/통',exportKrw:null,retailKrw:null,t1:16.5,t2:15.0,t3:13.5,t4:12.0,costKg:6000,lead:'25일'},
+      {name:'POUR 타일도막방수제 18kg',cat:'특수기능성',pkg:18,unit:'kg/통',exportKrw:null,retailKrw:null,t1:7.7,t2:7.0,t3:6.3,t4:5.6,costKg:2800,lead:'25일'},
+      {name:'POUR 타일도막방수제 9kg',cat:'특수기능성',pkg:9,unit:'kg/통',exportKrw:null,retailKrw:null,t1:7.7,t2:7.0,t3:6.3,t4:5.6,costKg:2800,lead:'25일'},
+      {name:'POUR 콘크리트 중성화방지제',cat:'특수기능성',pkg:20,unit:'kg/통',exportKrw:null,retailKrw:null,t1:10.0,t2:9.0,t3:8.0,t4:7.0,costKg:3500,lead:'25일'},
+      {name:'POUR 106파우더',cat:'파우더',pkg:20,unit:'kg/포',exportKrw:32000,retailKrw:108700,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 107파우더',cat:'파우더',pkg:20,unit:'kg/포',exportKrw:32000,retailKrw:108700,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 표면강화 파우더',cat:'파우더',pkg:20,unit:'kg/포',exportKrw:32000,retailKrw:108700,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR MMA',cat:'아스팔트',pkg:20,unit:'kg/통',exportKrw:100300,retailKrw:207000,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 씰코트',cat:'아스팔트',pkg:25,unit:'kg/통',exportKrw:119000,retailKrw:159600,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+      {name:'POUR 하드씰코트',cat:'아스팔트',pkg:20,unit:'kg/통',exportKrw:119000,retailKrw:159600,t1:null,t2:null,t3:null,t4:null,costKg:null,lead:'25일'},
+    ];
+    const FP_CAT_ORDER=['수용성','유성','특수기능성','아스팔트','파우더'];
+    const FP_CAT_CLS={수용성:'cat-water',유성:'cat-oil',특수기능성:'cat-special',아스팔트:'cat-asphalt',파우더:'cat-powder'};
+    let fpOpenState={수용성:true,유성:false,특수기능성:false,아스팔트:false,파우더:false};
+
+    function renderFinPriceAccordion(){
+      const search=(document.getElementById('finPriceSearch')?.value||'').toLowerCase();
+      const filtered=FP_DATA.filter(p=>!search||p.name.toLowerCase().includes(search));
+      const container=document.getElementById('finPriceAccordion');
+      if(!container)return;
+      document.getElementById('finPriceCnt').textContent='총 '+filtered.length+'개 제품';
+      const groups={};filtered.forEach(p=>{if(!groups[p.cat])groups[p.cat]=[];groups[p.cat].push(p);});
+      const isSearching=search.length>0;
+      let html='';
+      FP_CAT_ORDER.forEach(cat=>{
+        const items=groups[cat];if(!items||items.length===0)return;
+        const isOpen=isSearching||fpOpenState[cat];
+        const tagCls=FP_CAT_CLS[cat]||'';
+        html+='<div class="fp-group"><div class="fp-header" onclick="toggleFpAcc(\''+cat+'\')"><span class="fp-arrow '+(isOpen?'open':'')+'">▶</span><span class="fp-cat '+tagCls+'">'+cat+'</span><span class="fp-name">'+cat+' 도료</span><span class="fp-cnt">'+items.length+'종</span></div>';
+        html+='<div class="fp-body '+(isOpen?'open':'')+'">';
+        if(items[0].t1){
+          html+='<table class="fp-tbl"><thead><tr><th style="min-width:180px;">제품명</th><th>규격</th><th class="r">수출가</th><th class="r">1~100kg</th><th class="r">101~999</th><th class="r">1K~2.9K</th><th class="r">3K+</th><th class="r">매입가/kg</th><th class="r">마진</th></tr></thead><tbody>';
+          items.forEach(p=>{
+            let mHtml='<span style="color:#c4c9d0;">-</span>';
+            if(p.costKg&&p.t1){const s=p.t1*1477;const m=((s-p.costKg)/s*100).toFixed(0);const c=m>=50?'#0ca678':m>=30?'#f59e0b':'#f04452';mHtml='<span style="font-weight:700;color:'+c+';">'+m+'%</span>';}
+            html+='<tr><td style="font-weight:600;">'+p.name+'</td><td>'+p.pkg+' '+p.unit+'</td><td class="r">'+(p.exportKrw?formatWon(p.exportKrw):'-')+'</td>';
+            html+='<td class="r"><span class="fp-tier fp-t1">$'+p.t1+'</span></td><td class="r"><span class="fp-tier fp-t2">$'+p.t2+'</span></td><td class="r"><span class="fp-tier fp-t3">$'+p.t3+'</span></td><td class="r"><span class="fp-tier fp-t4">$'+p.t4+'</span></td>';
+            html+='<td class="r">'+(p.costKg?formatWon(p.costKg):'-')+'</td><td class="r">'+mHtml+'</td></tr>';
+          });
+          html+='</tbody></table>';
+        } else {
+          html+='<table class="fp-tbl"><thead><tr><th style="min-width:180px;">제품명</th><th>규격</th><th class="r">수출가(KRW)</th><th class="r">USD</th><th class="r">자사몰 정가</th><th class="r">kg당</th><th>리드타임</th></tr></thead><tbody>';
+          items.forEach(p=>{
+            const perKg=p.pkg>0&&p.exportKrw?(p.exportKrw/p.pkg):0;
+            html+='<tr><td style="font-weight:600;">'+p.name+'</td><td>'+p.pkg+' '+p.unit+'</td><td class="r">'+(p.exportKrw?formatWon(p.exportKrw):'-')+'</td><td class="r">'+(p.exportKrw?'$'+(p.exportKrw/1477).toFixed(2):'-')+'</td><td class="r">'+(p.retailKrw?formatWon(p.retailKrw):'-')+'</td><td class="r">'+(perKg?formatWon(Math.round(perKg)):'-')+'</td><td>'+p.lead+'</td></tr>';
+          });
+          html+='</tbody></table>';
+        }
+        html+='</div></div>';
+      });
+      container.innerHTML=html||'<div style="text-align:center;padding:30px;color:#c4c9d0;">검색 결과 없음</div>';
+    }
+    function toggleFpAcc(cat){fpOpenState[cat]=!fpOpenState[cat];renderFinPriceAccordion();}
+    function toggleFinPriceAll(open){FP_CAT_ORDER.forEach(c=>{fpOpenState[c]=open;});renderFinPriceAccordion();}
+
     // ===== 정산관리 끝 =====
 
     // 프로젝트 선택
