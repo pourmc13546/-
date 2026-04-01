@@ -14620,25 +14620,22 @@ Option C: [제품C] - $[가격]
 
     function calcFinRevAmount() {
       const kg = parseFloat(document.getElementById('finR-qty').value) || 0;
-      const price = parseFloat(document.getElementById('finR-price').value) || 0;
       const calcEl = document.getElementById('finR-calcResult');
-      if (kg > 0 && price > 0) {
-        // 볼륨 단계별 자동 단가 추천
-        const idx = document.getElementById('finR-product').value;
-        if (idx !== '') {
-          const p = FP_DATA[idx];
-          if (p.t1) {
-            let recommended = p.t1;
-            if (kg >= 3000 && p.t4) recommended = p.t4;
-            else if (kg >= 1000 && p.t3) recommended = p.t3;
-            else if (kg >= 101 && p.t2) recommended = p.t2;
-            if (price !== recommended && price === p.t1 && recommended !== p.t1) {
-              document.getElementById('finR-price').value = recommended;
-              calcFinRevAmount();
-              return;
-            }
-          }
+      const priceEl = document.getElementById('finR-price');
+      // 볼륨 단계별 자동 단가 적용
+      const idx = document.getElementById('finR-product').value;
+      if (idx !== '' && kg > 0) {
+        const p = FP_DATA[idx];
+        if (p.t1) {
+          let auto = p.t1;
+          if (kg >= 3000 && p.t4) auto = p.t4;
+          else if (kg >= 1000 && p.t3) auto = p.t3;
+          else if (kg >= 101 && p.t2) auto = p.t2;
+          priceEl.value = auto;
         }
+      }
+      const price = parseFloat(priceEl.value) || 0;
+      if (kg > 0 && price > 0) {
         const totalUsd = kg * price;
         const totalKrw = totalUsd * 1477;
         document.getElementById('finR-totalUsd').textContent = '$' + Math.round(totalUsd).toLocaleString();
