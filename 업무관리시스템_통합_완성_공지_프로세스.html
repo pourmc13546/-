@@ -696,6 +696,13 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
         응답 템플릿
       </div>
+
+      <p class="px-4 text-xs text-toss-gray-400 font-medium mb-2 mt-6">바이어 응대</p>
+      <a href="files/cs_zip.html" class="nav-item" id="nav-cszip" style="text-decoration:none;">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        응대 센터
+        <span class="ml-auto text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded font-medium">AI</span>
+      </a>
     </nav>
 
     <!-- 사용자 정보 & 로그아웃 -->
@@ -5819,11 +5826,16 @@ Best regards,
       renderPipeline();
 
       // 카운트 업데이트
-      document.getElementById('quote-total').textContent = quoteData.length;
-      document.getElementById('quote-request').textContent = quoteData.filter(q => q.status === 'request').length;
-      document.getElementById('quote-negotiation').textContent = quoteData.filter(q => q.status === 'negotiation').length;
-      document.getElementById('quote-contract').textContent = quoteData.filter(q => q.status === 'contract').length;
-      document.getElementById('quote-complete').textContent = quoteData.filter(q => q.status === 'complete').length;
+      const qTotal = document.getElementById('quote-total');
+      const qRequest = document.getElementById('quote-request');
+      const qNegotiation = document.getElementById('quote-negotiation');
+      const qContract = document.getElementById('quote-contract');
+      const qComplete = document.getElementById('quote-complete');
+      if (qTotal) qTotal.textContent = quoteData.length;
+      if (qRequest) qRequest.textContent = quoteData.filter(q => q.status === 'request').length;
+      if (qNegotiation) qNegotiation.textContent = quoteData.filter(q => q.status === 'negotiation').length;
+      if (qContract) qContract.textContent = quoteData.filter(q => q.status === 'contract').length;
+      if (qComplete) qComplete.textContent = quoteData.filter(q => q.status === 'complete').length;
     }
 
     function renderPipeline() {
@@ -9855,6 +9867,55 @@ Best regards,
   </script>
 
 <!-- ========================================
+     Firebase (commerce-division 중앙 대시보드) 연동
+     ======================================== -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+  const centralFirebaseConfig = {
+    apiKey: "AIzaSyAA5CEMdm0RUFocGlcAv_JF5ckf9k9XZr4",
+    authDomain: "commerce-division.firebaseapp.com",
+    projectId: "commerce-division",
+    storageBucket: "commerce-division.firebasestorage.app",
+    messagingSenderId: "990937465227",
+    appId: "1:990937465227:web:4013cb98e5e5869bb06f8e"
+  };
+
+  const centralApp = initializeApp(centralFirebaseConfig, 'central');
+  const centralDb = getFirestore(centralApp);
+
+  // 정산 데이터 → Firebase 저장 (추가/수정)
+  window._firebaseSaveSettlement = async (settlementId, data) => {
+    try {
+      const docRef = doc(centralDb, 'settlements_overseas', String(settlementId));
+      await setDoc(docRef, {
+        ...data,
+        team: '해외사업부',
+        source: 'overseas-management',
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      console.log('[Firebase] 정산 저장 완료:', settlementId);
+    } catch (e) {
+      console.warn('[Firebase] 정산 저장 실패 (무시됨):', e.message);
+    }
+  };
+
+  // 정산 데이터 → Firebase 삭제
+  window._firebaseDeleteSettlement = async (settlementId) => {
+    try {
+      const docRef = doc(centralDb, 'settlements_overseas', String(settlementId));
+      await deleteDoc(docRef);
+      console.log('[Firebase] 정산 삭제 완료:', settlementId);
+    } catch (e) {
+      console.warn('[Firebase] 정산 삭제 실패 (무시됨):', e.message);
+    }
+  };
+
+  console.log('✅ Firebase (commerce-division) 연동 완료!');
+</script>
+
+<!-- ========================================
      Supabase 연동
      ======================================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -10062,6 +10123,10 @@ Best regards,
       .insert([settlement])
       .select();
     if (error) console.error('settlements 추가 에러:', error);
+    // Firebase 이중 저장
+    if (data && data[0] && window._firebaseSaveSettlement) {
+      window._firebaseSaveSettlement(data[0].id, data[0]);
+    }
     return data;
   }
 
@@ -10166,6 +10231,10 @@ Best regards,
       .eq('id', id)
       .select();
     if (error) console.error('settlements 수정 에러:', error);
+    // Firebase 이중 저장
+    if (data && data[0] && window._firebaseSaveSettlement) {
+      window._firebaseSaveSettlement(id, data[0]);
+    }
     return data;
   }
 
@@ -10230,6 +10299,10 @@ Best regards,
   async function deleteSettlement(id) {
     const { error } = await supabaseClient.from('settlements').delete().eq('id', id);
     if (error) console.error('settlements 삭제 에러:', error);
+    // Firebase 동시 삭제
+    if (!error && window._firebaseDeleteSettlement) {
+      window._firebaseDeleteSettlement(id);
+    }
     return !error;
   }
 
@@ -10532,6 +10605,28 @@ Best regards,
       if (settlements && settlements.length > 0) {
         settlementData = mapper.mapSettlementData(settlements);
         console.log('✅ 정산 데이터 로드:', settlementData.length, '건');
+      } else {
+        // Supabase에 정산 데이터가 없으면 기존 하드코딩 데이터를 자동 시딩
+        console.log('🔄 정산 데이터 없음 → Supabase 자동 시딩 시작...');
+        const seedData = [
+          { settlement_id: 'STL-2025-007', order_id: 'ORD-2025-041', buyer: 'GlobalTech Inc.', order_amount: '$7,500', fee: '-$375', settlement_amount: '$7,125', status: '완료', due_date: '2025.03.28', complete_date: '2025.03.27', method: 'T/T 송금', bank: 'KB국민은행', account: '123-456-789012' },
+          { settlement_id: 'STL-2025-006', order_id: 'ORD-2025-038', buyer: 'EuroTrade GmbH', order_amount: '$15,200', fee: '-$760', settlement_amount: '$14,440', status: '처리중', due_date: '2025.03.30', complete_date: '-', method: 'L/C', bank: '신한은행', account: '987-654-321098' },
+          { settlement_id: 'STL-2025-005', order_id: 'ORD-2025-035', buyer: 'AsiaPac Ltd.', order_amount: '$22,000', fee: '-$1,100', settlement_amount: '$20,900', status: '대기', due_date: '2025.04.05', complete_date: '-', method: 'T/T 송금', bank: '하나은행', account: '456-789-012345' },
+        ];
+        for (const item of seedData) {
+          await addSettlement(item);
+        }
+        console.log('✅ 정산 데이터 Supabase 시딩 완료:', seedData.length, '건');
+      }
+
+      // Firebase 일괄 동기화 (Supabase → Firebase, 매 로드 시)
+      const firebaseSettlements = settlements && settlements.length > 0 ? settlements : await fetchSettlements();
+      if (firebaseSettlements && firebaseSettlements.length > 0 && window._firebaseSaveSettlement) {
+        console.log('🔄 정산 데이터 Firebase 동기화 시작...');
+        for (const s of firebaseSettlements) {
+          await window._firebaseSaveSettlement(s.id, s);
+        }
+        console.log('✅ 정산 데이터 Firebase 동기화 완료:', firebaseSettlements.length, '건');
       }
 
       // 테이블 다시 렌더링
