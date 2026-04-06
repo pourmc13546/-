@@ -14087,6 +14087,21 @@ Option C: [제품C] - $[가격]
     let finPurchaseData = [];
     let finRevEditIdx = -1;
     let finPurEditIdx = -1;
+    let FIN_USD_KRW = 1450; // 기본값, 실시간 환율로 업데이트됨
+
+    // 실시간 환율 조회 (Frankfurter API)
+    (async function loadExchangeRate() {
+      try {
+        const res = await fetch('https://api.frankfurter.dev/latest?from=USD&to=KRW');
+        const data = await res.json();
+        if (data.rates && data.rates.KRW) {
+          FIN_USD_KRW = data.rates.KRW;
+          console.log('✅ 실시간 환율 적용: 1 USD = ' + FIN_USD_KRW.toLocaleString() + ' KRW (' + data.date + ')');
+        }
+      } catch (e) {
+        console.warn('환율 조회 실패, 기본값 사용:', FIN_USD_KRW);
+      }
+    })();
 
     // 샘플 데이터
     const finDefaultRevenue = [
@@ -14446,7 +14461,7 @@ Option C: [제품C] - $[가격]
       document.getElementById('finRevModal').style.display = 'flex';
     }
 
-    function saveRevenue() {
+    async function saveRevenue() {
       const date = document.getElementById('finR-date').value;
       const company = document.getElementById('finR-company').value.trim();
       if (!date || !company) { alert('날짜와 거래처를 입력하세요.'); return; }
@@ -14455,16 +14470,44 @@ Option C: [제품C] - $[가격]
       const prodIdx = document.getElementById('finR-product').value;
       const prodName = prodIdx !== '' && FP_DATA[prodIdx] ? FP_DATA[prodIdx].name : '';
       const amountUsd = kg * price;
-      const amount = Math.round(amountUsd * 1477);
+      const amount = Math.round(amountUsd * FIN_USD_KRW);
+      const status = document.getElementById('finR-status').value;
+      const existingRec = (finRevEditIdx >= 0 && finRevEditIdx < finRevenueData.length)
+        ? finRevenueData[finRevEditIdx] : {};
       const rec = {
+        _fsId: existingRec._fsId || null,
         date, company,
         product: prodName,
         quantity: kg, unitPrice: price, amount: amount,
-        paymentStatus: document.getElementById('finR-status').value,
+        paymentStatus: status,
         memo: document.getElementById('finR-memo').value.trim(),
         createdBy: (JSON.parse(localStorage.getItem('loggedInUser')||'{}').name) || '',
-        createdAt: new Date().toISOString().slice(0,10)
+        createdAt: existingRec.createdAt || new Date().toISOString().slice(0,10)
       };
+
+      // Firebase 이중저장 (커머스 대시보드 호환)
+      if (window._firebaseSaveSettlement) {
+        try {
+          const fsId = rec._fsId || ('rev_' + Date.now());
+          await window._firebaseSaveSettlement(fsId, {
+            buyer: company,
+            product: prodName,
+            quantity: kg,
+            unitPrice: price,
+            amount: amount,
+            date: date,
+            status: status,
+            paymentStatus: status,
+            memo: rec.memo,
+            createdBy: rec.createdBy,
+            createdAt: rec.createdAt
+          });
+          if (!rec._fsId) rec._fsId = fsId;
+        } catch (e) {
+          console.warn('Firebase 저장 실패 (무시됨):', e);
+        }
+      }
+
       if (finRevEditIdx >= 0 && finRevEditIdx < finRevenueData.length) {
         finRevenueData[finRevEditIdx] = rec;
       } else {
@@ -14473,11 +14516,16 @@ Option C: [제품C] - $[가격]
       saveFinanceData();
       renderRevenueTable();
       closeFinModal('rev');
-      if (typeof showToast === 'function') showToast('✅ 매출이 저장되었습니다');
+      if (typeof showToast === 'function') showToast('✅ 매출이 저장되었습니다 (환율: $1 = ₩' + Math.round(FIN_USD_KRW).toLocaleString() + ')');
     }
 
-    function deleteRevenue(idx) {
+    async function deleteRevenue(idx) {
       if (!confirm('"' + (finRevenueData[idx]?.company||'') + '" 매출 건을 삭제하시겠습니까?')) return;
+      const rec = finRevenueData[idx];
+      // Firebase 동시 삭제
+      if (rec._fsId && window._firebaseDeleteSettlement) {
+        try { await window._firebaseDeleteSettlement(rec._fsId); } catch (e) {}
+      }
       finRevenueData.splice(idx, 1);
       saveFinanceData();
       renderRevenueTable();
@@ -14597,7 +14645,7 @@ Option C: [제품C] - $[가격]
         infoEl.innerHTML = info;
         infoEl.style.display = '';
       } else if (p.exportKrw) {
-        priceEl.value = (p.exportKrw / p.pkg / 1477).toFixed(2);
+        priceEl.value = (p.exportKrw / p.pkg / FIN_USD_KRW).toFixed(2);
         infoEl.innerHTML = '<strong>' + p.name + '</strong> · ' + p.pkg + ' ' + p.unit + '<br>수출가: ₩' + p.exportKrw.toLocaleString() + ' · 자사몰: ₩' + (p.retailKrw || 0).toLocaleString();
         infoEl.style.display = '';
       }
@@ -14623,7 +14671,7 @@ Option C: [제품C] - $[가격]
       const price = parseFloat(priceEl.value) || 0;
       if (kg > 0 && price > 0) {
         const totalUsd = kg * price;
-        const totalKrw = totalUsd * 1477;
+        const totalKrw = totalUsd * FIN_USD_KRW;
         document.getElementById('finR-totalUsd').textContent = '$' + Math.round(totalUsd).toLocaleString();
         document.getElementById('finR-totalKrw').textContent = '₩' + Math.round(totalKrw).toLocaleString();
         calcEl.style.display = '';
@@ -14713,7 +14761,7 @@ Option C: [제품C] - $[가격]
           html+='<table class="fp-tbl"><thead><tr><th style="min-width:180px;">제품명</th><th>규격</th><th class="r">수출가</th><th class="r">1~100kg</th><th class="r">101~999</th><th class="r">1K~2.9K</th><th class="r">3K+</th><th class="r">매입가/kg</th><th class="r">마진</th></tr></thead><tbody>';
           items.forEach(p=>{
             let mHtml='<span style="color:#c4c9d0;">-</span>';
-            if(p.costKg&&p.t1){const s=p.t1*1477;const m=((s-p.costKg)/s*100).toFixed(0);const c=m>=50?'#0ca678':m>=30?'#f59e0b':'#f04452';mHtml='<span style="font-weight:700;color:'+c+';">'+m+'%</span>';}
+            if(p.costKg&&p.t1){const s=p.t1*FIN_USD_KRW;const m=((s-p.costKg)/s*100).toFixed(0);const c=m>=50?'#0ca678':m>=30?'#f59e0b':'#f04452';mHtml='<span style="font-weight:700;color:'+c+';">'+m+'%</span>';}
             html+='<tr><td style="font-weight:600;">'+p.name+'</td><td>'+p.pkg+' '+p.unit+'</td><td class="r">'+(p.exportKrw?formatWon(p.exportKrw):'-')+'</td>';
             html+='<td class="r"><span class="fp-tier fp-t1">$'+p.t1+'</span></td><td class="r"><span class="fp-tier fp-t2">$'+p.t2+'</span></td><td class="r"><span class="fp-tier fp-t3">$'+p.t3+'</span></td><td class="r"><span class="fp-tier fp-t4">$'+p.t4+'</span></td>';
             html+='<td class="r">'+(p.costKg?formatWon(p.costKg):'-')+'</td><td class="r">'+mHtml+'</td></tr>';
@@ -14723,7 +14771,7 @@ Option C: [제품C] - $[가격]
           html+='<table class="fp-tbl"><thead><tr><th style="min-width:180px;">제품명</th><th>규격</th><th class="r">수출가(KRW)</th><th class="r">USD</th><th class="r">자사몰 정가</th><th class="r">kg당</th><th>리드타임</th></tr></thead><tbody>';
           items.forEach(p=>{
             const perKg=p.pkg>0&&p.exportKrw?(p.exportKrw/p.pkg):0;
-            html+='<tr><td style="font-weight:600;">'+p.name+'</td><td>'+p.pkg+' '+p.unit+'</td><td class="r">'+(p.exportKrw?formatWon(p.exportKrw):'-')+'</td><td class="r">'+(p.exportKrw?'$'+(p.exportKrw/1477).toFixed(2):'-')+'</td><td class="r">'+(p.retailKrw?formatWon(p.retailKrw):'-')+'</td><td class="r">'+(perKg?formatWon(Math.round(perKg)):'-')+'</td><td>'+p.lead+'</td></tr>';
+            html+='<tr><td style="font-weight:600;">'+p.name+'</td><td>'+p.pkg+' '+p.unit+'</td><td class="r">'+(p.exportKrw?formatWon(p.exportKrw):'-')+'</td><td class="r">'+(p.exportKrw?'$'+(p.exportKrw/FIN_USD_KRW).toFixed(2):'-')+'</td><td class="r">'+(p.retailKrw?formatWon(p.retailKrw):'-')+'</td><td class="r">'+(perKg?formatWon(Math.round(perKg)):'-')+'</td><td>'+p.lead+'</td></tr>';
           });
           html+='</tbody></table>';
         }
