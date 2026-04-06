@@ -14087,12 +14087,12 @@ Option C: [제품C] - $[가격]
     let finPurchaseData = [];
     let finRevEditIdx = -1;
     let finPurEditIdx = -1;
-    let FIN_USD_KRW = 1450; // 기본값, 실시간 환율로 업데이트됨
+    let FIN_USD_KRW = 1505; // 기본값, 실시간 환율로 업데이트됨
 
     // 실시간 환율 조회 (Frankfurter API)
     (async function loadExchangeRate() {
       try {
-        const res = await fetch('https://api.frankfurter.dev/latest?from=USD&to=KRW');
+        const res = await fetch('https://api.frankfurter.dev/v1/latest?from=USD&to=KRW');
         const data = await res.json();
         if (data.rates && data.rates.KRW) {
           FIN_USD_KRW = data.rates.KRW;
