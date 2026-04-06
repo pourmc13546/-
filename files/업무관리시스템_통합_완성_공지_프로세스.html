@@ -16219,12 +16219,24 @@ Option C: [제품C] - $[가격]
   window._firebaseSaveSettlement = async (settlementId, data) => {
     try {
       const docRef = doc(centralDb, 'settlements_overseas', String(settlementId));
-      await setDoc(docRef, {
-        ...data,
+      // commerce-division 대시보드 호환 필드 구조
+      const fsDoc = {
+        buyer: data.buyer || data.company || '',
+        product: data.product || '',
+        quantity: Number(data.quantity) || 0,
+        unitPrice: Number(data.unitPrice || data.unit_price) || 0,
+        amount: Number(data.amount || data.settlement_amount || data.order_amount) || 0,
+        complete_date: (data.status === '완료' || data.paymentStatus === '완료') ? (data.complete_date || data.date || data.due_date || '') : null,
+        due_date: (data.status !== '완료' && data.paymentStatus !== '완료') ? (data.due_date || data.date || '') : null,
+        status: data.status || data.paymentStatus || '대기',
+        memo: data.memo || '',
+        createdBy: data.createdBy || data.created_by || '',
+        createdAt: data.createdAt || data.created_at || '',
         team: '해외사업부',
         source: 'overseas-management',
         updatedAt: new Date().toISOString()
-      }, { merge: true });
+      };
+      await setDoc(docRef, fsDoc, { merge: true });
       console.log('[Firebase] 정산 저장 완료:', settlementId);
     } catch (e) {
       console.warn('[Firebase] 정산 저장 실패 (무시됨):', e.message);
