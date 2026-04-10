@@ -5157,6 +5157,74 @@ Best regards,
             <button onclick="switchEducationTab('downloads')" id="eduTab-downloads" class="edu-tab px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700">
               자료 다운로드
             </button>
+            <button onclick="switchEducationTab('glossary')" id="eduTab-glossary" class="edu-tab px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+              실무용어 사전
+            </button>
+          </div>
+        </div>
+
+        <!-- 실무용어 사전 탭 -->
+        <div id="eduContent-glossary" class="edu-tab-content hidden">
+          <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-lg font-bold text-slate-800">실무용어 사전</h3>
+                <p class="text-sm text-slate-400 mt-1">해외사업 실무에서 자주 쓰이는 용어를 카테고리별로 정리</p>
+              </div>
+              <button onclick="openGlossaryModal()" class="px-4 py-2 bg-navy-500 text-white rounded-lg text-sm font-medium hover:bg-navy-600 flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                용어 추가
+              </button>
+            </div>
+            <!-- 카테고리 필터 -->
+            <div class="flex gap-2 mb-4 flex-wrap" id="glossaryCatTabs">
+              <button onclick="filterGlossary('all',this)" class="gl-cat-btn text-xs px-3 py-1.5 rounded-full border border-navy-500 bg-navy-500 text-white font-medium">전체</button>
+              <button onclick="filterGlossary('물류/운송',this)" class="gl-cat-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">물류/운송</button>
+              <button onclick="filterGlossary('무역조건',this)" class="gl-cat-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">무역조건</button>
+              <button onclick="filterGlossary('결제/정산',this)" class="gl-cat-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">결제/정산</button>
+              <button onclick="filterGlossary('서류/인증',this)" class="gl-cat-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">서류/인증</button>
+              <button onclick="filterGlossary('제품/기술',this)" class="gl-cat-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">제품/기술</button>
+              <button onclick="filterGlossary('알리바바',this)" class="gl-cat-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium">알리바바</button>
+            </div>
+            <!-- 검색 -->
+            <input type="text" id="glossarySearch" oninput="renderGlossary()" placeholder="용어 검색 (영문, 한글, 약어)" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-navy-500">
+            <div class="text-xs text-slate-400 mb-3" id="glossaryCount"></div>
+          </div>
+          <!-- 용어 카드 목록 -->
+          <div id="glossaryList" class="space-y-3"></div>
+        </div>
+
+        <!-- 실무용어 추가/수정 모달 -->
+        <div id="glossaryModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center;">
+          <div style="background:#fff; border-radius:16px; width:520px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+            <div style="padding:20px 24px; border-bottom:1px solid #f4f5f7; display:flex; align-items:center; justify-content:space-between;">
+              <h3 id="glossaryModalTitle" style="font-size:16px; font-weight:800; color:#202454;">용어 추가</h3>
+              <button onclick="closeGlossaryModal()" style="background:none; border:none; cursor:pointer; font-size:18px; color:#8b95a1;">&times;</button>
+            </div>
+            <div style="padding:24px;">
+              <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">영문 용어 *</label><input id="gl-termEn" type="text" placeholder="예: POL (Port of Loading)" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">약어</label><input id="gl-abbr" type="text" placeholder="예: POL" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+                <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">한글 뜻 *</label><input id="gl-termKo" type="text" placeholder="예: 선적항" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              </div>
+              <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">카테고리 *</label>
+                <select id="gl-category" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; background:#fff;">
+                  <option value="물류/운송">물류/운송</option><option value="무역조건">무역조건</option><option value="결제/정산">결제/정산</option><option value="서류/인증">서류/인증</option><option value="제품/기술">제품/기술</option><option value="알리바바">알리바바</option>
+                </select>
+              </div>
+              <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">설명</label><textarea id="gl-desc" rows="3" placeholder="실무에서 어떻게 쓰이는지 설명" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;"></textarea></div>
+              <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">사용 예시</label><input id="gl-example" type="text" placeholder="예: POL: Busan, South Korea" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">이미지</label>
+                <input id="gl-imageFile" type="file" accept="image/*" onchange="glPreviewImage(this)" style="width:100%; font-size:13px; margin-bottom:6px;">
+                <input id="gl-imageUrl" type="text" placeholder="또는 이미지 URL 입력" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;">
+                <div id="gl-imagePreview" style="margin-top:6px;"></div>
+              </div>
+              <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">태그 (쉼표 구분)</label><input id="gl-tags" type="text" placeholder="예: 견적, 운송, 필수" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button onclick="closeGlossaryModal()" style="padding:10px 20px; border:1px solid #e5e8eb; border-radius:8px; background:#fff; color:#6b7684; font-size:13px; font-weight:600; cursor:pointer;">취소</button>
+                <button onclick="saveGlossaryTerm()" style="padding:10px 20px; border:none; border-radius:8px; background:#202454; color:#fff; font-size:13px; font-weight:600; cursor:pointer;">저장</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -15230,6 +15298,156 @@ Option C: [제품C] - $[가격]
         activeContent.classList.remove('hidden');
       }
     }
+
+    // ========== 실무용어 사전 ==========
+    let glossaryTerms = [];
+    let glossaryEditIdx = -1;
+    let glossaryCat = 'all';
+    const GLOSSARY_DEFAULT = [
+      {termEn:'POL (Port of Loading)',abbr:'POL',termKo:'선적항',category:'물류/운송',desc:'화물을 배에 싣는 출발 항구. 한국 기준 주로 부산항(Busan), 인천항(Incheon) 사용.',example:'POL: Busan, South Korea',imageUrl:'',tags:['견적','운송','필수']},
+      {termEn:'POD (Port of Discharge)',abbr:'POD',termKo:'도착항',category:'물류/운송',desc:'화물이 도착하는 항구. 바이어 국가의 주요 항구 지정. POL→POD 구간으로 운송비 산출.',example:'POD: Jebel Ali, UAE',imageUrl:'',tags:['견적','운송','필수']},
+      {termEn:'COMMODITY',abbr:'',termKo:'화물명',category:'물류/운송',desc:'운송하는 화물의 품목명. 페인트/도료는 위험물(DG Cargo)로 분류될 수 있으므로 주의.',example:'COMMODITY: Water-based Waterproof Coating (Non-DG)',imageUrl:'',tags:['견적','통관','필수']},
+      {termEn:'HS CODE',abbr:'HS',termKo:'관세분류번호',category:'서류/인증',desc:'국제 통일 상품 분류 코드(6자리). 수출입 시 관세율/통관 요건 결정. POUR 도료: 3209(수성) 또는 3208(유성).',example:'HS CODE: 3209.10 (수성 페인트/바니시)',imageUrl:'',tags:['통관','관세','필수']},
+      {termEn:'INVOICE VALUE',abbr:'',termKo:'화물가액 (송장가격)',category:'결제/정산',desc:'상업송장(Commercial Invoice)에 기재된 화물 총 금액. 보험료/관세 산출 기준.',example:'INVOICE VALUE: USD 12,500',imageUrl:'',tags:['견적','보험','관세']},
+      {termEn:"Q'TY (Quantity)",abbr:"Q'TY",termKo:'수량 (전체)',category:'물류/운송',desc:'운송할 화물의 전체 수량. 팔레트, 드럼, 박스 등 포장 단위로 기재.',example:"Q'TY: 50 pallets (1,000 buckets x 20kg)",imageUrl:'',tags:['견적','운송']},
+      {termEn:'TOTAL WEIGHT',abbr:'G.W.',termKo:'전체 화물 중량',category:'물류/운송',desc:'화물 전체 총중량(Gross Weight). 포장재 포함. 해상=톤(MT), 항공=kg.',example:'TOTAL WEIGHT: 20,000 kg (20 MT)',imageUrl:'',tags:['견적','운송','필수']},
+      {termEn:'EACH WEIGHT',abbr:'',termKo:'개별 화물 중량',category:'물류/운송',desc:'개별 포장 단위의 중량. 팔레트 1개 또는 박스 1개의 무게.',example:'EACH WEIGHT: 400 kg/pallet',imageUrl:'',tags:['견적','운송']},
+      {termEn:'DIMENSION',abbr:'DIM',termKo:'개별 화물 포장 사이즈',category:'물류/운송',desc:'가로x세로x높이(cm). 컨테이너 적재 계산, 항공운임 산출에 필수.',example:'DIMENSION: 120 x 100 x 150 cm/pallet',imageUrl:'',tags:['견적','운송','필수']},
+      {termEn:'PACKING TYPE',abbr:'',termKo:'화물 포장 형태',category:'물류/운송',desc:'포장 방식. Pallet, Drum, Carton Box, IBC Tank 등.',example:'PACKING TYPE: Plastic Bucket on Pallet (Shrink Wrapped)',imageUrl:'',tags:['견적','운송']},
+      {termEn:'MODE',abbr:'',termKo:'운송 방식',category:'물류/운송',desc:'항공(Air) 또는 해상(Ocean). 해상=저렴/30~45일, 항공=5~7일/비용 5~10배.',example:'MODE: Ocean (FCL 20ft container)',imageUrl:'',tags:['견적','운송','필수']},
+      {termEn:'CARGO READY DATE',abbr:'CRD',termKo:'화물 준비일',category:'물류/운송',desc:'화물이 출고 가능한 날짜. 이 날짜 기준으로 선박/항공 부킹.',example:'CARGO READY DATE: 2026-05-15',imageUrl:'',tags:['견적','스케줄']},
+      {termEn:'PICK UP ADDRESS',abbr:'',termKo:'화물 출고처 주소',category:'물류/운송',desc:'화물 픽업 장소(공장/물류창고). 국내 운송비 산출에 필요.',example:'PICK UP ADD: 경기도 화성시 OO공장',imageUrl:'',tags:['견적','국내운송']},
+      {termEn:'DELIVERY ADDRESS',abbr:'',termKo:'도착지 입고처 주소',category:'물류/운송',desc:'최종 도착 장소. CIF/DDP 조건에서는 바이어 창고 주소까지 기재.',example:'DELIVERY ADD: Dubai, Al Quoz Industrial Area 3',imageUrl:'',tags:['견적','배송']},
+      {termEn:'INCOTERMS',abbr:'',termKo:'인코텀즈 (국제무역조건)',category:'무역조건',desc:'매도인/매수인의 비용·위험 분담 기준.\n\n- FOB: 선적항까지 셀러 부담\n- CIF: 도착항까지 운송비+보험 셀러 부담\n- DDP: 바이어 문 앞까지 전부 셀러 부담\n- EXW: 공장 출고가, 모든 운송 바이어 부담',example:'FOB Busan / CIF Dubai / DDP Ho Chi Minh',imageUrl:'',tags:['무역조건','견적','필수','핵심']},
+      {termEn:'FCL (Full Container Load)',abbr:'FCL',termKo:'전체 컨테이너 운송',category:'물류/운송',desc:'컨테이너 1개 통째 사용. 20ft(28CBM/22톤), 40ft(58CBM/26톤).',example:'Ocean FCL 20ft (20,000kg)',imageUrl:'',tags:['운송','컨테이너']},
+      {termEn:'LCL (Less than Container Load)',abbr:'LCL',termKo:'소량 혼적 운송',category:'물류/운송',desc:'다른 화주와 컨테이너 공유. CBM 단위 운임. 소량 주문 시 사용.',example:'Ocean LCL (5 CBM)',imageUrl:'',tags:['운송','소량']},
+      {termEn:'B/L (Bill of Lading)',abbr:'B/L',termKo:'선하증권',category:'서류/인증',desc:'선박회사 발행 화물 수령증. 화물 소유권 증명 핵심 서류. B/L 없이 화물 인수 불가.',example:'B/L No: KMTC-BSN-2026-04-12345',imageUrl:'',tags:['서류','해상','필수','핵심']},
+      {termEn:'T/T (Telegraphic Transfer)',abbr:'T/T',termKo:'전신환 송금',category:'결제/정산',desc:'은행 국제 송금. B2B 가장 많이 사용. 보통 30% 선금 + 70% 잔금.',example:'T/T 30% deposit, 70% before shipment',imageUrl:'',tags:['결제','송금','핵심']},
+      {termEn:'L/C (Letter of Credit)',abbr:'L/C',termKo:'신용장',category:'결제/정산',desc:'바이어 은행이 대금 지급 보증하는 서류. 큰 금액 거래 안전장치.',example:'Irrevocable L/C at sight',imageUrl:'',tags:['결제','은행','대규모']},
+      {termEn:'Trade Assurance',abbr:'TA',termKo:'알리바바 거래 보증',category:'알리바바',desc:'알리바바 결제 보호 시스템. TA 적용 시 검색 노출 우대.',example:'Trade Assurance Order: $12,500',imageUrl:'',tags:['알리바바','결제','핵심']},
+      {termEn:'RFQ (Request for Quotation)',abbr:'RFQ',termKo:'견적 요청',category:'알리바바',desc:'바이어가 견적을 요청하는 것. RFQ 마켓에서 셀러가 응답.',example:'RFQ: "Need waterproof coating, 1000kg, FOB to Dubai"',imageUrl:'',tags:['알리바바','견적','핵심']},
+      {termEn:'RTS (Ready to Ship)',abbr:'RTS',termKo:'즉시 배송 가능 상품',category:'알리바바',desc:'재고 보유, 바로 배송 가능. RTS 태그 시 검색 노출 우대 + 바이어 신뢰도 상승.',example:'RTS 상품 30개 등록 목표',imageUrl:'',tags:['알리바바','리스팅']},
+      {termEn:'MOQ (Minimum Order Quantity)',abbr:'MOQ',termKo:'최소 주문 수량',category:'무역조건',desc:'주문 가능 최소 수량. POUR 제품 보통 400kg~1톤. 바이어 규모에 따라 유연 조정.',example:'MOQ: 500kg (20kg x 25ea)',imageUrl:'',tags:['무역조건','견적','핵심']},
+      {termEn:'MSDS',abbr:'MSDS',termKo:'물질안전보건자료',category:'서류/인증',desc:'화학물질 유해성/취급방법/응급조치 서류. 화학제품 수출 시 필수.',example:'MSDS for POUR Coat Material I (Non-hazardous)',imageUrl:'',tags:['서류','안전','필수','핵심']},
+      {termEn:'TDS (Technical Data Sheet)',abbr:'TDS',termKo:'기술자료서',category:'서류/인증',desc:'제품 물성/시공방법/건조시간/커버리지 기술 정보. 바이어가 가장 먼저 요청하는 서류.',example:'TDS: Drying 2hrs, Coverage 5m2/kg',imageUrl:'',tags:['서류','기술','필수']},
+      {termEn:'COA (Certificate of Analysis)',abbr:'COA',termKo:'성적분석서',category:'서류/인증',desc:'배치별 품질 검사 결과서. 성분 함량, 점도, 비중 등 측정값 기재.',example:'COA: Batch 2026-03-001, Viscosity: 12,000 cps',imageUrl:'',tags:['서류','품질']},
+      {termEn:'DG Cargo (Dangerous Goods)',abbr:'DG',termKo:'위험물 화물',category:'물류/운송',desc:'인화성 물질 포함 화물. 별도 운임/특수 컨테이너/추가 서류 필요. POUR 수성=Non-DG, 유성=DG Class 3.',example:'POUR 에폭시(유성)→DG | POUR 코트재(수성)→Non-DG',imageUrl:'',tags:['운송','위험물','주의']},
+      {termEn:'CBM (Cubic Meter)',abbr:'CBM',termKo:'입방미터 (부피)',category:'물류/운송',desc:'화물 부피 단위. 가로(m)x세로(m)x높이(m). LCL 운임/컨테이너 적재량 계산에 사용.',example:'1 pallet(1.2x1.0x1.5m)=1.8CBM → 10pallets=18CBM',imageUrl:'',tags:['운송','계산']}
+    ];
+
+    function initGlossary() {
+      const saved = localStorage.getItem('trade_terms');
+      glossaryTerms = saved ? JSON.parse(saved) : [...GLOSSARY_DEFAULT];
+      renderGlossary();
+    }
+    function saveGlossaryData() { localStorage.setItem('trade_terms', JSON.stringify(glossaryTerms)); }
+
+    function filterGlossary(cat, btn) {
+      glossaryCat = cat;
+      document.querySelectorAll('.gl-cat-btn').forEach(b => { b.className = 'gl-cat-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium'; });
+      btn.className = 'gl-cat-btn text-xs px-3 py-1.5 rounded-full border border-navy-500 bg-navy-500 text-white font-medium';
+      renderGlossary();
+    }
+
+    function renderGlossary() {
+      const search = (document.getElementById('glossarySearch')?.value || '').toLowerCase();
+      let data = glossaryTerms;
+      if (glossaryCat !== 'all') data = data.filter(t => t.category === glossaryCat);
+      if (search) data = data.filter(t => t.termEn.toLowerCase().includes(search) || t.termKo.includes(search) || (t.abbr||'').toLowerCase().includes(search) || (t.desc||'').includes(search));
+
+      document.getElementById('glossaryCount').textContent = data.length + '개 용어';
+      const el = document.getElementById('glossaryList');
+      if (!el) return;
+      if (data.length === 0) { el.innerHTML = '<div class="text-center py-12 text-slate-400 text-sm">검색 결과 없음</div>'; return; }
+
+      const catColors = {'물류/운송':'#3182f6','무역조건':'#0ca678','결제/정산':'#f59e0b','서류/인증':'#8b5cf6','제품/기술':'#ef4444','알리바바':'#ec4899'};
+      el.innerHTML = data.map(t => {
+        const idx = glossaryTerms.indexOf(t);
+        const c = catColors[t.category]||'#64748b';
+        const descHtml = (t.desc||'').replace(/\n/g,'<br>');
+        const tagsHtml = (t.tags||[]).map(tag => '<span style="font-size:11px;padding:2px 8px;background:#eff6ff;color:#3182f6;border-radius:6px;font-weight:500;">#'+tag+'</span>').join(' ');
+        return '<div class="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow">' +
+          '<div class="flex items-center gap-2 mb-2 flex-wrap">' +
+            '<span class="text-base font-bold text-navy-500">' + t.termEn + '</span>' +
+            (t.abbr ? '<span class="text-xs font-bold text-white bg-blue-500 px-2 py-0.5 rounded">' + t.abbr + '</span>' : '') +
+            '<span style="font-size:11px;color:'+c+';background:'+c+'15;padding:2px 8px;border-radius:6px;font-weight:600;margin-left:auto;">' + t.category + '</span>' +
+            '<button onclick="openGlossaryModal('+idx+')" class="text-xs text-blue-500 hover:text-blue-700">수정</button>' +
+            '<button onclick="deleteGlossaryTerm('+idx+')" class="text-xs text-red-500 hover:text-red-700">삭제</button>' +
+          '</div>' +
+          '<div class="text-sm font-semibold text-slate-700 mb-1">' + t.termKo + '</div>' +
+          '<div class="text-sm text-slate-500 leading-relaxed">' + descHtml + '</div>' +
+          (t.example ? '<div class="mt-2 p-3 bg-slate-50 rounded-lg text-xs text-slate-600 border-l-3 border-navy-500" style="border-left:3px solid #202454;"><strong class="text-navy-500">예시:</strong> ' + t.example.replace(/\n/g,'<br>') + '</div>' : '') +
+          (t.imageUrl ? '<div class="mt-2 rounded-lg overflow-hidden border border-slate-200"><img src="'+t.imageUrl+'" style="width:100%;display:block;max-height:200px;object-fit:cover;"></div>' : '') +
+          (tagsHtml ? '<div class="flex gap-1 mt-2 flex-wrap">' + tagsHtml + '</div>' : '') +
+        '</div>';
+      }).join('');
+    }
+
+    function openGlossaryModal(idx = -1) {
+      glossaryEditIdx = idx;
+      if (idx >= 0) {
+        const t = glossaryTerms[idx];
+        document.getElementById('glossaryModalTitle').textContent = '용어 수정';
+        document.getElementById('gl-termEn').value = t.termEn||'';
+        document.getElementById('gl-abbr').value = t.abbr||'';
+        document.getElementById('gl-termKo').value = t.termKo||'';
+        document.getElementById('gl-category').value = t.category||'물류/운송';
+        document.getElementById('gl-desc').value = t.desc||'';
+        document.getElementById('gl-example').value = t.example||'';
+        document.getElementById('gl-imageUrl').value = t.imageUrl||'';
+        document.getElementById('gl-tags').value = (t.tags||[]).join(', ');
+      } else {
+        document.getElementById('glossaryModalTitle').textContent = '용어 추가';
+        ['gl-termEn','gl-abbr','gl-termKo','gl-desc','gl-example','gl-imageUrl','gl-tags'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('gl-category').value = '물류/운송';
+      }
+      document.getElementById('gl-imagePreview').innerHTML = '';
+      document.getElementById('gl-imageFile').value = '';
+      document.getElementById('glossaryModal').style.display = 'flex';
+    }
+    function closeGlossaryModal() { document.getElementById('glossaryModal').style.display = 'none'; }
+
+    function glPreviewImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('gl-imagePreview').innerHTML = '<img src="'+e.target.result+'" style="max-height:100px;border-radius:8px;">';
+          document.getElementById('gl-imageUrl').value = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function saveGlossaryTerm() {
+      const termEn = document.getElementById('gl-termEn').value.trim();
+      const termKo = document.getElementById('gl-termKo').value.trim();
+      if (!termEn || !termKo) { alert('영문 용어와 한글 뜻은 필수입니다.'); return; }
+      const data = {
+        termEn, abbr: document.getElementById('gl-abbr').value.trim(), termKo,
+        category: document.getElementById('gl-category').value,
+        desc: document.getElementById('gl-desc').value.trim(),
+        example: document.getElementById('gl-example').value.trim(),
+        imageUrl: document.getElementById('gl-imageUrl').value.trim(),
+        tags: document.getElementById('gl-tags').value.split(',').map(s=>s.trim()).filter(Boolean)
+      };
+      if (glossaryEditIdx >= 0) { glossaryTerms[glossaryEditIdx] = data; } else { glossaryTerms.unshift(data); }
+      saveGlossaryData(); renderGlossary(); closeGlossaryModal();
+      if (typeof showToast === 'function') showToast(glossaryEditIdx >= 0 ? '✅ 용어가 수정되었습니다' : '✅ 용어가 추가되었습니다');
+    }
+
+    function deleteGlossaryTerm(idx) {
+      if (!confirm('"' + glossaryTerms[idx].termEn + '" 용어를 삭제하시겠습니까?')) return;
+      glossaryTerms.splice(idx, 1);
+      saveGlossaryData(); renderGlossary();
+      if (typeof showToast === 'function') showToast('🗑️ 용어가 삭제되었습니다');
+    }
+
+    // 교육자료 탭 전환 시 실무용어 초기화
+    const _origSwitchEduTab = switchEducationTab;
+    switchEducationTab = function(tabName) {
+      _origSwitchEduTab(tabName);
+      if (tabName === 'glossary') initGlossary();
+    };
 
     function openPanel(taskId) {
       const task = findTaskById(taskId);
