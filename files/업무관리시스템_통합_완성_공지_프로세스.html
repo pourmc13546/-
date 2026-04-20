@@ -14172,32 +14172,28 @@ Option C: [제품C] - $[가격]
     })();
 
     // 샘플 데이터
-    const finDefaultRevenue = [
-      { date:'2026-03-05', company:'ABC Trading', product:'코트재 I 20kg', quantity:50, unitPrice:45000, amount:2250000, paymentStatus:'완료', memo:'첫 선적분', createdBy:'김채원', createdAt:'2026-03-05' },
-      { date:'2026-03-10', company:'Dubai Imports LLC', product:'발수코팅제 10L', quantity:100, unitPrice:32000, amount:3200000, paymentStatus:'처리중', memo:'두바이 2차', createdBy:'김채원', createdAt:'2026-03-10' },
-      { date:'2026-03-15', company:'Vietnam Partner Co.', product:'프라이머 5L', quantity:200, unitPrice:18000, amount:3600000, paymentStatus:'대기', memo:'', createdBy:'허지은', createdAt:'2026-03-15' },
-      { date:'2026-03-20', company:'India Steel Corp', product:'방청코팅 20kg', quantity:30, unitPrice:55000, amount:1650000, paymentStatus:'완료', memo:'인도 첫 거래', createdBy:'김채원', createdAt:'2026-03-20' },
-      { date:'2026-02-12', company:'ABC Trading', product:'코트재 I 20kg', quantity:40, unitPrice:45000, amount:1800000, paymentStatus:'완료', memo:'2월분', createdBy:'김채원', createdAt:'2026-02-12' },
-      { date:'2026-02-20', company:'Dubai Imports LLC', product:'발수코팅제 10L', quantity:80, unitPrice:32000, amount:2560000, paymentStatus:'완료', memo:'', createdBy:'허지은', createdAt:'2026-02-20' }
-    ];
-    const finDefaultPurchase = [
-      { date:'2026-03-03', company:'Extrans 물류', category:'물류비', amount:850000, memo:'3월 해상운송비', createdBy:'김채원', createdAt:'2026-03-03' },
-      { date:'2026-03-08', company:'관세법인 A', category:'통관비', amount:320000, memo:'두바이 통관 대행', createdBy:'허지은', createdAt:'2026-03-08' },
-      { date:'2026-03-12', company:'KP화학', category:'제품매입', amount:2100000, memo:'코트재 원재료', createdBy:'김채원', createdAt:'2026-03-12' },
-      { date:'2026-03-18', company:'검역원', category:'수수료', amount:150000, memo:'검역 수수료', createdBy:'허지은', createdAt:'2026-03-18' },
-      { date:'2026-02-05', company:'Extrans 물류', category:'물류비', amount:720000, memo:'2월 해상운송', createdBy:'김채원', createdAt:'2026-02-05' },
-      { date:'2026-02-15', company:'KP화학', category:'제품매입', amount:1800000, memo:'2월 원재료', createdBy:'김채원', createdAt:'2026-02-15' }
-    ];
+    const finDefaultRevenue = [];
+    const finDefaultPurchase = [];
+
+    // 기존 샘플 데이터 1회 자동 초기화 (v2 플래그)
+    (function clearOldSampleData() {
+      if (!localStorage.getItem('finance_reset_v2')) {
+        localStorage.removeItem('financeRevenueData');
+        localStorage.removeItem('financePurchaseData');
+        localStorage.setItem('finance_reset_v2', 'done');
+        console.log('✅ 기존 샘플 매출/매입 데이터 초기화 완료');
+      }
+    })();
 
     function loadFinanceData() {
       try {
         const r = localStorage.getItem('financeRevenueData');
         const p = localStorage.getItem('financePurchaseData');
-        finRevenueData = r ? JSON.parse(r) : JSON.parse(JSON.stringify(finDefaultRevenue));
-        finPurchaseData = p ? JSON.parse(p) : JSON.parse(JSON.stringify(finDefaultPurchase));
+        finRevenueData = r ? JSON.parse(r) : [];
+        finPurchaseData = p ? JSON.parse(p) : [];
       } catch(e) {
-        finRevenueData = JSON.parse(JSON.stringify(finDefaultRevenue));
-        finPurchaseData = JSON.parse(JSON.stringify(finDefaultPurchase));
+        finRevenueData = [];
+        finPurchaseData = [];
       }
     }
 
