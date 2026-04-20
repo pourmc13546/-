@@ -14596,6 +14596,7 @@ Option C: [제품C] - $[가격]
       if (typeof showToast === 'function') showToast('🗑️ 매출이 삭제되었습니다');
     }
 
+
     // ── 매입 모달 ──
     function openPurchaseModal(idx) {
       finPurEditIdx = idx;
@@ -17189,34 +17190,10 @@ Option C: [제품C] - $[가격]
         console.log('✅ 이슈 데이터 로드:', issueData.length, '건');
       }
 
-      // 정산 데이터 복원
+      // 정산 데이터 복원 (샘플 자동 시딩 제거됨 - 실제 입력만 Firebase로 반영)
       if (savedSettlements && savedSettlements.length > 0) {
         settlementData = savedSettlements;
         console.log('✅ 정산 데이터 로드:', settlementData.length, '건');
-      } else {
-        // Supabase에 정산 데이터가 없으면 기존 하드코딩 데이터를 자동 시딩
-        console.log('🔄 정산 데이터 없음 → Supabase 자동 시딩 시작...');
-        const seedData = [
-          { settlement_id: 'STL-2025-007', order_id: 'ORD-2025-041', buyer: 'GlobalTech Inc.', order_amount: '$7,500', fee: '-$375', settlement_amount: '$7,125', status: '완료', due_date: '2025.03.28', complete_date: '2025.03.27', method: 'T/T 송금', bank: 'KB국민은행', account: '123-456-789012' },
-          { settlement_id: 'STL-2025-006', order_id: 'ORD-2025-038', buyer: 'EuroTrade GmbH', order_amount: '$15,200', fee: '-$760', settlement_amount: '$14,440', status: '처리중', due_date: '2025.03.30', complete_date: '-', method: 'L/C', bank: '신한은행', account: '987-654-321098' },
-          { settlement_id: 'STL-2025-005', order_id: 'ORD-2025-035', buyer: 'AsiaPac Ltd.', order_amount: '$22,000', fee: '-$1,100', settlement_amount: '$20,900', status: '대기', due_date: '2025.04.05', complete_date: '-', method: 'T/T 송금', bank: '하나은행', account: '456-789-012345' },
-        ];
-        for (const item of seedData) {
-          await addSettlement(item);
-        }
-        console.log('✅ 정산 데이터 Supabase 시딩 완료:', seedData.length, '건');
-      }
-
-      // Firebase 일괄 동기화 (매 로드 시)
-      if (window._firebaseSaveSettlement) {
-        const firebaseData = await fetchSettlements();
-        if (firebaseData && firebaseData.length > 0) {
-          console.log('🔄 정산 데이터 Firebase 동기화 시작...');
-          for (const s of firebaseData) {
-            await window._firebaseSaveSettlement(s.id, s);
-          }
-          console.log('✅ 정산 데이터 Firebase 동기화 완료:', firebaseData.length, '건');
-        }
       }
 
       // 제품 데이터 복원
