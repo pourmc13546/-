@@ -11027,131 +11027,12 @@ Option C: [제품C] - $[가격]
     }
 
     // ==================== 샘플 데이터 ====================
-    let orderData = [
-      { id: 'ORD-2025-048', buyer: 'GlobalTech Inc.', country: '🇺🇸', orderDate: '2025.03.25', dueDate: '2025.04.10', product: '워터실드 프리미엄', qty: 500, amount: '$12,500', assignee: '허지은', status: '신규', note: '긴급 주문 요청' },
-      { id: 'ORD-2025-047', buyer: 'EuroTrade GmbH', country: '🇩🇪', orderDate: '2025.03.24', dueDate: '2025.04.15', product: '하이템프 코팅', qty: 300, amount: '$8,400', assignee: '김채원', status: '신규', note: '' },
-      { id: 'ORD-2025-046', buyer: 'AsiaPac Ltd.', country: '🇸🇬', orderDate: '2025.03.23', dueDate: '2025.04.08', product: '워터실드 스탠다드', qty: 1000, amount: '$22,000', assignee: '허지은', status: '진행중', note: '샘플 요청' },
-      { id: 'ORD-2025-045', buyer: 'CanadaCorp', country: '🇨🇦', orderDate: '2025.03.22', dueDate: '2025.04.05', product: '특수 시트 A형', qty: 200, amount: '$6,000', assignee: '허지은', status: '진행중', note: '' },
-      { id: 'ORD-2025-044', buyer: 'AussieTrade', country: '🇦🇺', orderDate: '2025.03.20', dueDate: '2025.04.02', product: '워터실드 프리미엄', qty: 800, amount: '$20,000', assignee: '김채원', status: '진행중', note: '분할 배송 요청' },
-      { id: 'ORD-2025-043', buyer: 'UK Imports', country: '🇬🇧', orderDate: '2025.03.18', dueDate: '2025.03.30', product: '파우더 코팅제', qty: 400, amount: '$9,600', assignee: '허지은', status: '완료', note: '' },
-      { id: 'ORD-2025-042', buyer: 'FranceBuild', country: '🇫🇷', orderDate: '2025.03.15', dueDate: '2025.03.28', product: '보수용 퍼티', qty: 600, amount: '$7,200', assignee: '허지은', status: '이슈', note: '색상 불일치 클레임' },
-      { id: 'ORD-2025-041', buyer: 'GlobalTech Inc.', country: '🇺🇸', orderDate: '2025.03.10', dueDate: '2025.03.25', product: '워터실드 프리미엄', qty: 300, amount: '$7,500', assignee: '김채원', status: '완료', note: '' },
-    ];
+    let orderData = [];
 
     // 배송/물류관리 데이터 - 5단계 프로세스 (통관+물류 통합)
-    let shippingData = [
-      { 
-        orderId: 'ORD-2025-048', buyer: 'GlobalTech Inc.', blNo: 'BL-2025-008', 
-        country: '🇺🇸', countryName: '미국', status: '국내운송',
-        departure: '2025.03.26', eta: '2025.04.10', carrier: 'CJ대한통운', assignee: '허지은',
-        steps: [1, 0, 0, 0, 0],
-        vessel: '-', route: '인천 → LA',
-        history: [
-          { step: '주문 접수', date: '2025.03.25', status: 'completed' },
-          { step: '국내운송 시작', date: '2025.03.26', status: 'active' },
-          { step: '수출통관', date: '-', status: 'pending' },
-          { step: '선적', date: '-', status: 'pending' },
-          { step: '해외운송', date: '-', status: 'pending' },
-          { step: '배송완료', date: '-', status: 'pending' }
-        ]
-      },
-      { 
-        orderId: 'ORD-2025-047', buyer: 'EuroTrade GmbH', blNo: 'BL-2025-007', 
-        country: '🇩🇪', countryName: '독일', status: '수출통관',
-        departure: '2025.03.25', eta: '2025.04.15', carrier: 'MSC', assignee: '김채원',
-        steps: [2, 1, 0, 0, 0],
-        vessel: 'MSC ISABELLA', route: '부산 → 함부르크',
-        history: [
-          { step: '주문 접수', date: '2025.03.24', status: 'completed' },
-          { step: '국내운송 완료', date: '2025.03.25', status: 'completed' },
-          { step: '수출통관 진행중', date: '2025.03.26', status: 'active' },
-          { step: '선적', date: '-', status: 'pending' },
-          { step: '해외운송', date: '-', status: 'pending' },
-          { step: '배송완료', date: '-', status: 'pending' }
-        ]
-      },
-      { 
-        orderId: 'ORD-2025-046', buyer: 'AsiaPac Ltd.', blNo: 'BL-2025-006', 
-        country: '🇸🇬', countryName: '싱가포르', status: '선적',
-        departure: '2025.03.24', eta: '2025.04.08', carrier: 'Evergreen', assignee: '허지은',
-        steps: [2, 2, 1, 0, 0],
-        vessel: 'EVER GOLDEN', route: '부산 → 싱가포르',
-        history: [
-          { step: '주문 접수', date: '2025.03.23', status: 'completed' },
-          { step: '국내운송 완료', date: '2025.03.24', status: 'completed' },
-          { step: '수출통관 완료', date: '2025.03.25', status: 'completed' },
-          { step: '선적 진행중', date: '2025.03.26', status: 'active' },
-          { step: '해외운송', date: '-', status: 'pending' },
-          { step: '배송완료', date: '-', status: 'pending' }
-        ]
-      },
-      { 
-        orderId: 'ORD-2025-045', buyer: 'CanadaCorp', blNo: 'BL-2025-005', 
-        country: '🇨🇦', countryName: '캐나다', status: '해외운송',
-        departure: '2025.03.22', eta: '2025.04.05', carrier: 'FedEx', assignee: '허지은',
-        steps: [2, 2, 2, 1, 0],
-        vessel: 'FedEx Express', route: '인천 → 밴쿠버',
-        history: [
-          { step: '주문 접수', date: '2025.03.22', status: 'completed' },
-          { step: '국내운송 완료', date: '2025.03.23', status: 'completed' },
-          { step: '수출���관 완료', date: '2025.03.24', status: 'completed' },
-          { step: '선적 완료', date: '2025.03.25', status: 'completed' },
-          { step: '해외운송 중', date: '2025.03.26', status: 'active' },
-          { step: '배송완료', date: '-', status: 'pending' }
-        ]
-      },
-      { 
-        orderId: 'ORD-2025-044', buyer: 'AussieTrade', blNo: 'BL-2025-004', 
-        country: '🇦🇺', countryName: '호주', status: '해외운송',
-        departure: '2025.03.20', eta: '2025.04.02', carrier: 'Maersk', assignee: '김채원',
-        steps: [2, 2, 2, 1, 0],
-        vessel: 'MAERSK SELETAR', route: '부산 → 시드니',
-        history: [
-          { step: '주문 접수', date: '2025.03.20', status: 'completed' },
-          { step: '국내운송 완료', date: '2025.03.21', status: 'completed' },
-          { step: '수출통관 완료', date: '2025.03.22', status: 'completed' },
-          { step: '선적 완료', date: '2025.03.23', status: 'completed' },
-          { step: '해외운송 중', date: '2025.03.24', status: 'active' },
-          { step: '배송완료', date: '-', status: 'pending' }
-        ]
-      },
-      { 
-        orderId: 'ORD-2025-043', buyer: 'UK Imports', blNo: 'BL-2025-003', 
-        country: '🇬🇧', countryName: '영국', status: '배송완료',
-        departure: '2025.03.18', eta: '2025.03.30', carrier: 'MSC', assignee: '허지은',
-        steps: [2, 2, 2, 2, 2],
-        vessel: 'MSC LONDON', route: '부산 → 펠릭스토',
-        history: [
-          { step: '주문 접수', date: '2025.03.18', status: 'completed' },
-          { step: '국내운송 완료', date: '2025.03.19', status: 'completed' },
-          { step: '수출통관 완료', date: '2025.03.20', status: 'completed' },
-          { step: '선적 완료', date: '2025.03.21', status: 'completed' },
-          { step: '해외운송 완료', date: '2025.03.28', status: 'completed' },
-          { step: '배송완료', date: '2025.03.30', status: 'completed' }
-        ]
-      },
-      { 
-        orderId: 'ORD-2025-041', buyer: 'GlobalTech Inc.', blNo: 'BL-2025-001', 
-        country: '🇺🇸', countryName: '미국', status: '배송완료',
-        departure: '2025.03.10', eta: '2025.03.25', carrier: 'FedEx', assignee: '허지은',
-        steps: [2, 2, 2, 2, 2],
-        vessel: 'FedEx Express', route: '인천 → LA',
-        history: [
-          { step: '주문 접수', date: '2025.03.10', status: 'completed' },
-          { step: '국내운송 완료', date: '2025.03.11', status: 'completed' },
-          { step: '수출통관 완료', date: '2025.03.12', status: 'completed' },
-          { step: '선적 완료', date: '2025.03.13', status: 'completed' },
-          { step: '해외운송 완료', date: '2025.03.23', status: 'completed' },
-          { step: '배송완료', date: '2025.03.25', status: 'completed' }
-        ]
-      },
-    ];
+    let shippingData = [];
 
-    let issueData = [
-      { id: 'ISS-2025-003', priority: '긴급', status: '미처리', type: '품질', title: '도료 색상 불일치', orderId: 'ORD-2025-042', buyer: 'FranceBuild', assignee: '허지은', date: '2025.03.24', days: 'D+1', description: '납품된 도료의 색상이 샘플과 다릅니다. 고객사에서 전량 반품을 요청하고 있습니다.', actions: ['고객사 담당자 연락 완료', '품질팀 검토 진행중'] },
-      { id: 'ISS-2025-002', priority: '높음', status: '처리중', type: '배송', title: '배송 지연', orderId: 'ORD-2025-043', buyer: 'UK Imports', assignee: '김채원', date: '2025.03.22', days: 'D+3', description: '예정일보다 3일 지연되어 고객사에서 불만을 표시하고 있습니다.', actions: ['운송사 긴급 연락', '고객사 사과 메일 발송'] },
-      { id: 'ISS-2025-001', priority: '보통', status: '협의중', type: '가격', title: '추가 할인 요청', orderId: 'ORD-2025-046', buyer: 'AsiaPac Ltd.', assignee: '허지은', date: '2025.03.20', days: 'D+5', description: '대량 구매에 따른 추가 할인을 요청하고 있습니다. 현재 5% 추가 할인 제안 검토 중입니다.', actions: ['영업팀 내부 협의', '가격 재산정 검토'] },
-    ];
+    let issueData = [];
 
     let settlementData = [
       { id: 'STL-2025-007', orderId: 'ORD-2025-041', buyer: 'GlobalTech Inc.', orderAmount: '$7,500', fee: '-$375', settlement: '$7,125', status: '완료', dueDate: '2025.03.28', completeDate: '2025.03.27', method: 'T/T 송금', bank: 'KB국민은행', account: '123-456-789012' },
@@ -14175,13 +14056,16 @@ Option C: [제품C] - $[가격]
     const finDefaultRevenue = [];
     const finDefaultPurchase = [];
 
-    // 기존 샘플 데이터 1회 자동 초기화 (v2 플래그)
+    // 기존 샘플 데이터 1회 자동 초기화 (v3 플래그: 매출/매입/주문/배송/이슈)
     (function clearOldSampleData() {
-      if (!localStorage.getItem('finance_reset_v2')) {
+      if (!localStorage.getItem('finance_reset_v3')) {
         localStorage.removeItem('financeRevenueData');
         localStorage.removeItem('financePurchaseData');
-        localStorage.setItem('finance_reset_v2', 'done');
-        console.log('✅ 기존 샘플 매출/매입 데이터 초기화 완료');
+        localStorage.removeItem('orderData');
+        localStorage.removeItem('shippingData');
+        localStorage.removeItem('issueData');
+        localStorage.setItem('finance_reset_v3', 'done');
+        console.log('✅ 기존 샘플 데이터 초기화 완료 (매출/매입/주문/배송/이슈)');
       }
     })();
 
