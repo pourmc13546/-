@@ -4928,6 +4928,7 @@ Best regards,
                 <button onclick="openRevenueModal(-1)" style="padding:7px 16px; background:#202454; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">+ 매출 등록</button>
                 <button onclick="document.getElementById('alibabaImportFile').click()" style="padding:7px 16px; background:#ff6a00; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;" title="알리바바 주문관리에서 내보낸 엑셀/CSV 파일 업로드">📤 알리바바 주문 가져오기</button>
                 <input type="file" id="alibabaImportFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importAlibabaOrders(this.files[0])">
+                <button onclick="recalcExchangeRates()" style="padding:7px 12px; background:#fff; color:#3182f6; border:1px solid #3182f6; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;" title="모든 매출의 KRW 금액을 각 거래일자의 실제 환율로 재계산">💱 환율 재계산</button>
                 <button onclick="exportFinanceCsv('revenue')" style="padding:7px 16px; background:#fff; color:#333d4b; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; cursor:pointer;">📥 엑셀 다운로드</button>
               </div>
             </div>
@@ -14601,6 +14602,57 @@ Option C: [제품C] - $[가격]
       }
       _rateCache[d] = FIN_USD_KRW;
       return FIN_USD_KRW;
+    }
+
+    // ──────────────────────────────────────────
+    // 매출 KRW 금액을 거래일자별 환율로 재계산
+    // ──────────────────────────────────────────
+    async function recalcExchangeRates() {
+      if (!finRevenueData.length) { alert('재계산할 매출 데이터가 없습니다.'); return; }
+      if (!confirm(finRevenueData.length + '건의 매출 KRW 금액을 각 거래일자의 환율로 재계산합니다. 진행할까요?')) return;
+
+      let updated = 0, failed = 0;
+      const changes = [];
+      for (const r of finRevenueData) {
+        const oldRate = r.usdKrwRate || FIN_USD_KRW;
+        const oldKrw = r.amount || 0;
+        try {
+          const newRate = await getUsdKrwRateForDate(r.date);
+          const totalUsd = r.totalUsd != null ? r.totalUsd
+            : ((r.productUsd != null ? r.productUsd : (r.quantity||0)*(r.unitPrice||0)) + (r.shippingUsd||0));
+          const newKrw = Math.round(totalUsd * newRate);
+          if (Math.abs(newRate - oldRate) > 0.01 || newKrw !== oldKrw) {
+            r.usdKrwRate = newRate;
+            r.amount = newKrw;
+            // 메모의 환율 표기도 갱신 (있으면)
+            if (r.memo && /환율 ₩[\d,]+/.test(r.memo)) {
+              r.memo = r.memo.replace(/환율 ₩[\d,]+/, '환율 ₩' + Math.round(newRate).toLocaleString());
+            }
+            // Firebase 동기화
+            if (r._fsId && window._firebaseSaveSettlement) {
+              try {
+                await window._firebaseSaveSettlement(r._fsId, {
+                  buyer: r.company, product: r.product, quantity: r.quantity,
+                  unitPrice: r.unitPrice, amount: r.amount, date: r.date,
+                  status: r.paymentStatus, paymentStatus: r.paymentStatus,
+                  channel: r.channel, orderNo: r.orderNo,
+                  shippingUsd: r.shippingUsd||0, feeUsd: r.feeUsd||0, withholdUsd: r.withholdUsd||0,
+                  totalUsd: r.totalUsd, netUsd: r.netUsd, usdKrwRate: r.usdKrwRate,
+                  memo: r.memo, createdBy: r.createdBy, createdAt: r.createdAt
+                });
+              } catch (e) { console.warn('Firebase 동기화 실패:', e); }
+            }
+            changes.push(`${r.date} · ${r.company}: ₩${Math.round(oldRate).toLocaleString()} → ₩${Math.round(newRate).toLocaleString()}`);
+            updated++;
+          }
+        } catch (e) {
+          console.error('환율 재계산 실패:', r.date, e);
+          failed++;
+        }
+      }
+      saveFinanceData();
+      renderRevenueTable();
+      alert('환율 재계산 완료\n\n변경: ' + updated + '건\n실패: ' + failed + '건\n변경 없음: ' + (finRevenueData.length - updated - failed) + '건' + (changes.length ? '\n\n' + changes.slice(0, 10).join('\n') + (changes.length > 10 ? '\n...외 ' + (changes.length-10) + '건' : '') : ''));
     }
 
     // ──────────────────────────────────────────
