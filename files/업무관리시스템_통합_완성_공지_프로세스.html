@@ -14230,6 +14230,7 @@ Option C: [제품C] - $[가격]
         const colors = {'알리바바':'#ff6a00','직거래':'#3182f6','에이전트':'#7c3aed','기타':'#8b95a1'};
         return '<span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:'+(colors[c]||'#8b95a1')+'22;color:'+(colors[c]||'#8b95a1')+';">'+c+'</span>';
       };
+      const fmtUsd = (v) => v == null ? '-' : '$' + Number(v).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
       tbody.innerHTML = data.length === 0 ? '<tr><td colspan="11" style="text-align:center;padding:30px;color:#c4c9d0;">데이터가 없습니다</td></tr>' :
         data.map(r => {
           const idx = finRevenueData.indexOf(r);
@@ -14238,14 +14239,26 @@ Option C: [제품C] - $[가격]
           const netStr = (typeof r.netUsd === 'number' && r.netUsd > 0)
             ? '$' + r.netUsd.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})
             : '<span style="color:#cbd5e0;">-</span>';
+          // 매출 분류 (제품 / 배송 / 수수료 / 원천세)
+          const prodU = (r.productUsd != null) ? r.productUsd : ((r.quantity||0) * (r.unitPrice||0));
+          const shipU = r.shippingUsd || 0;
+          const feeU  = r.feeUsd || 0;
+          const taxU  = r.withholdUsd || 0;
+          const rate  = r.usdKrwRate || FIN_USD_KRW;
+          const parts = [];
+          if (prodU > 0) parts.push('<span style="color:#0ca678;">제품</span> ' + fmtUsd(prodU));
+          if (shipU > 0) parts.push('<span style="color:#3182f6;">배송</span> ' + fmtUsd(shipU));
+          if (feeU > 0)  parts.push('<span style="color:#f04452;">수수료</span> -' + fmtUsd(feeU));
+          if (taxU > 0)  parts.push('<span style="color:#f04452;">원천세</span> -' + fmtUsd(taxU));
+          const breakdownHtml = parts.length ? '<div style="font-size:10px;color:#8b95a1;margin-top:3px;line-height:1.4;">' + parts.join(' · ') + '</div>' : '';
           return '<tr>' +
             '<td>' + r.date + '</td>' +
             '<td>' + chBadge(r.channel) + '</td>' +
             '<td><div>' + (r.company||'') + '</div>' + (r.orderNo ? '<div style="font-size:11px;color:#8b95a1;">#'+r.orderNo+'</div>' : '') + '</td>' +
             '<td>' + (r.product||'') + '</td>' +
             '<td style="text-align:right;">' + (r.quantity||0).toLocaleString() + '</td>' +
-            '<td style="text-align:right;">' + formatWon(r.unitPrice) + '</td>' +
-            '<td style="text-align:right;font-weight:600;color:#0ca678;">' + formatWon(r.amount) + '</td>' +
+            '<td style="text-align:right;">$' + Number(r.unitPrice||0).toFixed(2) + '</td>' +
+            '<td style="text-align:right;"><div style="font-weight:600;color:#0ca678;">' + formatWon(r.amount) + '</div>' + breakdownHtml + '<div style="font-size:10px;color:#cbd5e0;margin-top:2px;">@₩' + Math.round(rate).toLocaleString() + '</div></td>' +
             '<td style="text-align:right;color:#202454;font-weight:600;">' + netStr + '</td>' +
             '<td><span class="fin-status ' + stCls + '">' + (r.paymentStatus||'대기') + '</span></td>' +
             '<td style="color:#8b95a1;font-size:12px;">' + (r.memo||'') + '</td>' +
