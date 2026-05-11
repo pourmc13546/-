@@ -14568,6 +14568,29 @@ Option C: [제품C] - $[가격]
     }
 
     // ──────────────────────────────────────────
+    // 날짜별 USD→KRW 환율 (Frankfurter API 캐싱)
+    // ──────────────────────────────────────────
+    const _rateCache = {};
+    async function getUsdKrwRateForDate(dateStr) {
+      const d = (dateStr || '').slice(0, 10);
+      if (!d) return FIN_USD_KRW;
+      if (_rateCache[d]) return _rateCache[d];
+      try {
+        const res = await fetch('https://api.frankfurter.dev/v1/' + d + '?from=USD&to=KRW');
+        if (!res.ok) throw new Error('rate api ' + res.status);
+        const data = await res.json();
+        if (data.rates && data.rates.KRW) {
+          _rateCache[d] = data.rates.KRW;
+          return _rateCache[d];
+        }
+      } catch (e) {
+        console.warn('환율 조회 실패 (' + d + '), 현재 환율 사용:', e.message);
+      }
+      _rateCache[d] = FIN_USD_KRW;
+      return FIN_USD_KRW;
+    }
+
+    // ──────────────────────────────────────────
     // 알리바바 주문 일괄 import (XLSX/CSV)
     // ──────────────────────────────────────────
     async function importAlibabaOrders(file) {
@@ -14626,11 +14649,20 @@ Option C: [제품C] - $[가격]
         const orders = Object.values(orderMap);
         if (!orders.length) { alert('주문번호가 있는 행을 찾지 못했습니다.'); return; }
 
-        // 상태 매핑
+        // 매출에 잡으면 안 되는 상태 (취소/마감/거절/환불)
+        const isExcludedStatus = (s) => {
+          if (!s) return false;
+          const t = String(s);
+          return t.includes('마감') || t.includes('취소') || t.includes('환불')
+              || t.includes('거절') || t.includes('Cancel') || t.includes('Close')
+              || t.includes('Refund') || t.includes('Reject');
+        };
+
+        // 매출 등록 가능 상태 → 결제상태 매핑
         const mapStatus = (s) => {
           if (!s) return '대기';
-          if (s.includes('완료') || s.includes('마감')) return '완료';
-          if (s.includes('배송') || s.includes('처리')) return '처리중';
+          if (s.includes('완료')) return '완료';
+          if (s.includes('배송') || s.includes('처리') || s.includes('진행')) return '처리중';
           return '대기';
         };
 
@@ -14645,11 +14677,43 @@ Option C: [제품C] - $[가격]
           });
         };
 
-        let added = 0, skipped = 0;
-        const skippedList = [], addedList = [];
+        let added = 0, skipped = 0, excluded = 0, autoDeleted = 0;
+        const skippedList = [], addedList = [], excludedList = [], autoDeletedList = [];
 
+        // ① 사전 정리: 파일에 마감/취소 상태로 있는 주문이 이미 매출에 등록되어 있으면 자동 삭제
+        for (const ord of orders) {
+          if (!isExcludedStatus(ord.status)) continue;
+          const buyer = ord.buyer || ord.company || '(이름없음)';
+          const d = (ord.date || '').slice(0, 10);
+          const bKey = (buyer || '').toLowerCase().replace(/\s+/g, '');
+          // 매칭 기준: 주문번호 일치 OR (날짜+거래처 일치)
+          for (let i = finRevenueData.length - 1; i >= 0; i--) {
+            const r = finRevenueData[i];
+            const rb = (r.company || '').toLowerCase().replace(/\s+/g, '');
+            const matchByOrder = r.orderNo && r.orderNo === ord.orderNo;
+            const matchByDateBuyer = ((r.date || '').slice(0, 10) === d) && (rb === bKey);
+            if (matchByOrder || matchByDateBuyer) {
+              // Firebase에서도 삭제
+              if (r._fsId && window._firebaseDeleteSettlement) {
+                try { await window._firebaseDeleteSettlement(r._fsId); } catch (e) {}
+              }
+              finRevenueData.splice(i, 1);
+              autoDeleted++;
+              autoDeletedList.push(`#${ord.orderNo} · ${d} · ${buyer} · ${ord.status}`);
+            }
+          }
+        }
+
+        // ② 정상 주문 처리
         for (const ord of orders) {
           const buyer = ord.buyer || ord.company || '(이름없음)';
+          // 1) 취소/마감 상태는 매출 아님 - 완전 제외
+          if (isExcludedStatus(ord.status)) {
+            excluded++;
+            excludedList.push(`#${ord.orderNo} · ${ord.date} · ${buyer} · ${ord.status}`);
+            continue;
+          }
+          // 2) 중복 체크 (날짜 + 바이어)
           if (isDuplicate(ord.date, buyer)) {
             skipped++;
             skippedList.push(`#${ord.orderNo} · ${ord.date} · ${buyer}`);
@@ -14660,6 +14724,9 @@ Option C: [제품C] - $[가격]
           // 통합 단가: 제품가(총가-배송비) / 총수량
           const productUsd = Math.max(0, ord.amount - ord.shipping);
           const unitPrice = ord.totalQty > 0 ? (productUsd / ord.totalQty) : 0;
+
+          // 주문 날짜의 USD→KRW 환율 가져오기
+          const orderRate = await getUsdKrwRateForDate(ord.date);
 
           const rec = {
             _fsId: null,
@@ -14676,9 +14743,10 @@ Option C: [제품C] - $[가격]
             withholdUsd: 0,
             totalUsd: ord.amount,
             netUsd: ord.amount,
-            amount: Math.round(ord.amount * FIN_USD_KRW),
+            usdKrwRate: orderRate,
+            amount: Math.round(ord.amount * orderRate),
             paymentStatus: mapStatus(ord.status),
-            memo: `[알리바바 일괄] ${ord.country || ''}${ord.products.length>1 ? ` · 제품 ${ord.products.length}개` : ''}`.trim(),
+            memo: `[알리바바 일괄] ${ord.country || ''}${ord.products.length>1 ? ` · 제품 ${ord.products.length}개` : ''} · 환율 ₩${Math.round(orderRate).toLocaleString()}`.trim(),
             createdBy: (JSON.parse(localStorage.getItem('loggedInUser')||'{}').name) || '',
             createdAt: new Date().toISOString().slice(0,10)
           };
@@ -14708,8 +14776,13 @@ Option C: [제품C] - $[가격]
         saveFinanceData();
         renderRevenueTable();
 
+        // 등록된 주문이 어느 월에 속하는지 안내용 정보 수집
+        const monthSet = new Set();
+        addedList.forEach(s => { const m = s.match(/(\d{4}-\d{2})-\d{2}/); if (m) monthSet.add(m[1]); });
+        const monthHint = monthSet.size > 0 ? Array.from(monthSet).sort().join(', ') : '';
+
         // 결과 모달 표시
-        showImportResultModal(orders.length, added, skipped, addedList, skippedList);
+        showImportResultModal(orders.length, added, skipped, excluded, autoDeleted, addedList, skippedList, excludedList, autoDeletedList, monthHint);
       } catch (e) {
         console.error(e);
         alert('파일 처리 중 오류:\n' + e.message);
@@ -14718,28 +14791,34 @@ Option C: [제품C] - $[가격]
       }
     }
 
-    function showImportResultModal(total, added, skipped, addedList, skippedList) {
+    function showImportResultModal(total, added, skipped, excluded, autoDeleted, addedList, skippedList, excludedList, autoDeletedList, monthHint) {
       const existing = document.getElementById('aliImportResultModal');
       if (existing) existing.remove();
       const modal = document.createElement('div');
       modal.id = 'aliImportResultModal';
       modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:300;display:flex;align-items:center;justify-content:center;';
-      const addedHtml = addedList.length ? addedList.map(s => '<li style="padding:4px 0;color:#0ca678;">✓ ' + s + '</li>').join('') : '<li style="color:#cbd5e0;">없음</li>';
-      const skippedHtml = skippedList.length ? skippedList.map(s => '<li style="padding:4px 0;color:#f04452;">⊘ ' + s + '</li>').join('') : '<li style="color:#cbd5e0;">없음</li>';
+      const mkList = (arr, color, icon) => arr.length ? arr.map(s => '<li style="padding:3px 0;color:'+color+';">'+icon+' '+s+'</li>').join('') : '<li style="color:#cbd5e0;padding:3px 0;">없음</li>';
+      const hintHtml = monthHint
+        ? '<div style="margin-bottom:16px;padding:10px 14px;background:#fff8e6;border-left:3px solid #ff9500;border-radius:6px;font-size:12px;color:#8a5a00;">💡 등록된 건은 <b>' + monthHint + '</b> 월에 속해있습니다. 상단 월 필터를 해당 월로 변경하면 보입니다.</div>'
+        : '';
       modal.innerHTML =
-        '<div style="background:#fff;border-radius:16px;width:560px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">' +
+        '<div style="background:#fff;border-radius:16px;width:600px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">' +
         '<div style="padding:20px 24px;border-bottom:1px solid #f4f5f7;display:flex;justify-content:space-between;align-items:center;">' +
         '<h3 style="margin:0;font-size:16px;font-weight:800;color:#202454;">📤 알리바바 주문 가져오기 결과</h3>' +
         '<button onclick="document.getElementById(\'aliImportResultModal\').remove()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#8b95a1;">✕</button>' +
         '</div>' +
         '<div style="padding:24px;">' +
-        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">' +
-        '<div style="padding:14px;background:#f8f9fa;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#8b95a1;">총 주문</div><div style="font-size:22px;font-weight:800;color:#202454;margin-top:4px;">' + total + '</div></div>' +
-        '<div style="padding:14px;background:#e6f9ef;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#0ca678;">신규 등록</div><div style="font-size:22px;font-weight:800;color:#0ca678;margin-top:4px;">' + added + '</div></div>' +
-        '<div style="padding:14px;background:#fff0f0;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#f04452;">중복 제외</div><div style="font-size:22px;font-weight:800;color:#f04452;margin-top:4px;">' + skipped + '</div></div>' +
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">' +
+        '<div style="padding:12px 8px;background:#f8f9fa;border-radius:10px;text-align:center;"><div style="font-size:10px;color:#8b95a1;">총 주문</div><div style="font-size:20px;font-weight:800;color:#202454;margin-top:4px;">' + total + '</div></div>' +
+        '<div style="padding:12px 8px;background:#e6f9ef;border-radius:10px;text-align:center;"><div style="font-size:10px;color:#0ca678;">신규 등록</div><div style="font-size:20px;font-weight:800;color:#0ca678;margin-top:4px;">' + added + '</div></div>' +
+        '<div style="padding:12px 8px;background:#fff0f0;border-radius:10px;text-align:center;"><div style="font-size:10px;color:#f04452;">중복 제외</div><div style="font-size:20px;font-weight:800;color:#f04452;margin-top:4px;">' + skipped + '</div></div>' +
+        '<div style="padding:12px 8px;background:#fff8e6;border-radius:10px;text-align:center;"><div style="font-size:10px;color:#b35900;">취소/마감 제외</div><div style="font-size:20px;font-weight:800;color:#b35900;margin-top:4px;">' + excluded + '</div></div>' +
         '</div>' +
-        '<div style="margin-bottom:16px;"><div style="font-size:13px;font-weight:700;color:#0ca678;margin-bottom:6px;">✅ 등록된 매출 (' + added + '건)</div><ul style="margin:0;padding-left:20px;font-size:12px;line-height:1.5;">' + addedHtml + '</ul></div>' +
-        '<div><div style="font-size:13px;font-weight:700;color:#f04452;margin-bottom:6px;">⊘ 중복으로 제외 (' + skipped + '건)</div><ul style="margin:0;padding-left:20px;font-size:12px;line-height:1.5;">' + skippedHtml + '</ul><div style="font-size:11px;color:#8b95a1;margin-top:8px;">* 중복 판정 기준: 날짜 + 거래처(바이어명) 동일</div></div>' +
+        hintHtml +
+        (autoDeleted > 0 ? '<div style="margin-bottom:16px;padding:12px 14px;background:#fff8e6;border:1px solid #ffd591;border-radius:8px;"><div style="font-size:13px;font-weight:700;color:#b35900;margin-bottom:6px;">🧹 자동 삭제됨 (' + autoDeleted + '건) - 이전에 등록되었으나 취소/마감된 주문</div><ul style="margin:0;padding-left:20px;font-size:12px;line-height:1.5;">' + mkList(autoDeletedList, '#b35900', '🗑️') + '</ul></div>' : '') +
+        '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:700;color:#0ca678;margin-bottom:6px;">✅ 등록된 매출 (' + added + '건)</div><ul style="margin:0;padding-left:20px;font-size:12px;line-height:1.5;">' + mkList(addedList, '#0ca678', '✓') + '</ul></div>' +
+        (excluded > 0 ? '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:700;color:#b35900;margin-bottom:6px;">🚫 취소/마감으로 제외 (' + excluded + '건)</div><ul style="margin:0;padding-left:20px;font-size:12px;line-height:1.5;">' + mkList(excludedList, '#b35900', '×') + '</ul></div>' : '') +
+        '<div><div style="font-size:13px;font-weight:700;color:#f04452;margin-bottom:6px;">⊘ 중복으로 제외 (' + skipped + '건)</div><ul style="margin:0;padding-left:20px;font-size:12px;line-height:1.5;">' + mkList(skippedList, '#f04452', '⊘') + '</ul><div style="font-size:11px;color:#8b95a1;margin-top:8px;">* 중복 판정 기준: 날짜 + 거래처(바이어명) 동일</div></div>' +
         '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;"><button onclick="document.getElementById(\'aliImportResultModal\').remove()" style="padding:10px 20px;border:none;border-radius:8px;background:#202454;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">확인</button></div>' +
         '</div></div>';
       document.body.appendChild(modal);
