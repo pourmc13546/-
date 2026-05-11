@@ -4928,7 +4928,7 @@ Best regards,
                 <button onclick="openRevenueModal(-1)" style="padding:7px 16px; background:#202454; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">+ 매출 등록</button>
                 <button onclick="document.getElementById('alibabaImportFile').click()" style="padding:7px 16px; background:#ff6a00; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;" title="알리바바 주문관리에서 내보낸 엑셀/CSV 파일 업로드">📤 알리바바 주문 가져오기</button>
                 <input type="file" id="alibabaImportFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importAlibabaOrders(this.files[0])">
-                <button onclick="recalcExchangeRates()" style="padding:7px 12px; background:#fff; color:#3182f6; border:1px solid #3182f6; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;" title="모든 매출의 KRW 금액을 각 거래일자의 실제 환율로 재계산">💱 환율 재계산</button>
+                <button onclick="syncAllToCommerceDashboard()" style="padding:7px 14px; background:#fff; color:#0ca678; border:1px solid #0ca678; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;" title="현재 매출 데이터를 커머스 본부 대시보드로 강제 동기화">🔄 대시보드 동기화</button>
                 <button onclick="exportFinanceCsv('revenue')" style="padding:7px 16px; background:#fff; color:#333d4b; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; cursor:pointer;">📥 엑셀 다운로드</button>
               </div>
             </div>
@@ -5082,7 +5082,7 @@ Best regards,
           </div>
           <div style="padding:24px;">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">날짜 *</label><input id="finR-date" type="date" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">날짜 *</label><input id="finR-date" type="date" onchange="onFinDateChange()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
               <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">거래 구분</label>
                 <select id="finR-channel" onchange="onFinChannelChange()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; background:#fff;">
                   <option value="알리바바">알리바바</option>
@@ -5126,7 +5126,10 @@ Best regards,
 
             <!-- 정산 요약 -->
             <div style="margin-bottom:14px; padding:14px; background:#eff6ff; border-radius:10px; display:none;" id="finR-calcResult">
-              <div style="font-size:12px; font-weight:700; color:#3182f6; margin-bottom:10px;">💰 정산 요약</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="font-size:12px; font-weight:700; color:#3182f6;">💰 정산 요약</div>
+                <div style="font-size:11px; color:#8b95a1;">적용 환율: <span id="finR-rateLabel" style="font-weight:700; color:#202454;">₩-</span> <span id="finR-rateSource" style="font-size:10px;">(거래일 기준)</span></div>
+              </div>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px;">
                 <div style="padding:6px 0;"><span style="color:#8b95a1;">제품 매출:</span> <span style="font-weight:600;" id="finR-prodAmt">$0</span></div>
                 <div style="padding:6px 0;"><span style="color:#8b95a1;">배송비:</span> <span style="font-weight:600;" id="finR-shipAmt">$0</span></div>
@@ -11870,6 +11873,10 @@ Option C: [제품C] - $[가격]
         }
         document.getElementById('nav-finance')?.classList.add('active');
         if (typeof initFinance === 'function') initFinance();
+        // 환율 누락된 기존 매출 자동 갱신 (silent, 1회만)
+        if (typeof autoSyncMissingRates === 'function') {
+          setTimeout(() => autoSyncMissingRates(), 500);
+        }
       }
     }
 
@@ -14472,12 +14479,36 @@ Option C: [제품C] - $[가격]
         document.getElementById('finR-memo').value = '';
       }
       document.getElementById('finRevModal').style.display = 'flex';
+      // 모달 열릴 때마다 날짜의 환율 자동 조회
+      onFinDateChange();
     }
 
     function onFinChannelChange() {
-      // 알리바바 외 채널이면 수수료/원천세 비활성 안내 (값은 유지)
       const ch = document.getElementById('finR-channel').value;
       const hint = ch === '알리바바' ? '' : ' (' + ch + ' 거래)';
+    }
+
+    // 매출 모달에서 사용 중인 환율 (날짜 기반)
+    window._modalRate = null;
+    async function onFinDateChange() {
+      const dateEl = document.getElementById('finR-date');
+      if (!dateEl) return;
+      const date = dateEl.value;
+      if (!date) return;
+      const lbl = document.getElementById('finR-rateLabel');
+      const src = document.getElementById('finR-rateSource');
+      if (lbl) lbl.textContent = '⏳ 로드중...';
+      try {
+        const rate = await getUsdKrwRateForDate(date);
+        window._modalRate = rate;
+        if (lbl) lbl.textContent = '₩' + Math.round(rate).toLocaleString();
+        if (src) src.textContent = '(' + date + ' 기준)';
+      } catch (e) {
+        window._modalRate = FIN_USD_KRW;
+        if (lbl) lbl.textContent = '₩' + Math.round(FIN_USD_KRW).toLocaleString();
+        if (src) src.textContent = '(현재 환율 fallback)';
+      }
+      calcFinRevAmount();
     }
 
     async function saveRevenue() {
@@ -14495,9 +14526,14 @@ Option C: [제품C] - $[가격]
       const withholdUsd = parseFloat(document.getElementById('finR-withhold').value) || 0;
 
       const prodUsd = kg * price;
-      const totalUsd = prodUsd + shippingUsd;          // 총 매출 (USD)
-      const netUsd = totalUsd - feeUsd - withholdUsd;  // 실수령 (USD)
-      const amount = Math.round(totalUsd * FIN_USD_KRW); // KRW 매출 (총액 기준)
+      const totalUsd = prodUsd + shippingUsd;
+      const netUsd = totalUsd - feeUsd - withholdUsd;
+      // 거래일자 기준 환율 (모달에서 미리 로드됐으면 그것 사용, 아니면 지금 조회)
+      let rate = window._modalRate;
+      if (!rate || typeof rate !== 'number') {
+        try { rate = await getUsdKrwRateForDate(date); } catch { rate = FIN_USD_KRW; }
+      }
+      const amount = Math.round(totalUsd * rate);
 
       const status = document.getElementById('finR-status').value;
       const existingRec = (finRevEditIdx >= 0 && finRevEditIdx < finRevenueData.length)
@@ -14511,6 +14547,7 @@ Option C: [제품C] - $[가격]
         productUsd: prodUsd,
         shippingUsd, feeUsd, withholdUsd,
         totalUsd, netUsd,
+        usdKrwRate: rate,
         amount: amount,
         paymentStatus: status,
         memo: document.getElementById('finR-memo').value.trim(),
@@ -14533,6 +14570,7 @@ Option C: [제품C] - $[가격]
             channel, orderNo,
             shippingUsd, feeUsd, withholdUsd,
             totalUsd, netUsd,
+            usdKrwRate: rate,
             memo: rec.memo,
             createdBy: rec.createdBy,
             createdAt: rec.createdAt
@@ -14556,8 +14594,8 @@ Option C: [제품C] - $[가격]
           finPurchaseData.unshift({
             date, company: '알리바바',
             category: '수수료',
-            amount: Math.round(feeUsd * FIN_USD_KRW),
-            memo: '알리바바 거래수수료 ' + refTag + ' (USD ' + feeUsd.toFixed(2) + ')',
+            amount: Math.round(feeUsd * rate),
+            memo: '알리바바 거래수수료 ' + refTag + ' (USD ' + feeUsd.toFixed(2) + ' × ₩' + Math.round(rate).toLocaleString() + ')',
             createdBy: rec.createdBy,
             createdAt: rec.createdAt
           });
@@ -14566,8 +14604,8 @@ Option C: [제품C] - $[가격]
           finPurchaseData.unshift({
             date, company: '알리바바',
             category: '기타',
-            amount: Math.round(withholdUsd * FIN_USD_KRW),
-            memo: '알리바바 원천징수세 ' + refTag + ' (USD ' + withholdUsd.toFixed(2) + ')',
+            amount: Math.round(withholdUsd * rate),
+            memo: '알리바바 원천징수세 ' + refTag + ' (USD ' + withholdUsd.toFixed(2) + ' × ₩' + Math.round(rate).toLocaleString() + ')',
             createdBy: rec.createdBy,
             createdAt: rec.createdAt
           });
@@ -14578,7 +14616,7 @@ Option C: [제품C] - $[가격]
       renderRevenueTable();
       if (typeof renderPurchaseTable === 'function') renderPurchaseTable();
       closeFinModal('rev');
-      if (typeof showToast === 'function') showToast('✅ 매출 저장 (환율: $1 = ₩' + Math.round(FIN_USD_KRW).toLocaleString() + ')' + ((feeUsd>0||withholdUsd>0)&&channel==='알리바바' ? ' + 매입(수수료/세금) 자동등록' : ''));
+      if (typeof showToast === 'function') showToast('✅ 매출 저장 (' + date + ' 환율: $1 = ₩' + Math.round(rate).toLocaleString() + ')' + ((feeUsd>0||withholdUsd>0)&&channel==='알리바바' ? ' + 매입(수수료/세금) 자동등록' : ''));
     }
 
     // ──────────────────────────────────────────
@@ -14605,54 +14643,87 @@ Option C: [제품C] - $[가격]
     }
 
     // ──────────────────────────────────────────
-    // 매출 KRW 금액을 거래일자별 환율로 재계산
+    // 모든 매출을 커머스 본부 대시보드(Firebase)로 강제 동기화
     // ──────────────────────────────────────────
-    async function recalcExchangeRates() {
-      if (!finRevenueData.length) { alert('재계산할 매출 데이터가 없습니다.'); return; }
-      if (!confirm(finRevenueData.length + '건의 매출 KRW 금액을 각 거래일자의 환율로 재계산합니다. 진행할까요?')) return;
+    async function syncAllToCommerceDashboard() {
+      if (!finRevenueData.length) { alert('동기화할 매출 데이터가 없습니다.'); return; }
+      if (!window._firebaseSaveSettlement) {
+        alert('❌ Firebase 연결이 안 되어 있습니다.\n페이지를 새로고침 후 다시 시도하세요.');
+        return;
+      }
+      if (!confirm('현재 매출 ' + finRevenueData.length + '건을 커머스 본부 대시보드로 강제 동기화합니다.\n진행할까요?')) return;
 
-      let updated = 0, failed = 0;
-      const changes = [];
+      let success = 0, failed = 0;
+      const failedList = [];
       for (const r of finRevenueData) {
-        const oldRate = r.usdKrwRate || FIN_USD_KRW;
-        const oldKrw = r.amount || 0;
         try {
-          const newRate = await getUsdKrwRateForDate(r.date);
-          const totalUsd = r.totalUsd != null ? r.totalUsd
-            : ((r.productUsd != null ? r.productUsd : (r.quantity||0)*(r.unitPrice||0)) + (r.shippingUsd||0));
-          const newKrw = Math.round(totalUsd * newRate);
-          if (Math.abs(newRate - oldRate) > 0.01 || newKrw !== oldKrw) {
-            r.usdKrwRate = newRate;
-            r.amount = newKrw;
-            // 메모의 환율 표기도 갱신 (있으면)
-            if (r.memo && /환율 ₩[\d,]+/.test(r.memo)) {
-              r.memo = r.memo.replace(/환율 ₩[\d,]+/, '환율 ₩' + Math.round(newRate).toLocaleString());
-            }
-            // Firebase 동기화
-            if (r._fsId && window._firebaseSaveSettlement) {
-              try {
-                await window._firebaseSaveSettlement(r._fsId, {
-                  buyer: r.company, product: r.product, quantity: r.quantity,
-                  unitPrice: r.unitPrice, amount: r.amount, date: r.date,
-                  status: r.paymentStatus, paymentStatus: r.paymentStatus,
-                  channel: r.channel, orderNo: r.orderNo,
-                  shippingUsd: r.shippingUsd||0, feeUsd: r.feeUsd||0, withholdUsd: r.withholdUsd||0,
-                  totalUsd: r.totalUsd, netUsd: r.netUsd, usdKrwRate: r.usdKrwRate,
-                  memo: r.memo, createdBy: r.createdBy, createdAt: r.createdAt
-                });
-              } catch (e) { console.warn('Firebase 동기화 실패:', e); }
-            }
-            changes.push(`${r.date} · ${r.company}: ₩${Math.round(oldRate).toLocaleString()} → ₩${Math.round(newRate).toLocaleString()}`);
-            updated++;
-          }
+          const fsId = r._fsId || ('rev_' + Date.now() + '_' + (r.orderNo || Math.random().toString(36).slice(2,8)));
+          await window._firebaseSaveSettlement(fsId, {
+            buyer: r.company, product: r.product,
+            quantity: r.quantity, unitPrice: r.unitPrice, amount: r.amount,
+            date: r.date, status: r.paymentStatus, paymentStatus: r.paymentStatus,
+            channel: r.channel, orderNo: r.orderNo,
+            shippingUsd: r.shippingUsd||0, feeUsd: r.feeUsd||0, withholdUsd: r.withholdUsd||0,
+            totalUsd: r.totalUsd, netUsd: r.netUsd, usdKrwRate: r.usdKrwRate,
+            memo: r.memo, createdBy: r.createdBy, createdAt: r.createdAt
+          });
+          if (!r._fsId) r._fsId = fsId;
+          success++;
         } catch (e) {
-          console.error('환율 재계산 실패:', r.date, e);
+          console.error('동기화 실패:', r.company, r.date, e);
+          failedList.push(`${r.date} · ${r.company}: ${e.message || e}`);
           failed++;
         }
       }
       saveFinanceData();
-      renderRevenueTable();
-      alert('환율 재계산 완료\n\n변경: ' + updated + '건\n실패: ' + failed + '건\n변경 없음: ' + (finRevenueData.length - updated - failed) + '건' + (changes.length ? '\n\n' + changes.slice(0, 10).join('\n') + (changes.length > 10 ? '\n...외 ' + (changes.length-10) + '건' : '') : ''));
+      alert('🔄 대시보드 동기화 완료\n\n성공: ' + success + '건\n실패: ' + failed + '건' + (failedList.length ? '\n\n[실패 내역]\n' + failedList.slice(0,5).join('\n') : ''));
+    }
+
+    // ──────────────────────────────────────────
+    // 환율이 누락된 매출만 자동으로 거래일자 환율로 갱신 (silent)
+    // ──────────────────────────────────────────
+    let _autoSyncRan = false;
+    async function autoSyncMissingRates() {
+      if (_autoSyncRan) return;
+      _autoSyncRan = true;
+      if (!finRevenueData || !finRevenueData.length) return;
+      // usdKrwRate가 없는 (옛날 import) 매출만 대상
+      const targets = finRevenueData.filter(r => !r.usdKrwRate && r.date && r.totalUsd);
+      if (!targets.length) return;
+
+      let updated = 0;
+      for (const r of targets) {
+        try {
+          const rate = await getUsdKrwRateForDate(r.date);
+          r.usdKrwRate = rate;
+          r.amount = Math.round(r.totalUsd * rate);
+          if (r.memo && /환율 ₩[\d,]+/.test(r.memo)) {
+            r.memo = r.memo.replace(/환율 ₩[\d,]+/, '환율 ₩' + Math.round(rate).toLocaleString());
+          } else if (r.memo) {
+            r.memo += ' · 환율 ₩' + Math.round(rate).toLocaleString();
+          }
+          // Firebase 동기화
+          if (r._fsId && window._firebaseSaveSettlement) {
+            try {
+              await window._firebaseSaveSettlement(r._fsId, {
+                buyer: r.company, product: r.product, quantity: r.quantity,
+                unitPrice: r.unitPrice, amount: r.amount, date: r.date,
+                status: r.paymentStatus, paymentStatus: r.paymentStatus,
+                channel: r.channel, orderNo: r.orderNo,
+                shippingUsd: r.shippingUsd||0, feeUsd: r.feeUsd||0, withholdUsd: r.withholdUsd||0,
+                totalUsd: r.totalUsd, netUsd: r.netUsd, usdKrwRate: r.usdKrwRate,
+                memo: r.memo, createdBy: r.createdBy, createdAt: r.createdAt
+              });
+            } catch (e) {}
+          }
+          updated++;
+        } catch (e) {}
+      }
+      if (updated > 0) {
+        saveFinanceData();
+        if (typeof renderRevenueTable === 'function') renderRevenueTable();
+        if (typeof showToast === 'function') showToast('💱 매출 ' + updated + '건의 환율을 거래일자 기준으로 자동 갱신했습니다');
+      }
     }
 
     // ──────────────────────────────────────────
@@ -15050,7 +15121,8 @@ Option C: [제품C] - $[가격]
       const totalUsd = prodUsd + shipping;
       const deduct = fee + withhold;
       const netUsd = totalUsd - deduct;
-      const totalKrw = totalUsd * FIN_USD_KRW;
+      const rate = window._modalRate || FIN_USD_KRW;
+      const totalKrw = totalUsd * rate;
 
       if (kg > 0 && price > 0) {
         document.getElementById('finR-prodAmt').textContent = '$' + prodUsd.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
