@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>해외사업 관리센터</title>
   <script src="./업무관리시스템_통합_완성_공지_프로세스_files/saved_resource"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -4925,6 +4926,8 @@ Best regards,
               </div>
               <div style="display:flex; gap:8px;">
                 <button onclick="openRevenueModal(-1)" style="padding:7px 16px; background:#202454; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">+ 매출 등록</button>
+                <button onclick="document.getElementById('alibabaImportFile').click()" style="padding:7px 16px; background:#ff6a00; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;" title="알리바바 주문관리에서 내보낸 엑셀/CSV 파일 업로드">📤 알리바바 주문 가져오기</button>
+                <input type="file" id="alibabaImportFile" accept=".xlsx,.xls,.csv" style="display:none;" onchange="importAlibabaOrders(this.files[0])">
                 <button onclick="exportFinanceCsv('revenue')" style="padding:7px 16px; background:#fff; color:#333d4b; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; cursor:pointer;">📥 엑셀 다운로드</button>
               </div>
             </div>
@@ -4932,7 +4935,7 @@ Best regards,
               <table class="fin-tbl">
                 <thead>
                   <tr>
-                    <th>날짜</th><th>거래처</th><th>제품명</th><th style="text-align:right;">수량</th><th style="text-align:right;">단가</th><th style="text-align:right;">금액</th><th>결제상태</th><th>메모</th><th style="width:80px;">관리</th>
+                    <th>날짜</th><th>구분</th><th>거래처<br><span style="font-weight:400; color:#8b95a1; font-size:11px;">주문번호</span></th><th>제품명</th><th style="text-align:right;">수량</th><th style="text-align:right;">단가</th><th style="text-align:right;">총매출(KRW)</th><th style="text-align:right;">실수령(USD)</th><th>결제상태</th><th>메모</th><th style="width:80px;">관리</th>
                   </tr>
                 </thead>
                 <tbody id="finRevBody"></tbody>
@@ -5071,16 +5074,26 @@ Best regards,
 
       <!-- 정산관리 모달: 매출 등록/수정 -->
       <div id="finRevModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center;">
-        <div style="background:#fff; border-radius:16px; width:480px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="background:#fff; border-radius:16px; width:560px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
           <div style="padding:20px 24px; border-bottom:1px solid #f4f5f7; display:flex; align-items:center; justify-content:space-between;">
             <h3 id="finRevModalTitle" style="font-size:16px; font-weight:800; color:#202454; margin:0;">매출 등록</h3>
             <button onclick="closeFinModal('rev')" style="background:none; border:none; cursor:pointer; padding:4px;"><svg width="20" height="20" fill="none" stroke="#8b95a1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
           </div>
           <div style="padding:24px;">
-            <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">날짜 *</label><input id="finR-date" type="date" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
-            <div style="margin-bottom:14px;">
-              <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">거래처 *</label>
-              <input id="finR-company" type="text" placeholder="바이어 회사명" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">날짜 *</label><input id="finR-date" type="date" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">거래 구분</label>
+                <select id="finR-channel" onchange="onFinChannelChange()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; background:#fff;">
+                  <option value="알리바바">알리바바</option>
+                  <option value="직거래">직거래</option>
+                  <option value="에이전트">에이전트</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">거래처 *</label><input id="finR-company" type="text" placeholder="바이어 회사명" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">주문번호</label><input id="finR-orderNo" type="text" placeholder="Order No." style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
             </div>
             <div style="margin-bottom:14px;">
               <label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">제품 선택 *</label>
@@ -5091,19 +5104,37 @@ Best regards,
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px;">
               <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">주문량 (kg)</label><input id="finR-qty" type="number" placeholder="0" oninput="calcFinRevAmount()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
-              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">단가 (USD/kg)</label><input id="finR-price" type="number" step="0.1" placeholder="0" oninput="calcFinRevAmount()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
+              <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">단가 (USD/kg)</label><input id="finR-price" type="number" step="0.01" placeholder="0" oninput="calcFinRevAmount()" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
               <div><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">결제상태</label>
                 <select id="finR-status" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px; background:#fff;">
                   <option value="대기">대기</option><option value="처리중">처리중</option><option value="완료">완료</option>
                 </select>
               </div>
             </div>
-            <div style="margin-bottom:14px; padding:12px 14px; background:#eff6ff; border-radius:8px; display:none;" id="finR-calcResult">
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; text-align:center; font-size:12px;">
-                <div><div style="color:#8b95a1;">매출액 (USD)</div><div style="font-weight:700; color:#0ca678; margin-top:2px;" id="finR-totalUsd">$0</div></div>
-                <div><div style="color:#8b95a1;">매출액 (KRW)</div><div style="font-weight:700; color:#202454; margin-top:2px;" id="finR-totalKrw">₩0</div></div>
+
+            <!-- 부가 비용 (배송비 / 알리바바 수수료 / 원천세) -->
+            <div style="margin-bottom:14px; padding:14px; background:#fafbfc; border:1px solid #f1f3f5; border-radius:10px;">
+              <div style="font-size:12px; font-weight:700; color:#4e5968; margin-bottom:10px;">📦 부가 비용 / 공제 (USD)</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                <div><label style="display:block; font-size:11px; color:#6b7684; margin-bottom:4px;">배송비</label><input id="finR-shipping" type="number" step="0.01" placeholder="0.00" oninput="calcFinRevAmount()" style="width:100%; padding:8px 12px; border:1px solid #e5e8eb; border-radius:6px; font-size:12px;"></div>
+                <div><label style="display:block; font-size:11px; color:#6b7684; margin-bottom:4px;">알리바바 수수료</label><input id="finR-fee" type="number" step="0.01" placeholder="0.00" oninput="calcFinRevAmount()" style="width:100%; padding:8px 12px; border:1px solid #e5e8eb; border-radius:6px; font-size:12px;"></div>
+                <div><label style="display:block; font-size:11px; color:#6b7684; margin-bottom:4px;">원천징수세</label><input id="finR-withhold" type="number" step="0.01" placeholder="0.00" oninput="calcFinRevAmount()" style="width:100%; padding:8px 12px; border:1px solid #e5e8eb; border-radius:6px; font-size:12px;"></div>
+              </div>
+              <div style="margin-top:8px; font-size:11px; color:#8b95a1;">※ 알리바바 거래는 자동으로 매입(수수료/세금) 항목에도 등록됩니다</div>
+            </div>
+
+            <!-- 정산 요약 -->
+            <div style="margin-bottom:14px; padding:14px; background:#eff6ff; border-radius:10px; display:none;" id="finR-calcResult">
+              <div style="font-size:12px; font-weight:700; color:#3182f6; margin-bottom:10px;">💰 정산 요약</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px;">
+                <div style="padding:6px 0;"><span style="color:#8b95a1;">제품 매출:</span> <span style="font-weight:600;" id="finR-prodAmt">$0</span></div>
+                <div style="padding:6px 0;"><span style="color:#8b95a1;">배송비:</span> <span style="font-weight:600;" id="finR-shipAmt">$0</span></div>
+                <div style="padding:6px 0; grid-column:1 / -1; border-top:1px dashed #cbd5e0;"><span style="color:#8b95a1;">총 매출 (USD):</span> <span style="font-weight:700; color:#0ca678;" id="finR-totalUsd">$0</span> <span style="color:#cbd5e0; margin:0 6px;">/</span> <span style="font-weight:700; color:#202454;" id="finR-totalKrw">₩0</span></div>
+                <div style="padding:6px 0;"><span style="color:#8b95a1;">공제 합계:</span> <span style="font-weight:600; color:#f04452;" id="finR-deductAmt">-$0</span></div>
+                <div style="padding:6px 0; text-align:right;"><span style="color:#8b95a1;">실수령:</span> <span style="font-weight:700; color:#202454;" id="finR-netUsd">$0</span></div>
               </div>
             </div>
+
             <div style="margin-bottom:14px;"><label style="display:block; font-size:12px; font-weight:600; color:#4e5968; margin-bottom:6px;">메모</label><input id="finR-memo" type="text" placeholder="메모" style="width:100%; padding:10px 14px; border:1px solid #e5e8eb; border-radius:8px; font-size:13px;"></div>
             <div style="display:flex; gap:8px; justify-content:flex-end;">
               <button onclick="closeFinModal('rev')" style="padding:10px 20px; border:1px solid #e5e8eb; border-radius:8px; background:#fff; color:#6b7684; font-size:13px; font-weight:600; cursor:pointer;">취소</button>
@@ -14194,18 +14225,28 @@ Option C: [제품C] - $[가격]
       const tbody = document.getElementById('finRevBody');
       if (!tbody) return;
       let total = 0;
-      tbody.innerHTML = data.length === 0 ? '<tr><td colspan="9" style="text-align:center;padding:30px;color:#c4c9d0;">데이터가 없습니다</td></tr>' :
+      const chBadge = (ch) => {
+        const c = ch || '알리바바';
+        const colors = {'알리바바':'#ff6a00','직거래':'#3182f6','에이전트':'#7c3aed','기타':'#8b95a1'};
+        return '<span style="display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:'+(colors[c]||'#8b95a1')+'22;color:'+(colors[c]||'#8b95a1')+';">'+c+'</span>';
+      };
+      tbody.innerHTML = data.length === 0 ? '<tr><td colspan="11" style="text-align:center;padding:30px;color:#c4c9d0;">데이터가 없습니다</td></tr>' :
         data.map(r => {
           const idx = finRevenueData.indexOf(r);
           total += r.amount || 0;
           const stCls = r.paymentStatus === '완료' ? 'done' : r.paymentStatus === '처리중' ? 'processing' : 'waiting';
+          const netStr = (typeof r.netUsd === 'number' && r.netUsd > 0)
+            ? '$' + r.netUsd.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})
+            : '<span style="color:#cbd5e0;">-</span>';
           return '<tr>' +
             '<td>' + r.date + '</td>' +
-            '<td>' + (r.company||'') + '</td>' +
+            '<td>' + chBadge(r.channel) + '</td>' +
+            '<td><div>' + (r.company||'') + '</div>' + (r.orderNo ? '<div style="font-size:11px;color:#8b95a1;">#'+r.orderNo+'</div>' : '') + '</td>' +
             '<td>' + (r.product||'') + '</td>' +
             '<td style="text-align:right;">' + (r.quantity||0).toLocaleString() + '</td>' +
             '<td style="text-align:right;">' + formatWon(r.unitPrice) + '</td>' +
             '<td style="text-align:right;font-weight:600;color:#0ca678;">' + formatWon(r.amount) + '</td>' +
+            '<td style="text-align:right;color:#202454;font-weight:600;">' + netStr + '</td>' +
             '<td><span class="fin-status ' + stCls + '">' + (r.paymentStatus||'대기') + '</span></td>' +
             '<td style="color:#8b95a1;font-size:12px;">' + (r.memo||'') + '</td>' +
             '<td><button onclick="openRevenueModal(' + idx + ')" style="border:none;background:none;color:#3182f6;cursor:pointer;font-size:12px;margin-right:4px;">수정</button><button onclick="deleteRevenue(' + idx + ')" style="border:none;background:none;color:#f04452;cursor:pointer;font-size:12px;">삭제</button></td>' +
@@ -14383,8 +14424,9 @@ Option C: [제품C] - $[가격]
         const r = finRevenueData[idx];
         document.getElementById('finRevModalTitle').textContent = '매출 수정';
         document.getElementById('finR-date').value = r.date || '';
+        document.getElementById('finR-channel').value = r.channel || '알리바바';
         document.getElementById('finR-company').value = r.company || '';
-        // 제품 드롭다운에서 매칭
+        document.getElementById('finR-orderNo').value = r.orderNo || '';
         const sel = document.getElementById('finR-product');
         let matched = false;
         for (let i = 0; i < FP_DATA.length; i++) {
@@ -14394,19 +14436,34 @@ Option C: [제품C] - $[가격]
         document.getElementById('finR-qty').value = r.quantity || '';
         document.getElementById('finR-price').value = r.unitPrice || '';
         document.getElementById('finR-status').value = r.paymentStatus || '대기';
+        document.getElementById('finR-shipping').value = r.shippingUsd || '';
+        document.getElementById('finR-fee').value = r.feeUsd || '';
+        document.getElementById('finR-withhold').value = r.withholdUsd || '';
         document.getElementById('finR-memo').value = r.memo || '';
         if (matched) onFinProductSelect();
+        calcFinRevAmount();
       } else {
         document.getElementById('finRevModalTitle').textContent = '매출 등록';
         document.getElementById('finR-date').value = new Date().toISOString().slice(0,10);
+        document.getElementById('finR-channel').value = '알리바바';
         document.getElementById('finR-company').value = '';
+        document.getElementById('finR-orderNo').value = '';
         document.getElementById('finR-product').value = '';
         document.getElementById('finR-qty').value = '';
         document.getElementById('finR-price').value = '';
         document.getElementById('finR-status').value = '대기';
+        document.getElementById('finR-shipping').value = '';
+        document.getElementById('finR-fee').value = '';
+        document.getElementById('finR-withhold').value = '';
         document.getElementById('finR-memo').value = '';
       }
       document.getElementById('finRevModal').style.display = 'flex';
+    }
+
+    function onFinChannelChange() {
+      // 알리바바 외 채널이면 수수료/원천세 비활성 안내 (값은 유지)
+      const ch = document.getElementById('finR-channel').value;
+      const hint = ch === '알리바바' ? '' : ' (' + ch + ' 거래)';
     }
 
     async function saveRevenue() {
@@ -14417,23 +14474,36 @@ Option C: [제품C] - $[가격]
       const price = parseFloat(document.getElementById('finR-price').value) || 0;
       const prodIdx = document.getElementById('finR-product').value;
       const prodName = prodIdx !== '' && FP_DATA[prodIdx] ? FP_DATA[prodIdx].name : '';
-      const amountUsd = kg * price;
-      const amount = Math.round(amountUsd * FIN_USD_KRW);
+      const channel = document.getElementById('finR-channel').value;
+      const orderNo = document.getElementById('finR-orderNo').value.trim();
+      const shippingUsd = parseFloat(document.getElementById('finR-shipping').value) || 0;
+      const feeUsd = parseFloat(document.getElementById('finR-fee').value) || 0;
+      const withholdUsd = parseFloat(document.getElementById('finR-withhold').value) || 0;
+
+      const prodUsd = kg * price;
+      const totalUsd = prodUsd + shippingUsd;          // 총 매출 (USD)
+      const netUsd = totalUsd - feeUsd - withholdUsd;  // 실수령 (USD)
+      const amount = Math.round(totalUsd * FIN_USD_KRW); // KRW 매출 (총액 기준)
+
       const status = document.getElementById('finR-status').value;
       const existingRec = (finRevEditIdx >= 0 && finRevEditIdx < finRevenueData.length)
         ? finRevenueData[finRevEditIdx] : {};
       const rec = {
         _fsId: existingRec._fsId || null,
         date, company,
+        channel, orderNo,
         product: prodName,
-        quantity: kg, unitPrice: price, amount: amount,
+        quantity: kg, unitPrice: price,
+        productUsd: prodUsd,
+        shippingUsd, feeUsd, withholdUsd,
+        totalUsd, netUsd,
+        amount: amount,
         paymentStatus: status,
         memo: document.getElementById('finR-memo').value.trim(),
         createdBy: (JSON.parse(localStorage.getItem('loggedInUser')||'{}').name) || '',
         createdAt: existingRec.createdAt || new Date().toISOString().slice(0,10)
       };
 
-      // Firebase 이중저장 (커머스 대시보드 호환)
       if (window._firebaseSaveSettlement) {
         try {
           const fsId = rec._fsId || ('rev_' + Date.now());
@@ -14446,6 +14516,9 @@ Option C: [제품C] - $[가격]
             date: date,
             status: status,
             paymentStatus: status,
+            channel, orderNo,
+            shippingUsd, feeUsd, withholdUsd,
+            totalUsd, netUsd,
             memo: rec.memo,
             createdBy: rec.createdBy,
             createdAt: rec.createdAt
@@ -14461,10 +14534,215 @@ Option C: [제품C] - $[가격]
       } else {
         finRevenueData.unshift(rec);
       }
+
+      // 알리바바 거래는 수수료/원천세를 매입에도 자동 등록
+      if (channel === '알리바바' && finRevEditIdx < 0) {
+        const refTag = orderNo ? ('[#' + orderNo + ']') : ('[' + company + ']');
+        if (feeUsd > 0) {
+          finPurchaseData.unshift({
+            date, company: '알리바바',
+            category: '수수료',
+            amount: Math.round(feeUsd * FIN_USD_KRW),
+            memo: '알리바바 거래수수료 ' + refTag + ' (USD ' + feeUsd.toFixed(2) + ')',
+            createdBy: rec.createdBy,
+            createdAt: rec.createdAt
+          });
+        }
+        if (withholdUsd > 0) {
+          finPurchaseData.unshift({
+            date, company: '알리바바',
+            category: '기타',
+            amount: Math.round(withholdUsd * FIN_USD_KRW),
+            memo: '알리바바 원천징수세 ' + refTag + ' (USD ' + withholdUsd.toFixed(2) + ')',
+            createdBy: rec.createdBy,
+            createdAt: rec.createdAt
+          });
+        }
+      }
+
       saveFinanceData();
       renderRevenueTable();
+      if (typeof renderPurchaseTable === 'function') renderPurchaseTable();
       closeFinModal('rev');
-      if (typeof showToast === 'function') showToast('✅ 매출이 저장되었습니다 (환율: $1 = ₩' + Math.round(FIN_USD_KRW).toLocaleString() + ')');
+      if (typeof showToast === 'function') showToast('✅ 매출 저장 (환율: $1 = ₩' + Math.round(FIN_USD_KRW).toLocaleString() + ')' + ((feeUsd>0||withholdUsd>0)&&channel==='알리바바' ? ' + 매입(수수료/세금) 자동등록' : ''));
+    }
+
+    // ──────────────────────────────────────────
+    // 알리바바 주문 일괄 import (XLSX/CSV)
+    // ──────────────────────────────────────────
+    async function importAlibabaOrders(file) {
+      if (!file) return;
+      if (typeof XLSX === 'undefined') {
+        alert('XLSX 라이브러리 로딩 실패. 인터넷 연결을 확인하세요.');
+        document.getElementById('alibabaImportFile').value = '';
+        return;
+      }
+      try {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        if (!rows.length) { alert('파일에 데이터가 없습니다.'); return; }
+
+        // 컬럼 키 유연 매핑 (한/중/영 모두 대응)
+        const getField = (row, ...keys) => {
+          for (const k of keys) {
+            for (const col in row) {
+              if (col === k || col.includes(k)) return row[col];
+            }
+          }
+          return '';
+        };
+
+        // 주문번호로 그룹핑 (같은 주문에 여러 제품 있을 수 있음)
+        const orderMap = {};
+        rows.forEach(row => {
+          const orderNo = String(getField(row, 'Order Number', '订单编号', '주문번호') || '').trim();
+          if (!orderNo) return;
+          if (!orderMap[orderNo]) {
+            orderMap[orderNo] = {
+              orderNo,
+              date: String(getField(row, 'Order Create Time', '订单创建时间') || '').slice(0, 10),
+              buyer: String(getField(row, 'Buyer Name', '买家名称', '구매자') || '').trim(),
+              company: String(getField(row, 'Company Name', '公司名称') || '').trim(),
+              country: String(getField(row, 'Buyer Country', '买家国家', 'Country') || '').trim(),
+              amount: parseFloat(getField(row, 'Order Amount', '订单总价') || 0) || 0,
+              shipping: parseFloat(getField(row, 'Shipping Fee', '运费') || 0) || 0,
+              status: String(getField(row, 'Status', '状态') || '').trim(),
+              products: [],
+              totalQty: 0
+            };
+          }
+          const productName = String(getField(row, 'Product Name', '产品名称') || '').trim();
+          const spu = String(getField(row, 'SPU Model number', '商品产品型号') || '').trim();
+          const qty = parseFloat(getField(row, 'Quantity', '数量') || 0) || 0;
+          const unitPrice = parseFloat(getField(row, 'Unit Price', '单价') || 0) || 0;
+          if (productName || spu) {
+            orderMap[orderNo].products.push({ name: spu || productName, qty, unitPrice });
+            orderMap[orderNo].totalQty += qty;
+          }
+        });
+
+        const orders = Object.values(orderMap);
+        if (!orders.length) { alert('주문번호가 있는 행을 찾지 못했습니다.'); return; }
+
+        // 상태 매핑
+        const mapStatus = (s) => {
+          if (!s) return '대기';
+          if (s.includes('완료') || s.includes('마감')) return '완료';
+          if (s.includes('배송') || s.includes('처리')) return '처리중';
+          return '대기';
+        };
+
+        // 중복 체크 함수: 날짜 + 바이어명(거래처)
+        const isDuplicate = (date, buyer) => {
+          const d = (date || '').slice(0, 10);
+          const b = (buyer || '').toLowerCase().replace(/\s+/g, '');
+          return finRevenueData.some(r => {
+            const rd = (r.date || '').slice(0, 10);
+            const rb = (r.company || '').toLowerCase().replace(/\s+/g, '');
+            return rd === d && rb === b;
+          });
+        };
+
+        let added = 0, skipped = 0;
+        const skippedList = [], addedList = [];
+
+        for (const ord of orders) {
+          const buyer = ord.buyer || ord.company || '(이름없음)';
+          if (isDuplicate(ord.date, buyer)) {
+            skipped++;
+            skippedList.push(`#${ord.orderNo} · ${ord.date} · ${buyer}`);
+            continue;
+          }
+          // 제품 표기: 여러 개면 " + "로 연결
+          const productLabel = ord.products.map(p => p.name).filter(Boolean).join(' + ') || '';
+          // 통합 단가: 제품가(총가-배송비) / 총수량
+          const productUsd = Math.max(0, ord.amount - ord.shipping);
+          const unitPrice = ord.totalQty > 0 ? (productUsd / ord.totalQty) : 0;
+
+          const rec = {
+            _fsId: null,
+            date: ord.date,
+            company: buyer,
+            channel: '알리바바',
+            orderNo: ord.orderNo,
+            product: productLabel,
+            quantity: ord.totalQty,
+            unitPrice: Math.round(unitPrice * 100) / 100,
+            productUsd,
+            shippingUsd: ord.shipping,
+            feeUsd: 0,
+            withholdUsd: 0,
+            totalUsd: ord.amount,
+            netUsd: ord.amount,
+            amount: Math.round(ord.amount * FIN_USD_KRW),
+            paymentStatus: mapStatus(ord.status),
+            memo: `[알리바바 일괄] ${ord.country || ''}${ord.products.length>1 ? ` · 제품 ${ord.products.length}개` : ''}`.trim(),
+            createdBy: (JSON.parse(localStorage.getItem('loggedInUser')||'{}').name) || '',
+            createdAt: new Date().toISOString().slice(0,10)
+          };
+
+          // Firebase 이중저장
+          if (window._firebaseSaveSettlement) {
+            try {
+              const fsId = 'rev_' + Date.now() + '_' + ord.orderNo;
+              await window._firebaseSaveSettlement(fsId, {
+                buyer: rec.company, product: rec.product,
+                quantity: rec.quantity, unitPrice: rec.unitPrice, amount: rec.amount,
+                date: rec.date, status: rec.paymentStatus, paymentStatus: rec.paymentStatus,
+                channel: rec.channel, orderNo: rec.orderNo,
+                shippingUsd: rec.shippingUsd, feeUsd: 0, withholdUsd: 0,
+                totalUsd: rec.totalUsd, netUsd: rec.netUsd,
+                memo: rec.memo, createdBy: rec.createdBy, createdAt: rec.createdAt
+              });
+              rec._fsId = fsId;
+            } catch (e) { console.warn('Firebase 저장 실패:', e); }
+          }
+
+          finRevenueData.unshift(rec);
+          added++;
+          addedList.push(`#${ord.orderNo} · ${ord.date} · ${buyer} · $${ord.amount.toLocaleString()}`);
+        }
+
+        saveFinanceData();
+        renderRevenueTable();
+
+        // 결과 모달 표시
+        showImportResultModal(orders.length, added, skipped, addedList, skippedList);
+      } catch (e) {
+        console.error(e);
+        alert('파일 처리 중 오류:\n' + e.message);
+      } finally {
+        document.getElementById('alibabaImportFile').value = '';
+      }
+    }
+
+    function showImportResultModal(total, added, skipped, addedList, skippedList) {
+      const existing = document.getElementById('aliImportResultModal');
+      if (existing) existing.remove();
+      const modal = document.createElement('div');
+      modal.id = 'aliImportResultModal';
+      modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:300;display:flex;align-items:center;justify-content:center;';
+      const addedHtml = addedList.length ? addedList.map(s => '<li style="padding:4px 0;color:#0ca678;">✓ ' + s + '</li>').join('') : '<li style="color:#cbd5e0;">없음</li>';
+      const skippedHtml = skippedList.length ? skippedList.map(s => '<li style="padding:4px 0;color:#f04452;">⊘ ' + s + '</li>').join('') : '<li style="color:#cbd5e0;">없음</li>';
+      modal.innerHTML =
+        '<div style="background:#fff;border-radius:16px;width:560px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">' +
+        '<div style="padding:20px 24px;border-bottom:1px solid #f4f5f7;display:flex;justify-content:space-between;align-items:center;">' +
+        '<h3 style="margin:0;font-size:16px;font-weight:800;color:#202454;">📤 알리바바 주문 가져오기 결과</h3>' +
+        '<button onclick="document.getElementById(\'aliImportResultModal\').remove()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#8b95a1;">✕</button>' +
+        '</div>' +
+        '<div style="padding:24px;">' +
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">' +
+        '<div style="padding:14px;background:#f8f9fa;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#8b95a1;">총 주문</div><div style="font-size:22px;font-weight:800;color:#202454;margin-top:4px;">' + total + '</div></div>' +
+        '<div style="padding:14px;background:#e6f9ef;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#0ca678;">신규 등록</div><div style="font-size:22px;font-weight:800;color:#0ca678;margin-top:4px;">' + added + '</div></div>' +
+        '<div style="padding:14px;background:#fff0f0;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#f04452;">중복 제외</div><div style="font-size:22px;font-weight:800;color:#f04452;margin-top:4px;">' + skipped + '</div></div>' +
+        '</div>' +
+        '<div style="margin-bottom:16px;"><div style="font-size:13px;font-weight:700;color:#0ca678;margin-bottom:6px;">✅ 등록된 매출 (' + added + '건)</div><ul style="margin:0;padding-left:20px;font-size:12px;line-height:1.5;">' + addedHtml + '</ul></div>' +
+        '<div><div style="font-size:13px;font-weight:700;color:#f04452;margin-bottom:6px;">⊘ 중복으로 제외 (' + skipped + '건)</div><ul style="margin:0;padding-left:20px;font-size:12px;line-height:1.5;">' + skippedHtml + '</ul><div style="font-size:11px;color:#8b95a1;margin-top:8px;">* 중복 판정 기준: 날짜 + 거래처(바이어명) 동일</div></div>' +
+        '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;"><button onclick="document.getElementById(\'aliImportResultModal\').remove()" style="padding:10px 20px;border:none;border-radius:8px;background:#202454;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">확인</button></div>' +
+        '</div></div>';
+      document.body.appendChild(modal);
     }
 
     async function deleteRevenue(idx) {
@@ -14545,9 +14823,12 @@ Option C: [제품C] - $[가격]
     function exportFinanceCsv(type) {
       let csv = '\uFEFF'; // BOM
       if (type === 'revenue') {
-        csv += '날짜,거래처,제품명,수량,단가,금액,결제상태,메모\n';
+        csv += '날짜,구분,거래처,주문번호,제품명,수량,단가(USD),제품매출(USD),배송비(USD),총매출(USD),수수료(USD),원천세(USD),실수령(USD),총매출(KRW),결제상태,메모\n';
         finRevenueData.forEach(r => {
-          csv += [r.date, r.company, r.product, r.quantity, r.unitPrice, r.amount, r.paymentStatus, r.memo||''].join(',') + '\n';
+          const productUsd = (r.productUsd != null ? r.productUsd : (r.quantity||0)*(r.unitPrice||0));
+          const totalUsd = r.totalUsd != null ? r.totalUsd : (productUsd + (r.shippingUsd||0));
+          const netUsd = r.netUsd != null ? r.netUsd : (totalUsd - (r.feeUsd||0) - (r.withholdUsd||0));
+          csv += [r.date, r.channel||'알리바바', r.company, r.orderNo||'', r.product, r.quantity, r.unitPrice, productUsd.toFixed(2), (r.shippingUsd||0).toFixed(2), totalUsd.toFixed(2), (r.feeUsd||0).toFixed(2), (r.withholdUsd||0).toFixed(2), netUsd.toFixed(2), r.amount, r.paymentStatus, (r.memo||'').replace(/,/g,';')].join(',') + '\n';
         });
       } else {
         csv += '날짜,거래처,항목,금액,메모\n';
@@ -14605,7 +14886,6 @@ Option C: [제품C] - $[가격]
       const kg = parseFloat(document.getElementById('finR-qty').value) || 0;
       const calcEl = document.getElementById('finR-calcResult');
       const priceEl = document.getElementById('finR-price');
-      // 볼륨 단계별 자동 단가 적용
       const idx = document.getElementById('finR-product').value;
       if (idx !== '' && kg > 0) {
         const p = FP_DATA[idx];
@@ -14614,15 +14894,27 @@ Option C: [제품C] - $[가격]
           if (kg >= 3000 && p.t4) auto = p.t4;
           else if (kg >= 1000 && p.t3) auto = p.t3;
           else if (kg >= 101 && p.t2) auto = p.t2;
-          priceEl.value = auto;
+          if (!priceEl.dataset.manual) priceEl.value = auto;
         }
       }
       const price = parseFloat(priceEl.value) || 0;
+      const shipping = parseFloat(document.getElementById('finR-shipping').value) || 0;
+      const fee = parseFloat(document.getElementById('finR-fee').value) || 0;
+      const withhold = parseFloat(document.getElementById('finR-withhold').value) || 0;
+
+      const prodUsd = kg * price;
+      const totalUsd = prodUsd + shipping;
+      const deduct = fee + withhold;
+      const netUsd = totalUsd - deduct;
+      const totalKrw = totalUsd * FIN_USD_KRW;
+
       if (kg > 0 && price > 0) {
-        const totalUsd = kg * price;
-        const totalKrw = totalUsd * FIN_USD_KRW;
-        document.getElementById('finR-totalUsd').textContent = '$' + Math.round(totalUsd).toLocaleString();
+        document.getElementById('finR-prodAmt').textContent = '$' + prodUsd.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+        document.getElementById('finR-shipAmt').textContent = '$' + shipping.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+        document.getElementById('finR-totalUsd').textContent = '$' + totalUsd.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
         document.getElementById('finR-totalKrw').textContent = '₩' + Math.round(totalKrw).toLocaleString();
+        document.getElementById('finR-deductAmt').textContent = '-$' + deduct.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+        document.getElementById('finR-netUsd').textContent = '$' + netUsd.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
         calcEl.style.display = '';
       } else {
         calcEl.style.display = 'none';
